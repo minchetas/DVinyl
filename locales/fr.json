@@ -181,6 +181,12 @@
       "confirm_import": "ATTENTION : Cela va supprimer toutes vos données actuelles (albums, utilisateurs, logs) pour les remplacer par le contenu du fichier. Vous serez déconnecté. Continuer ?",
       "subtitle": "Sauvegardez votre collection ou restaurez une base de données existante.",
       "title": "Maintenance du système"
+    },
+    "import": {
+      "title": "Importation Discogs",
+      "subtitle": "Importez votre collection ou votre wishlist Discogs",
+      "collection": "Importer la collection",
+      "wantlist": "Importer la wishlist"
     }
   },
   "collection": {

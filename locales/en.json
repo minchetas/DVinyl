@@ -181,6 +181,12 @@
       "confirm_import": "WARNING: This will delete all your current data (albums, users, logs) and replace it with the content of the file. You will be logged out. Continue?",
       "subtitle": "Backup your collection or restore an existing database.",
       "title": "System Maintenance"
+    },
+    "import": {
+      "title": "Discogs import",
+      "subtitle": "Import your Discogs collection or Discogs wantlist",
+      "collection": "Import collection",
+      "wantlist": "Import wantlist"
     }
   },
   "collection": {

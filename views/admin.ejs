@@ -6,14 +6,6 @@
         <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white flex items-center gap-3 transition-colors">
             <i class="fa-solid fa-shield-halved text-green-600 dark:text-green-500"></i> <%= t('admin.title') %>
         </h1>
-        <div class="flex flex-wrap gap-3">
-            <button onclick="toggleModal('importDiscogsModal')" class="w-full sm:w-auto bg-neutral-900 dark:bg-white text-white dark:text-black font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                <i class="fa-brands fa-discogs"></i> <%= t('admin.import_discogs_btn') %>
-            </button>
-            <button onclick="toggleModal('addUserModal')" class="w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95">
-                <i class="fa-solid fa-user-plus"></i> <%= t('admin.add_user_btn') %>
-            </button>
-        </div>
     </div>
 
 
@@ -151,6 +143,30 @@
             </div>
         <% } %>
     </section>
+    
+    <section class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 md:p-8 shadow-sm transition-colors mt-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <h2 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-record-vinyl"></i> <%= t('admin.import.title') %>
+                </h2>
+                <p class="text-sm text-neutral-500 dark:text-neutral-400">
+                    <%= t('admin.import.subtitle') %>
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+                <button onclick="openImportModal('collection')" class="flex-1 sm:flex-none bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-900 hover:text-white dark:hover:bg-white dark:hover:text-black text-neutral-700 dark:text-neutral-300 px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-record-vinyl"></i> <%= t('admin.import.collection') %>
+                </button>
+
+                <button onclick="openImportModal('wishlist')" class="flex-1 sm:flex-none bg-neutral-100 dark:bg-neutral-800 hover:bg-pink-600 hover:text-white text-neutral-700 dark:text-neutral-300 px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-heart"></i> <%= t('admin.import.wantlist') %>
+                </button>
+            </div>
+        </div>
+    </section>
+
 
     <section class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 md:p-8 shadow-sm transition-colors">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -288,7 +304,9 @@
             <i class="fa-solid fa-circle-xmark text-2xl"></i>
         </button>
 
-        <h3 class="text-2xl font-bold text-neutral-900 dark:text-white mb-2"><%= t('admin.modal.import_title') %></h3>
+        <h3 class="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
+            <span id="importModalTitle">Import Discogs</span>
+        </h3>
         <p class="text-sm text-neutral-500 mb-8"><%= t('admin.modal.import_subtitle') %></p>
 
         <div id="importError" class="hidden bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 text-sm flex items-start gap-3 relative z-10">
@@ -297,6 +315,8 @@
         </div>
 
         <div class="space-y-6">
+            <input type="hidden" id="importType" value="collection">
+
             <div>
                 <label class="block mb-2 text-xs font-bold uppercase tracking-widest text-neutral-500"><%= t('admin.modal.discogs_url') %></label>
                 <input type="text" id="discogsUrl" placeholder="https://www.discogs.com/user/..." class="bg-gray-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-4 transition-colors outline-none">
@@ -389,14 +409,29 @@
         errorText.innerText = data.message;
         errorBox.classList.remove('hidden');
     });
-
+    
+    function openImportModal(type) {
+        const titleEl = document.getElementById('importModalTitle');
+        const inputType = document.getElementById('importType');
+        
+        inputType.value = type;
+        
+        if(type === 'wishlist') {
+            titleEl.innerHTML = '<i class="fa-solid fa-heart text-pink-500 mr-2"></i> <%= t('admin.import.wantlist') %>';
+        } else {
+            titleEl.innerHTML = '<i class="fa-solid fa-record-vinyl text-neutral-500 mr-2"></i> <%= t('admin.import.collection') %>';
+        }
+        
+        toggleModal('importDiscogsModal');
+    }
 
     async function startDiscogsImport(isFull) {
         const urlInput = document.getElementById('discogsUrl');
         const btnFast = document.getElementById('btnFastImport');
         const btnFull = document.getElementById('btnFullImport');
         const errorBox = document.getElementById('importError');
-
+        const importType = document.getElementById('importType').value;
+        
         if (!urlInput.value) return;
 
         errorBox.classList.add('hidden');
@@ -413,7 +448,7 @@
             const response = await fetch('/import/discogs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ discogsUrl: urlInput.value, full: isFull })
+                body: JSON.stringify({ discogsUrl: urlInput.value, full: isFull, type: importType })
             });
 
             if (!response.ok) {
