@@ -483,11 +483,11 @@ router.get('/api/estimate/:discogsId', requireAuth, async (req, res) => {
 
 // Discogs import route (starts the import process)
 router.post('/import/discogs', requireAuth, async (req, res) => {
-    const { discogsUrl, full } = req.body;
+    const { discogsUrl, full, type } = req.body;
     const userId = req.user._id;
     const token = process.env.DISCOGS_TOKEN;
 
-    const usernameMatch = discogsUrl.match(/user\/([^/]+)/);
+    const usernameMatch = discogsUrl.match(/(?:user\/|user=)([^/?&]+)/);
     if (!usernameMatch) return res.status(400).json({ error: "Invalid Discogs URL" });
     const username = usernameMatch[1];
 
@@ -498,18 +498,26 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
         let totalImported = 0;
         let hasMore = true;
         const standardTerms = ['Vinyl', 'LP', 'Album', 'Reissue', 'Repress', 'Stereo', 'Gatefold', '12"', '7"'];
-
+        
+        const isWishlist = (type === 'wishlist');
+        const apiUrl = isWishlist ? `https://api.discogs.com/users/${username}/wants` : `https://api.discogs.com/users/${username}/collection/folders/0/releases`;
+        const listKey = isWishlist ? 'wants' : 'releases';
+        
         while (hasMore) {
-            const response = await axios.get(`https://api.discogs.com/users/${username}/collection/folders/0/releases`, {
+            const response = await axios.get(apiUrl, {
                 params: { page, per_page: 50 },
                 headers: { 'Authorization': `Discogs token=${token}`, 'User-Agent': 'DVinylApp/1.0' }
             });
+            
+            const listItems = response.data[listKey];
+            const pagination = response.data.pagination;
 
-            const { releases, pagination } = response.data;
-            if (!releases || releases.length === 0) break;
-
+            if (!listItems || listItems.length === 0) break;
+            
             const albumsToInsert = [];
-            for (const item of releases) {
+            
+            for (const item of listItems) {
+
                 const info = item.basic_information;
                 const existing = await Album.findOne({ discogs_id: info.id, owner: userId });
                 if (existing) continue;
@@ -549,7 +557,8 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                     discogs_id: info.id, 
                     owner: userId, 
                     added_at: new Date(),
-                    location: ''
+                    location: '',
+                    in_wishlist: isWishlist
                 });
                 
                 req.io.emit('import_progress', { current: totalImported + albumsToInsert.length });
