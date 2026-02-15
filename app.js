@@ -155,11 +155,13 @@ app.use('/settings', settingsRoutes);
 app.use('/backup', backupRoutes);
 
 
+const migrateDatabase = require('./utils/migrate.js');
 // Database connection and server start
 const dbURI = process.env.MONGODB_URL; ;
 mongoose.connect(dbURI)
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+    await migrateDatabase();
     server.listen(process.env.VINYL_PORT, () => {
         console.log(`🚀 Server started on port ${process.env.VINYL_PORT}`);
     });

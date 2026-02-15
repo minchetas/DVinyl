@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Album = require('../models/Album');
+const Album = require('../models/Vinyl');
 const User = require('../models/User');
 const LoginLog = require('../models/LoginLog');
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
