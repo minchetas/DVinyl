@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const options = {
   discriminatorKey: 'kind',
   collection: 'albums',
-  timestamps: { createdAt: 'added_at', updatedAt: 'updated_at' }
+  timestamps: { createdAt: false, updatedAt: 'updated_at' }
 };
 
 const itemSchema = new mongoose.Schema({
