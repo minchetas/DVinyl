@@ -43,19 +43,14 @@ To keep things organized, I have split the documentation into specialized guides
 
 ## Quick Start (Docker)
 
-If you have Docker and Docker Compose installed, run the following:
+The fastest way to run DVinyl is using the pre-built Docker image. You only need a `docker-compose.yml` and a `.env` file.
 
-```bash
-# Clone the repository
-git clone https://github.com/Kyonew/DVinyl.git
-cd dvinyl
-
-# Setup environment variables
-cp .env.example .env
-
-# Start the containers
-docker-compose up -d
-```
+1. **Create a `docker-compose.yml`** (see [Docker Deployment Guide](./docs/docker.md) for the full file).
+2. **Setup your environment variables** in a `.env` file (go check how to get your [api keys](./docs/api-keys.md)).
+3. **Run the application**:
+   ```bash
+   docker compose up -d
+   ```
 
 Access the application at `http://localhost:3099`.
 
