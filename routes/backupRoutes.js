@@ -56,14 +56,28 @@ router.get('/export', requireAuth, requireAdmin, async (req, res) => {
  * POST /import
  */
 router.post('/import', async (req, res) => {
-    try {
+    try {        
+        const userCount = await User.countDocuments();
+        
+        if (userCount > 0) {
+            const currentUser = res.locals.user;
+
+            if (!currentUser || !currentUser.isAdmin) {
+                console.warn(`[SECURITY] import unauthorized : ${req.ip}`);
+                return res.status(403).json({ 
+                    error: "Import unauthorized." 
+                });
+            }
+        }
+        
+        // Setup
         let data = req.body;
 
         if (data.backupData) {
             try {
                 data = typeof data.backupData === 'string' ? JSON.parse(data.backupData) : data.backupData;
             } catch (e) {
-                return res.status(400).json({ error: "invalid JSON" });
+                return res.status(400).json({ error: "Invalid JSON format" });
             }
         }
 
@@ -82,14 +96,10 @@ router.post('/import', async (req, res) => {
         }
 
         if (data.albums && data.albums.length > 0) {
-            
             const cleanAlbums = data.albums.map(album => {
-                if (!album.kind) {
-                    return { ...album, kind: 'Music' };
-                }
+                if (!album.kind) return { ...album, kind: 'Music' };
                 return album;
             });
-
             await Item.insertMany(cleanAlbums);
         }
 
