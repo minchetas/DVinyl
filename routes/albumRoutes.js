@@ -1,51 +1,77 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const Album = require('../models/Album');
+const Album = require('../models/Vinyl');
+
+const Item = require('../models/Item');
+const Vinyl = require('../models/Vinyl');
+
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware'); // Protect routes
 const User = require('../models/User');
+
+async function getAdminId() {
+    const admin = await User.findOne({ isAdmin: true }).select('_id');
+    return admin ? admin._id : null;
+}
+
+const formatForView = (item) => {
+    if (!item) return null;
+    const obj = item.toObject ? item.toObject() : item;
+
+    return {
+        ...obj,
+        artist: obj.artist || obj.creator || obj.author || obj.director || 'Inconnu',
+        media_type: obj.media_type || obj.format || 'other',
+        cover_image: obj.cover_image || obj.coverUrl || '/ressources/logo.png',        
+        tracklist: obj.tracklist || [],
+        label: obj.label || obj.publisher || obj.studio || '',
+        year: obj.year || '',
+        format_type: obj.format_type || '',
+        variant_color: obj.variant_color || '',
+        location: obj.location || ''
+    };
+};
 
 // routes/albumRoutes.js
 // Dashboard: view collection summary
 router.get('/', requireAuth, async (req, res) => {
     try {
-        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
+        const adminId = await getAdminId();
+        if (!adminId) return res.status(500).send("Admin not found");
 
-        // Latest collection additions (4 items)
-        const latestCollection = await Album.find({ owner: adminId, in_wishlist: false })
+        const latestCollection = await Item.find({ owner: adminId, in_wishlist: false })
             .sort({ added_at: -1 }).limit(4);
 
-        // Latest wishlist additions (4 items)
-        const latestWishlist = await Album.find({ owner: adminId, in_wishlist: true })
+        const latestWishlist = await Item.find({ owner: adminId, in_wishlist: true })
             .sort({ added_at: -1 }).limit(4);
 
-        // Calculate basic fun stats
-        const allCollection = await Album.find({ owner: adminId, in_wishlist: false });
+        const allCollection = await Item.find({ owner: adminId, in_wishlist: false });
         
-        // Total count
         const totalCount = allCollection.length;
         
-        // Count vinyl vs CD and cassette
-        const cdCount = allCollection.filter(a => a.media_type === 'cd').length;
-        const cassetteCount = allCollection.filter(a => a.media_type === 'cassette').length; 
-        const vinylCount = totalCount - cdCount - cassetteCount; 
+        const musicItems = allCollection.filter(i => i.kind === 'Music' || i.media_type);
+        const cdCount = musicItems.filter(a => a.media_type === 'cd').length;
+        const cassetteCount = musicItems.filter(a => a.media_type === 'cassette').length;
+        const vinylCount = musicItems.length - cdCount - cassetteCount;
 
-        // Most frequent artist (simple logic)
         const artistMap = {};
         let topArtistName = req.t('common.not_available');
         let topArtistCount = 0;
 
-        allCollection.forEach(album => {
-            artistMap[album.artist] = (artistMap[album.artist] || 0) + 1;
-            if (artistMap[album.artist] > topArtistCount) {
-                topArtistCount = artistMap[album.artist];
-                topArtistName = album.artist;
+        musicItems.forEach(album => {
+            const artistName = album.artist || album.creator;
+            if (artistName) {
+                artistMap[artistName] = (artistMap[artistName] || 0) + 1;
+                if (artistMap[artistName] > topArtistCount) {
+                    topArtistCount = artistMap[artistName];
+                    topArtistName = artistName;
+                }
             }
         });
 
         res.render('index', { 
-            latestCollection,
-            latestWishlist,
+            latestCollection: latestCollection.map(formatForView),
+            latestWishlist: latestWishlist.map(formatForView),
             stats: {
                 total: totalCount,
                 vinylCount,
@@ -63,41 +89,46 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
-
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const typeFilter = req.query.type;
-        const searchQuery = req.query.search; // Retrieve search query
-        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
+        const searchQuery = req.query.search;
+        const adminId = await getAdminId();
 
         let query = { 
             owner: adminId, 
             in_wishlist: false 
         };
         
-        // Filter by media type
         if (typeFilter) {
-            query.media_type = typeFilter;
+            if (typeFilter === 'books') {
+                query.kind = 'Book';
+            } else if (typeFilter === 'dvd') {
+                query.kind = 'Dvd';
+            } else if (['vinyl', 'cd', 'cassette'].includes(typeFilter)) {
+                query.kind = 'Music';
+                query.media_type = typeFilter;
+            }
         }
 
-        // Search filter (title or artist)
         if (searchQuery) {
-            // Use $regex to perform a case-insensitive contains search
             query.$or = [
                 { title: { $regex: searchQuery, $options: 'i' } },
                 { artist: { $regex: searchQuery, $options: 'i' } },
+                { creator: { $regex: searchQuery, $options: 'i' } },
+                { author: { $regex: searchQuery, $options: 'i' } },
                 { location: { $regex: searchQuery, $options: 'i' } }
             ];
         }
 
-        const albums = await Album.find(query).sort({ added_at: -1 });
-        const locations = await Album.distinct('location', { owner: adminId, in_wishlist: false, location: { $ne: "" } });
+        const albums = await Item.find(query).sort({ added_at: -1 });
+        const locations = await Item.distinct('location', { owner: adminId, in_wishlist: false, location: { $ne: "" } });
         
         res.render('collection', { 
-            albums,
+            albums: albums.map(formatForView),
             locations,
             currentType: typeFilter || 'all',
-            searchQuery: searchQuery || '', // Preserve search text for input
+            searchQuery: searchQuery || '',
             user: res.locals.user 
         });
     } catch (err) {
@@ -115,18 +146,16 @@ router.get('/add-vinyl', requireAuth, requireAdmin, (req, res) => {
 // route for editing an existing album
 router.get('/edit/:id', requireAuth, async (req, res) => {
     try {
-        // Find the album by its MongoDB ID (not Discogs ID)
-        const album = await Album.findById(req.params.id);
-        
+        const album = await Item.findById(req.params.id);
         if (!album) {
             return res.redirect('/collection');
         }
+        const albumFormatted = formatForView(album);
 
-        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
-        const locations = await Album.distinct('location', { owner: adminId, location: { $ne: "" } });
+        const adminId = await getAdminId();
+        const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
         
-        // Render the edit view with the album
-        res.render('edit-vinyl', { vinyl: album, user: res.locals.user, locations });
+        res.render('edit-vinyl', { vinyl: albumFormatted, user: res.locals.user, locations });
     } catch (err) {
         console.error(err);
         res.redirect('/collection');
@@ -188,7 +217,7 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
             }
         }
         const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
-        const locations = await Album.distinct('location', { owner: adminId, location: { $ne: "" } });
+        const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
 
         const vinyl = {
             title: data.title,
@@ -219,36 +248,28 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
 router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { 
-            mongo_id, // internal MongoDB ID (if editing)
-            title, artist, year, label, catalog_number, 
-            format_type, variant_color, 
-            cover_image, user_image, discogs_id, tracklist_json,
+            mongo_id, title, artist, year, label, catalog_number, 
+            format_type, variant_color, cover_image, user_image, discogs_id, tracklist_json,
             media_type, in_wishlist, comments, location
         } = req.body;
         
         const tracklist = tracklist_json ? JSON.parse(tracklist_json) : [];
-        const userId = res.locals.user._id;
+        const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
         
         let album;
 
-        // Smart matching
-        // If a mongo_id is provided (editing), search by that ID first
         if (mongo_id) {
-            album = await Album.findOne({ _id: mongo_id, owner: userId });
+            album = await Item.findById(mongo_id);
         }
         
-        // If not found by mongo_id, attempt to match by discogs_id (typical add flow)
-        if (!album) {
-            album = await Album.findOne({ discogs_id: discogs_id, owner: userId });
+        if (!album && discogs_id) {
+            album = await Vinyl.findOne({ discogs_id: discogs_id, owner: adminId });
         }
 
         if (album) {
-            // UPDATE
-            // Update fields safely even if Discogs ID changes
-            
             album.title = title;
-            album.artist = artist;
+            if (artist) album.artist = artist;
             album.discogs_id = discogs_id;
             album.year = year;
             album.label = label;
@@ -267,10 +288,8 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
             }
 
             await album.save();
-            console.log(`Album updated : ${title}`);
         } else {
-            // CREATE
-            await Album.create({
+            await Vinyl.create({
                 title, artist, year, label, catalog_number,
                 format_type, variant_color,
                 tracklist,
@@ -279,14 +298,12 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 discogs_id,
                 media_type: media_type || 'vinyl',
                 in_wishlist: isWishlist,
-                owner: userId,
+                owner: adminId,
                 comments: comments || '',
                 location: location || ''
             });
-            console.log(`Album créé : ${title}`);
         }
 
-        // Redirect after save
         if (isWishlist) {
             res.redirect('/wishlist');
         } else {
@@ -302,7 +319,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
 // API route to move an album from wishlist to collection
 router.post('/api/album/:id/move-to-collection', requireAuth, requireAdmin, async (req, res) => {
     try {
-        await Album.findByIdAndUpdate(req.params.id, { in_wishlist: false, added_at: new Date() });
+        await Item.findByIdAndUpdate(req.params.id, { in_wishlist: false, added_at: new Date() });
         res.json({ success: true });
     } catch (err) {
         res.status(500).send(req.t('errors.generic_server_error'));
@@ -312,18 +329,13 @@ router.post('/api/album/:id/move-to-collection', requireAuth, requireAdmin, asyn
 // API route to fetch all collection discogs IDs (used for global estimates)
 router.get('/api/collection/ids', requireAuth, async (req, res) => {
     try {
-        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
-
-        // Query all collection albums (excluding wishlist)
-        // Select only the 'discogs_id' field for performance
-        const albums = await Album.find({ 
+        const adminId = await getAdminId();
+        const albums = await Vinyl.find({ 
             owner: adminId, 
             in_wishlist: false 
         }).select('discogs_id');
         
         console.log(`📦 Global estimate: ${albums.length} albums sent to front-end.`);
-
-        // Return JSON
         res.json({ success: true, albums });
 
     } catch (err) {
@@ -334,10 +346,8 @@ router.get('/api/collection/ids', requireAuth, async (req, res) => {
 
 router.get('/wishlist', requireAuth, async (req, res) => {
     try {
-
-        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
-        // Retrieve only wishlist items
-        const albums = await Album.find({ 
+        const adminId = await getAdminId();
+        const albums = await Item.find({ 
             owner: adminId,
             in_wishlist: true 
         }).sort({ added_at: -1 });
@@ -355,10 +365,11 @@ router.get('/wishlist', requireAuth, async (req, res) => {
 // collection item detail
 router.get('/album/:id', requireAuth, async (req, res) => {
     try {
-        const album = await Album.findById(req.params.id);
+        const album = await Item.findById(req.params.id);
         if (!album) return res.redirect('/collection');
-        
-        res.render('vinyl-detail', { album, vinyl: album, user: res.locals.user });
+        const albumFormatted = formatForView(album);
+
+        res.render('vinyl-detail', { album: albumFormatted, vinyl: albumFormatted, user: res.locals.user });
     } catch (err) {
         res.redirect('/collection');
     }
@@ -368,7 +379,7 @@ router.get('/album/:id', requireAuth, async (req, res) => {
 router.delete('/api/album/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
         // Look up the album to determine its media type (CD or vinyl)
-        const album = await Album.findOne({ _id: req.params.id, owner: res.locals.user._id });
+        const album = await Item.findOne({ _id: req.params.id, owner: res.locals.user._id });
 
         if (!album) {
             return res.status(404).json({ error: "Album not found or you are not the owner." });
@@ -378,7 +389,7 @@ router.delete('/api/album/:id', requireAuth, requireAdmin, async (req, res) => {
         const typeRedirect = album.media_type || 'vinyl';
 
         // Delete
-        await Album.deleteOne({ _id: req.params.id });
+        await Item.deleteOne({ _id: req.params.id });
 
         // Respond to the frontend with the redirect URL
         res.json({ success: true, redirectUrl: `/collection?type=${typeRedirect}` });
@@ -521,7 +532,7 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
             for (const item of listItems) {
 
                 const info = item.basic_information;
-                const existing = await Album.findOne({ discogs_id: info.id, owner: userId });
+                const existing = await Vinyl.findOne({ discogs_id: info.id, owner: userId });
                 if (existing) continue;
 
                 let tracklist = [];
@@ -547,8 +558,6 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                     title: info.title,
                     artist: info.artists.map(a => a.name).join(', '),
                     year: info.year || 0, 
-                    genre: info.genres?.join(', ') || '',
-                    styles: info.styles || [], 
                     label: info.labels?.[0]?.name || 'Unknown',
                     catalog_number: info.labels?.[0]?.catno || '',
                     format_type: formatType.join(', '), 
@@ -560,14 +569,15 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                     owner: userId, 
                     added_at: new Date(),
                     location: '',
-                    in_wishlist: isWishlist
+                    in_wishlist: isWishlist,
+                    kind: 'Music'
                 });
                 
                 req.io.emit('import_progress', { current: totalImported + albumsToInsert.length });
             }
 
             if (albumsToInsert.length > 0) {
-                await Album.insertMany(albumsToInsert);
+                await Vinyl.insertMany(albumsToInsert);
                 totalImported += albumsToInsert.length;
 
                 req.io.emit('import_progress', { current: totalImported });
@@ -605,7 +615,7 @@ router.post('/api/album/:id/import-tracklist', requireAuth, requireAdmin, async 
             return res.status(404).json({ success: false, error: "No tracklist found on Discogs" });
         }
 
-        await Album.findByIdAndUpdate(albumId, { tracklist: tracklist });
+        await Vinyl.findByIdAndUpdate(albumId, { tracklist: tracklist });
         res.status(200).json({ success: true });
 
     } catch (err) {
