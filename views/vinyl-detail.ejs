@@ -129,19 +129,23 @@
             </div>
 
             <% if (album.comments) { %>
-                <div class="bg-yellow-50 dark:bg-yellow-900/10 rounded-xl p-6 border border-yellow-100 dark:border-yellow-700/30 relative overflow-hidden transition-colors">
-                    <div class="absolute -right-2 -top-2 text-yellow-500/10 dark:text-yellow-500/20 text-6xl">
+                <div class="card-theme rounded-xl p-6 border border-black/10 dark:border-white/10 relative overflow-hidden shadow-sm transition-colors">
+                    
+                    <div class="absolute -right-2 -top-2 text-black/5 dark:text-white/5 text-6xl">
                         <i class="fa-solid fa-quote-right"></i>
                     </div>
-                    <h3 class="text-xs uppercase font-bold text-yellow-700 dark:text-yellow-500 mb-3 flex items-center gap-2 relative z-10">
-                        <i class="fa-regular fa-comment-dots"></i> <%= t('detail.personal_notes') %>
+
+                    <h3 class="text-xs uppercase font-bold opacity-50 mb-3 flex items-center gap-2 relative z-10">
+                        <i class="fa-regular fa-comment-dots"></i> 
+                        <%= t('detail.personal_notes') %>
                     </h3>
-                    <p class="text-yellow-900 dark:text-yellow-100 text-sm leading-relaxed whitespace-pre-line relative z-10 transition-colors">
+
+                    <p class="text-sm leading-relaxed whitespace-pre-line relative z-10 transition-colors">
                         <%= album.comments %>
                     </p>
                 </div>
             <% } %>
-
+            
             <div>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2 transition-colors">
                     <i class="fa-solid fa-list-ul opacity-50"></i> <%= t('detail.tracklist_title') %>
@@ -192,7 +196,7 @@
             
             <% if (user.isAdmin) { %>
                 <div class="pt-6 border-t border-black/10 dark:border-white/10 flex justify-end gap-4 transition-colors">
-                    <a href="/edit/<%= album._id %>" class="opacity-70 hover:opacity-100 hover:text-primary-theme px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
+                    <a href="/album/edit/<%= album._id %>" class="opacity-70 hover:opacity-100 hover:text-primary-theme px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
                         <i class="fa-solid fa-pen-to-square mr-2"></i> <%= t('common.edit') %>
                     </a>
                     <button onclick="confirmDelete('<%= album._id %>')" class="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm transition-colors">

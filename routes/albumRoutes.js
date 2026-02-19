@@ -160,7 +160,7 @@ router.get('/add-vinyl', requireAuth, requireAdmin, (req, res) => {
 
 
 // route for editing an existing album
-router.get('/edit/:id', requireAuth, async (req, res) => {
+router.get('/album/edit/:id', requireAuth, async (req, res) => {
     try {
         const album = await Item.findById(req.params.id);
         if (!album) {
