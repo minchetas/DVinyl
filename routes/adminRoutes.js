@@ -175,15 +175,11 @@ router.post('/personnalisation/save', requireAuth, requireAdmin, async (req, res
         const { 
             musicActive, booksActive, dvdActive,
             homePreset, musicPreset, booksPreset, dvdPreset,
-            navbarShortcuts
+            navbarShortcuts, statsWidgets
         } = req.body;
 
-        let shortcuts = [];
-        if (Array.isArray(navbarShortcuts)) {
-            shortcuts = navbarShortcuts;
-        } else if (navbarShortcuts) {
-            shortcuts = [navbarShortcuts];
-        }
+        let shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);        
+        let stats = Array.isArray(statsWidgets) ? statsWidgets : (statsWidgets ? [statsWidgets] : []);
 
         const update = {
             'modules.music': musicActive === 'on',
@@ -195,7 +191,8 @@ router.post('/personnalisation/save', requireAuth, requireAdmin, async (req, res
             'theme.books.preset': booksPreset,
             'theme.dvd.preset':   dvdPreset,
 
-            'navbarShortcuts': shortcuts 
+            'navbarShortcuts': shortcuts,
+            'statsWidgets': stats
         };
 
         await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });

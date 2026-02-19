@@ -10,6 +10,8 @@ module.exports = async (req, res, next) => {
             settings = {
                 siteName: 'DVinyl',
                 modules: { music: true, books: false, dvd: false },
+                navbarShortcuts: ['global_home', 'music_vinyl', 'music_cd', 'music_cassette', 'global_wishlist'],
+                statsWidgets: ['total', 'vinyl', 'cd', 'cassette', 'artist'],
                 theme: {
                     home: { preset: 'default' },
                     music: { preset: 'emerald' },
@@ -17,7 +19,18 @@ module.exports = async (req, res, next) => {
                     dvd: { preset: 'blue' }
                 }
             };
+        } else {
+            if (!settings.navbarShortcuts) {
+                settings.navbarShortcuts = ['global_home', 'music_vinyl', 'music_cd', 'music_cassette', 'global_wishlist'];
+            }
+            if (!settings.statsWidgets) {
+                settings.statsWidgets = ['total', 'vinyl', 'cd', 'cassette', 'artist'];
+            }
         }
+
+        settings.navbarShortcuts = settings.navbarShortcuts || ['global_home', 'music_vinyl', 'music_cd', 'music_cassette', 'global_wishlist'];
+        settings.statsWidgets = settings.statsWidgets || ['total', 'vinyl', 'cd', 'cassette', 'artist'];
+
         res.locals.settings = settings;
 
         res.locals.currentLng = res.locals.user?.language || req.language || 'fr';

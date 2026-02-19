@@ -83,12 +83,21 @@
     "hardcover": "Hardcover",
     "paperback": "Paperback",
     "manga": "Manga",
+    "mangas": "Mangas",
     "comic": "Comics",
+    "comics": "Comics",
     "dvd": "DVD",
     "bluray": "Blu-ray",
+    "blurays": "Blu-rays",
     "4k": "4K Ultra HD",
     "vhs": "VHS",
-    "laserdisc": "Laserdisc"
+    "laserdisc": "Laserdisc",
+    "hardcover_pl": "Hardcovers",
+    "paperback_pl": "Paperbacks",
+    "dvds": "DVDs",
+    "4k_pl": "4K Ultra HDs",
+    "vhss": "VHS tapes",
+    "laserdiscs": "Laserdiscs"
   },
   "index": {
     "welcome": "Hello",
@@ -107,8 +116,12 @@
   },
   "stats": {
     "total_label": "Total Collection",
-    "albums_unit": "albums",
+    "books_total_label": "Total Books",
+    "dvd_total_label": "Total Videos",
     "top_artist_label": "Favorite Artist",
+    "top_author_label": "Favorite Author",
+    "top_director_label": "Favorite Director",
+    "albums_unit": "albums",
     "owned_times": "Owned {{count}} times in your collection"
   },
   "modal": {
@@ -322,6 +335,9 @@
     "save": "Save Preferences",
     "nav_title": "Navigation Configuration",
     "nav_desc": "Choose up to 6 shortcuts to display in your navigation bar.",
+    "nav_max": "You cannot select more than 6 shortcuts.",
+    "widgets_title": "Statistics Widgets",
+    "widgets_desc": "Select the statistics you want to see on your dashboard",
     "modules": {
       "title": "Active Modules",
       "music": "Music",

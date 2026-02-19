@@ -117,71 +117,75 @@
         <h2 class="text-xl md:text-2xl font-bold mb-6 px-2"><%= t('index.section_stats') %></h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <% 
+            const widgetConfig = {
+                'total': { label: t('stats.total_label'), val: stats.total, unit: t('stats.albums_unit'), icon: 'fa-database', color: 'bg-primary-theme/20', wide: true },
+                
+                'vinyl': { label: t('media.vinyls'), val: stats.vinyl, icon: 'fa-record-vinyl', color: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600' },
+                'cd': { label: t('media.cds'), val: stats.cd, icon: 'fa-compact-disc', color: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600' },
+                'cassette': { label: t('media.cassettes'), val: stats.cassette, icon: 'fa-tape', color: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600' },
+                
+                'book_total': { label: t('stats.books_total_label'), val: stats.book_total, icon: 'fa-book', color: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600' },
+                'book_manga': { label: t('media.mangas'), val: stats.book_manga, icon: 'fa-book-open', color: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-600' },
+                'book_comic': { label: t('media.comics'), val: stats.book_comic, icon: 'fa-mask', color: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600' },
+                'book_hardcover': { label: t('media.hardcover_pl'), val: stats.book_hardcover, icon: 'fa-book-atlas', color: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-600' },
+                'book_paperback': { label: t('media.paperback_pl'), val: stats.book_paperback, icon: 'fa-book-journal-whills', color: 'bg-fuchsia-100 dark:bg-fuchsia-900/30', text: 'text-fuchsia-600' },
+                
+                'dvd_total': { label: t('stats.dvd_total_label'), val: stats.dvd_total, icon: 'fa-film', color: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600' },
+                'dvd_dvd': { label: t('media.dvds'), val: stats.dvd_dvd, icon: 'fa-compact-disc', color: 'bg-sky-100 dark:bg-sky-900/30', text: 'text-sky-600' },
+                'dvd_bluray': { label: t('media.blurays'), val: stats.dvd_bluray, icon: 'fa-circle-dot', color: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600' },
+                'dvd_4k': { label: t('media.4k_pl'), val: stats.dvd_4k, icon: 'fa-wand-magic-sparkles', color: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600' },
+                'dvd_vhs': { label: t('media.vhss'), val: stats.dvd_vhs, icon: 'fa-tape', color: 'bg-stone-100 dark:bg-stone-900/30', text: 'text-stone-600' },
+                'dvd_laserdisc': { label: t('media.laserdiscs'), val: stats.dvd_laserdisc, icon: 'fa-compact-disc', color: 'bg-teal-100 dark:bg-teal-900/30', text: 'text-teal-600' }
+            };
+
+            const topConfigs = {
+                'artist': { label: t('stats.top_artist_label'), data: stats.artist, icon: 'fa-crown', color: 'bg-purple-100 dark:bg-purple-500/20' },
+                'author': { label: t('stats.top_author_label'), data: stats.author, icon: 'fa-pen-nib', color: 'bg-amber-100 dark:bg-amber-500/20' },
+                'director': { label: t('stats.top_director_label'), data: stats.director, icon: 'fa-clapperboard', color: 'bg-red-100 dark:bg-red-500/20' }
+            };
             
-            <div class="card-theme p-6 rounded-2xl relative overflow-hidden group col-span-1 md:col-span-2">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-primary-theme/20 rounded-full blur-xl"></div>
-                <div class="flex items-center justify-between h-full">
-                    <div>
-                        <p class="opacity-60 font-medium text-xs md:text-sm uppercase tracking-wider"><%= t('stats.total_label') %></p>
-                        <h3 class="text-4xl md:text-5xl font-black mt-2">
-                            <%= stats.total %> <span class="text-base md:text-lg opacity-50 font-normal"><%= t('stats.albums_unit') %></span>
-                        </h3>
+            const activeWidgets = (settings && settings.statsWidgets) ? settings.statsWidgets : ['total', 'vinyl', 'cd', 'cassette', 'artist'];
+
+            activeWidgets.forEach(id => { 
+                const w = widgetConfig[id];
+                const tW = topConfigs[id];
+
+                if (w) { %>
+                    <div class="card-theme p-6 rounded-2xl flex items-center justify-between transition-all hover:scale-[1.02] <%= w.wide ? 'md:col-span-2' : '' %>">
+                        <div>
+                            <p class="opacity-60 font-medium text-xs uppercase tracking-wider mb-1"><%= w.label %></p>
+                            <h3 class="<%= w.wide ? 'text-4xl md:text-5xl font-black' : 'text-3xl font-bold' %>">
+                                <%= w.val %> <% if(w.unit){ %><span class="text-base font-normal opacity-50"><%= w.unit %></span><% } %>
+                            </h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full <%= w.color %> <%= w.text %> flex items-center justify-center text-lg">
+                            <i class="fa-solid <%= w.icon %>"></i>
+                        </div>
                     </div>
-                    <div class="text-3xl md:text-4xl opacity-20 group-hover:text-primary-theme transition-colors">
-                        <i class="fa-solid fa-database"></i>
+                <% } else if (tW) { %>
+                    <div class="card-theme p-6 rounded-2xl md:col-span-4 flex items-center gap-6 transition-all hover:scale-[1.01]">
+                        <div class="w-16 h-16 rounded-full <%= tW.color %> flex items-center justify-center text-3xl flex-shrink-0">
+                            <i class="fa-solid <%= tW.icon %>"></i>
+                        </div>
+                        <div>
+                            <p class="opacity-60 font-medium text-sm uppercase tracking-wider"><%= tW.label %></p>
+                            <h3 class="text-2xl font-bold"><%= tW.data.name %></h3>
+                            <p class="text-sm opacity-60"><%= t('stats.owned_times', { count: tW.data.count }) %></p>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="card-theme p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="opacity-60 font-medium text-xs uppercase tracking-wider mb-1"><%= t('media.vinyls') %></p>
-                    <h3 class="text-3xl font-bold"><%= stats.vinylCount %></h3>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-500 flex items-center justify-center">
-                    <i class="fa-solid fa-record-vinyl"></i>
-                </div>
-            </div>
-
-            <div class="card-theme p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="opacity-60 font-medium text-xs uppercase tracking-wider mb-1"><%= t('media.cds') %></p>
-                    <h3 class="text-3xl font-bold"><%= stats.cdCount %></h3>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-500 flex items-center justify-center">
-                    <i class="fa-solid fa-compact-disc"></i>
-                </div>
-            </div>
-
-            <div class="card-theme p-6 rounded-2xl flex items-center justify-between">
-                <div>
-                    <p class="opacity-60 font-medium text-xs uppercase tracking-wider mb-1"><%= t('media.cassettes') %></p>
-                    <h3 class="text-3xl font-bold"><%= stats.cassetteCount %></h3>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-500 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><circle cx="8" cy="10" r="2"/><path d="M8 12h8"/><circle cx="16" cy="10" r="2"/><path d="m6 20 .7-2.9A1.4 1.4 0 0 1 8.1 16h7.8a1.4 1.4 0 0 1 1.4 1l.7 3"/></svg>
-                </div>
-            </div>
-
-            <div class="card-theme p-6 rounded-2xl md:col-span-4 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
-                <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-3xl border border-purple-200 dark:border-purple-500/30 flex-shrink-0">
-                    <i class="fa-solid fa-crown"></i>
-                </div>
-                <div>
-                    <p class="opacity-60 font-medium text-sm uppercase tracking-wider"><%= t('stats.top_artist_label') %></p>
-                    <h3 class="text-2xl font-bold truncate max-w-[250px] mx-auto sm:mx-0"><%= stats.topArtist %></h3>
-                    <p class="text-sm opacity-60"><%= t('stats.owned_times', { count: stats.topArtistCount }) %></p>
-                </div>
-            </div>
-
-            <div class="md:col-span-4 mt-2">
-                <button onclick="openEstimateModal()" class="w-full card-theme hover:brightness-110 border border-transparent hover:border-primary-theme font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 group hover:shadow-lg">
-                    <i class="fa-solid fa-calculator text-primary-theme group-hover:scale-110 transition-transform"></i>
-                    <span><%= t('index.btn_estimate') %></span>
-                </button>
-            </div>
+                <% }
+            }); %>
         </div>
     </section>
+
+    <div class="md:col-span-4 mt-2">
+        <button onclick="openEstimateModal()" class="w-full card-theme hover:brightness-110 border border-transparent hover:border-primary-theme font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 group hover:shadow-lg">
+            <i class="fa-solid fa-calculator text-primary-theme group-hover:scale-110 transition-transform"></i>
+            <span><%= t('index.btn_estimate') %></span>
+        </button>
+    </div>
+
 
 </div>
 

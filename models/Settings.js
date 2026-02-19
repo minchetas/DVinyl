@@ -20,6 +20,10 @@ const settingsSchema = new mongoose.Schema({
     navbarShortcuts: { 
         type: [String], 
         default: ['global_home', 'music_vinyl', 'music_cd', 'music_cassette', 'global_wishlist']
+    },
+    statsWidgets: { 
+        type: [String], 
+        default: ['total', 'vinyl', 'cd', 'cassette', 'artist'] 
     }
 });
 

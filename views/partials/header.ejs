@@ -202,7 +202,6 @@
             const shortcutConfig = {
                 'global_home':       { label: t('nav.home'), url: '/' },
                 'global_collection': { label: t('nav.collection'), url: '/collection' },
-                'global_wishlist':   { label: t('nav.wishlist'), url: '/wishlist' },
                 'music_vinyl':       { label: t('media.vinyls'), url: '/collection?type=vinyl', module: 'music' },
                 'music_cd':          { label: t('media.cds'), url: '/collection?type=cd', module: 'music' },
                 'music_cassette':    { label: t('media.cassettes'), url: '/collection?type=cassette', module: 'music' },
@@ -214,7 +213,8 @@
                 'dvd_bluray':        { label: t('media.bluray'), url: '/collection?type=dvd&format=bluray', module: 'dvd' },
                 'dvd_4k':            { label: t('media.4k'), url: '/collection?type=dvd&format=4k', module: 'dvd' },
                 'dvd_vhs':           { label: t('media.vhs'), url: '/collection?type=dvd&format=vhs', module: 'dvd' },
-                'dvd_laserdisc':     { label: t('media.laserdisc'), url: '/collection?type=dvd&format=laserdisc', module: 'dvd' }
+                'dvd_laserdisc':     { label: t('media.laserdisc'), url: '/collection?type=dvd&format=laserdisc', module: 'dvd' },
+                'global_wishlist':   { label: t('nav.wishlist'), url: '/wishlist' }
             };
 
             if (settings && settings.navbarShortcuts) {

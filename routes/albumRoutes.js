@@ -37,55 +37,61 @@ const formatForView = (item) => {
 router.get('/', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        if (!adminId) return res.status(500).send("Admin not found");
+        const settings = res.locals.settings;
 
-        const latestCollection = await Item.find({ owner: adminId, in_wishlist: false })
-            .sort({ added_at: -1 }).limit(4);
+        const allItems = await Item.find({ owner: adminId, in_wishlist: false });
 
-        const latestWishlist = await Item.find({ owner: adminId, in_wishlist: true })
-            .sort({ added_at: -1 }).limit(4);
+        const stats = {
+            total: allItems.length,
 
-        const allCollection = await Item.find({ owner: adminId, in_wishlist: false });
-        
-        const totalCount = allCollection.length;
-        
-        const musicItems = allCollection.filter(i => i.kind === 'Music' || i.media_type);
-        const cdCount = musicItems.filter(a => a.media_type === 'cd').length;
-        const cassetteCount = musicItems.filter(a => a.media_type === 'cassette').length;
-        const vinylCount = musicItems.length - cdCount - cassetteCount;
+            vinyl: allItems.filter(i => i.media_type === 'vinyl').length,
+            cd: allItems.filter(i => i.media_type === 'cd').length,
+            cassette: allItems.filter(i => i.media_type === 'cassette').length,
 
-        const artistMap = {};
-        let topArtistName = req.t('common.not_available');
-        let topArtistCount = 0;
+            book_total: allItems.filter(i => i.kind === 'Book').length,
+            book_hardcover: allItems.filter(i => i.kind === 'Book' && i.format === 'hardcover').length,
+            book_paperback: allItems.filter(i => i.kind === 'Book' && i.format === 'paperback').length,
+            book_manga: allItems.filter(i => i.kind === 'Book' && i.format === 'manga').length,
+            book_comic: allItems.filter(i => i.kind === 'Book' && i.format === 'comic').length,
 
-        musicItems.forEach(album => {
-            const artistName = album.artist || album.creator;
-            if (artistName) {
-                artistMap[artistName] = (artistMap[artistName] || 0) + 1;
-                if (artistMap[artistName] > topArtistCount) {
-                    topArtistCount = artistMap[artistName];
-                    topArtistName = artistName;
+            dvd_total: allItems.filter(i => i.kind === 'Dvd').length,
+            dvd_dvd: allItems.filter(i => i.kind === 'Dvd' && i.format === 'dvd').length,
+            dvd_bluray: allItems.filter(i => i.kind === 'Dvd' && i.format === 'bluray').length,
+            dvd_4k: allItems.filter(i => i.kind === 'Dvd' && i.format === '4k').length,
+            dvd_vhs: allItems.filter(i => i.kind === 'Dvd' && i.format === 'vhs').length,
+            dvd_laserdisc: allItems.filter(i => i.kind === 'Dvd' && i.format === 'laserdisc').length
+        };
+
+        const getTop = (items, field) => {
+            const map = {};
+            let topName = req.t('common.not_available');
+            let topCount = 0;
+            items.forEach(item => {
+                const name = item[field];
+                if (name) {
+                    map[name] = (map[name] || 0) + 1;
+                    if (map[name] > topCount) { 
+                        topCount = map[name]; 
+                        topName = name; 
+                    }
                 }
-            }
-        });
+            });
+            return { name: topName, count: topCount };
+        };
+
+        stats.artist = getTop(allItems.filter(i => i.kind === 'Music'), 'artist');
+        stats.author = getTop(allItems.filter(i => i.kind === 'Book'), 'author');
+        stats.director = getTop(allItems.filter(i => i.kind === 'Dvd'), 'director');
 
         res.render('index', { 
-            latestCollection: latestCollection.map(formatForView),
-            latestWishlist: latestWishlist.map(formatForView),
-            stats: {
-                total: totalCount,
-                vinylCount,
-                cdCount,
-                cassetteCount,
-                topArtist: topArtistName,
-                topArtistCount
-            },
-            user: res.locals.user 
+            latestCollection: (await Item.find({ owner: adminId, in_wishlist: false }).sort({ added_at: -1 }).limit(4)).map(formatForView),
+            latestWishlist: (await Item.find({ owner: adminId, in_wishlist: true }).sort({ added_at: -1 }).limit(4)).map(formatForView),
+            stats,
+            settings 
         });
-
     } catch (err) {
         console.error("Dashboard error:", err);
-        res.status(500).send(req.t('errors.generic_server_error'))
+        res.status(500).send(req.t('errors.generic_server_error'));
     }
 });
 

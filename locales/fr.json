@@ -83,12 +83,21 @@
     "hardcover": "Relié",
     "paperback": "Broché",
     "manga": "Manga",
+    "mangas": "Mangas",
     "comic": "Comics",
+    "comics": "Comics",
     "dvd": "DVD",
     "bluray": "Blu-ray",
+    "blurays": "Blu-rays",
     "4k": "4K Ultra HD",
     "vhs": "VHS",
-    "laserdisc": "Laserdisc"
+    "laserdisc": "Laserdisc",
+    "hardcover_pl": "Livres Reliés",
+    "paperback_pl": "Livres Brochés",
+    "dvds": "DVDs",
+    "4k_pl": "4K Ultra HDs",
+    "vhss": "VHS",
+    "laserdiscs": "Laserdiscs"
   },
   "index": {
     "welcome": "Salut",
@@ -107,8 +116,12 @@
   },
   "stats": {
     "total_label": "Total Collection",
+    "books_total_label": "Total Livres",
+    "dvd_total_label": "Total Vidéos",
+    "top_artist_label": "Artiste Favori",
+    "top_author_label": "Auteur Favori",
+    "top_director_label": "Réalisateur Favori",
     "albums_unit": "albums",
-    "top_artist_label": "L'artiste favori",
     "owned_times": "Possédé {{count}} fois dans la collection"
   },
   "modal": {
@@ -322,6 +335,9 @@
     "save": "Enregistrer les préférences",
     "nav_title": "Configuration de la Navigation",
     "nav_desc": "Choisissez jusqu'à 6 raccourcis à afficher dans votre barre de navigation.",
+    "nav_max": "Vous ne pouvez pas sélectionner plus de 6 raccourcis.",
+    "widgets_title": "Widgets de Statistiques",
+    "widgets_desc": "Sélectionnez les statistiques que vous souhaitez voir sur la page d'accueil",
     "modules": {
       "title": "Modules Actifs",
       "music": "Musique",
