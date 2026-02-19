@@ -105,7 +105,7 @@
     "welcome": "Salut",
     "hero_subtitle": "Du neuf dans la collection ?",
     "search_placeholder": "Rechercher...",
-    "nav_add_full": "Ajouter un disque",
+    "nav_add_full": "Ajouter un élément",
     "nav_add_short": "Ajouter",
     "nav_view_all": "Voir tout",
     "section_latest": "Derniers Ajouts",
@@ -114,7 +114,7 @@
     "view_everything": "Tout voir",
     "empty_collection": "Rien pour l'instant !",
     "empty_wishlist": "Pas de souhaits en attente.",
-    "btn_estimate": "Estimer la valeur de ma collection"
+    "btn_estimate": "Estimer"
   },
   "stats": {
     "total_label": "Total Collection",
@@ -133,7 +133,9 @@
     "condition_hint": "Basé sur l'état \"Very Good+\"",
     "min_label": "Minimum (G)",
     "max_label": "Maximum (Mint)",
-    "start_btn": "Lancer l'analyse"
+    "start_btn": "Lancer l'analyse",
+    "add_hub_title": "On ajoute quoi ?",
+    "add_hub_subtitle": "Sélectionnez le type de média à intégrer à votre collection"
   },
   "add_vinyl": {
     "title": "Ajouter un disque",
@@ -150,6 +152,7 @@
   },
   "admin": {
     "title": "Administration",
+    "modules": "Modules",
     "add_user_btn": "Ajouter un utilisateur",
     "temp_password_hint": "Voici le mot de passe temporaire (copie-le, il ne s'affichera plus) :",
     "users_title": "Utilisateurs",
@@ -163,6 +166,7 @@
     "confirm_delete_user": "SUPPRIMER DÉFINITIVEMENT {{name}} ?",
     "confirm_block_ip": "BLOQUER L'IP {{ip}} ?\nIl ne pourra plus accéder au site.",
     "import_discogs_btn": "Import Discogs",
+    "modules_description": "Activez ou désactivez les modules de DVinyl",
     "table": {
       "user": "Utilisateur",
       "email": "Email",
@@ -211,6 +215,9 @@
       "subtitle": "Importez votre collection ou votre wishlist Discogs",
       "collection": "Importer la collection",
       "wantlist": "Importer la wishlist"
+    },
+    "errors": {
+      "at_least_one_module": "Au moins un module doit être actif."
     }
   },
   "collection": {
@@ -333,7 +340,7 @@
   "perso": {
     "title": "Personnalisation",
     "subtitle": "Gérez les modules et l'apparence de {{siteName}}",
-    "backAdmin": "Retour Admin",
+    "backHome": "Retour à l'accueil",
     "save": "Enregistrer les préférences",
     "nav_title": "Configuration de la Navigation",
     "nav_desc": "Choisissez jusqu'à 6 raccourcis à afficher dans votre barre de navigation.",
@@ -343,8 +350,8 @@
     "modules": {
       "title": "Modules Actifs",
       "music": "Musique",
-      "books": "Bibliothèque",
-      "dvd": "Vidéothèque",
+      "books": "Livres",
+      "dvd": "DVDs",
       "global": "Général"
     },
     "themes": {

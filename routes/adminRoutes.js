@@ -173,34 +173,52 @@ router.get('/personnalisation', requireAuth, requireAdmin, async (req, res) => {
 router.post('/personnalisation/save', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { 
-            musicActive, booksActive, dvdActive,
             homePreset, musicPreset, booksPreset, dvdPreset,
-            navbarShortcuts, statsWidgets
+            navbarShortcuts, statsWidgets 
         } = req.body;
 
-        let shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);        
-        let stats = Array.isArray(statsWidgets) ? statsWidgets : (statsWidgets ? [statsWidgets] : []);
+        const shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);        
+        const stats = Array.isArray(statsWidgets) ? statsWidgets : (statsWidgets ? [statsWidgets] : []);
 
         const update = {
-            'modules.music': musicActive === 'on',
-            'modules.books': booksActive === 'on',
-            'modules.dvd':   dvdActive === 'on',
-            
             'theme.home.preset':  homePreset,
             'theme.music.preset': musicPreset,
             'theme.books.preset': booksPreset,
             'theme.dvd.preset':   dvdPreset,
-
-            'navbarShortcuts': shortcuts,
-            'statsWidgets': stats
+            'navbarShortcuts':    shortcuts,
+            'statsWidgets':       stats
         };
 
         await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });
         
         res.redirect('/admin/personnalisation?msg=saved');
     } catch (err) {
-        console.error("[ERR] save", err);
-        res.status(500).send("Error while saving settings.");
+        console.error("[ERR] perso save", err);
+        res.status(500).send("[ERR] perso save failed.");
+    }
+});
+
+
+router.post('/modules/save', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { musicActive, booksActive, dvdActive } = req.body;
+
+        if (!musicActive && !booksActive && !dvdActive) {
+            return res.redirect('/admin?msg=error_no_module');
+        }
+
+        const update = {
+            'modules.music': musicActive === 'on',
+            'modules.books': booksActive === 'on',
+            'modules.dvd':   dvdActive === 'on'
+        };
+
+        await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });
+        
+        res.redirect('/admin?msg=saved');
+    } catch (err) {
+        console.error("[ERR] modules save", err);
+        res.status(500).send("[ERR] modules save failed.");
     }
 });
 

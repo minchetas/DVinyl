@@ -8,6 +8,60 @@
         </h1>
     </div>
 
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3 transition-colors">
+            <i class="fa-solid fa-puzzle-piece text-primary-theme"></i> <%= t('admin.modules') %>
+        </h1>
+    </div>
+
+    <section class="card-theme rounded-3xl p-6 shadow-sm mb-10 transition-colors">
+        <div class="flex flex-col gap-8">
+            
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-primary-theme/10 text-primary-theme flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-cubes-stacked text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-black uppercase tracking-widest opacity-80"><%= t('perso.modules.title') %></h2>
+                    <p class="text-xs opacity-50"><%= t('admin.modules_description') %></p>
+                </div>
+            </div>
+
+            <form action="/admin/modules/save" method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <% const mods = [
+                        {key: 'music', label: t('perso.modules.music'), icon: 'fa-music'},
+                        {key: 'books', label: t('perso.modules.books'), icon: 'fa-book'},
+                        {key: 'dvd', label: t('media.dvds'), icon: 'fa-film'}
+                    ] %>
+                    
+                    <% mods.forEach((mod) => { %>
+                        <label class="group flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-transparent hover:border-primary-theme/30 transition-all cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-black/20 shadow-sm group-hover:text-primary-theme transition-colors">
+                                    <i class="fa-solid <%= mod.icon %> text-sm"></i>
+                                </div>
+                                <span class="text-sm font-bold opacity-70 group-hover:opacity-100 transition-opacity"><%= mod.label %></span>
+                            </div>
+                            
+                            <div class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="<%= mod.key %>Active" <%= settings.modules[mod.key] ? 'checked' : '' %> class="sr-only peer">
+                                <div class="w-11 h-6 bg-black/10 dark:bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-theme"></div>
+                            </div>
+                        </label>
+                    <% }) %>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button type="submit" class="w-full sm:w-auto bg-primary-theme text-white text-xs font-black uppercase tracking-widest px-10 py-4 rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary-theme/20 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-save"></i> 
+                        <%= t('perso.save') %>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
     <% if (locals.newPassword) { %>
         <div class="bg-primary-theme/10 border border-primary-theme/30 p-6 rounded-2xl text-center animate-pulse transition-colors">
             <h2 class="text-lg font-bold text-primary-theme mb-2">
@@ -463,5 +517,18 @@
             });
         }
     }
+    document.addEventListener('DOMContentLoaded', () => {
+        const moduleCheckboxes = document.querySelectorAll('input[name="musicActive"], input[name="booksActive"], input[name="dvdActive"]');
 
+        moduleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedModules = document.querySelectorAll('input[name="musicActive"]:checked, input[name="booksActive"]:checked, input[name="dvdActive"]:checked');
+                
+                if (checkedModules.length === 0) {
+                    this.checked = true;
+                    alert("<%= t('admin.errors.at_least_one_module') %>");
+                }
+            });
+        });
+    });
 </script>

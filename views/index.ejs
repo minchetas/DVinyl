@@ -27,10 +27,10 @@
 
             <div class="flex flex-wrap justify-center gap-4 pt-4 text-sm opacity-80">
                 <% if (user.isAdmin) { %>
-                    <a href="/add-vinyl" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
+                    <button onclick="toggleAddModal()" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
                         <i class="fa-solid fa-plus-circle"></i> 
                         <span class="hidden sm:inline"><%= t('index.nav_add_full') %></span>
-                    </a>
+                    </button>
                     <span class="opacity-30">|</span>
                 <% } %>
                 <a href="/collection" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
@@ -178,151 +178,72 @@
             }); %>
         </div>
     </section>
-
-    <div class="md:col-span-4 mt-2">
-        <button onclick="openEstimateModal()" class="w-full card-theme hover:brightness-110 border border-transparent hover:border-primary-theme font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 group hover:shadow-lg">
-            <i class="fa-solid fa-calculator text-primary-theme group-hover:scale-110 transition-transform"></i>
-            <span><%= t('index.btn_estimate') %></span>
-        </button>
-    </div>
-
-
 </div>
 
-<div id="estimateModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="card-theme rounded-2xl w-full max-w-lg p-6 md:p-8 shadow-2xl relative">
+<div id="addHubModal" class="fixed inset-0 z-[100] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <% 
+        let activeCount = 0;
+        if (settings.modules.music) activeCount++;
+        if (settings.modules.books) activeCount++;
+        if (settings.modules.dvd) activeCount++;
 
-        <button onclick="closeEstimateModal()" class="absolute top-4 right-4 opacity-50 hover:opacity-100">
-            <i class="fa-solid fa-xmark text-xl"></i>
+        let gridCols = (activeCount === 3) ? 'sm:grid-cols-3' : (activeCount === 2) ? 'sm:grid-cols-2' : 'sm:grid-cols-1';
+        let maxWidth = (activeCount === 1) ? 'max-w-md' : (activeCount === 2) ? 'max-w-xl' : 'max-w-3xl';
+    %>
+
+    <div class="card-theme w-full <%= maxWidth %> rounded-[2.5rem] p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300">
+        
+        <button onclick="toggleAddModal()" class="absolute top-6 right-6 opacity-40 hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
 
-        <h3 class="text-2xl font-bold mb-2"><%= t('modal.estimate_title') %></h3>
-        <p class="opacity-60 text-sm mb-6"><%= t('modal.estimate_desc') %></p>
-
-        <div id="progressContainer" class="mb-6">
-            <div class="w-full bg-gray-200 dark:bg-black/30 rounded-full h-4 mb-2 overflow-hidden">
-                <div id="estimateProgress" class="bg-primary-theme h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-            <div class="flex justify-between text-xs opacity-60 font-mono">
-                <span id="estimateCount">0 / <%= stats.total %></span>
-                <span id="estimatePercent">0%</span>
-            </div>
+        <div class="text-center mb-10">
+            <h2 class="text-2xl font-black tracking-tight"><%= t('modal.add_hub_title') %></h2>
+            <p class="opacity-50 text-sm"><%= t('modal.add_hub_subtitle') %></p>
         </div>
 
-        <div id="estimateResult" class="hidden text-center space-y-4">
-            <div class="p-6 bg-primary-theme/10 border border-primary-theme/30 rounded-xl">
-                <p class="text-primary-theme text-sm font-bold uppercase tracking-wider mb-1"><%= t('modal.avg_label') %></p>
-                <h4 id="finalPrice" class="text-4xl md:text-5xl font-black">--</h4>
-                <p class="text-xs opacity-60 mt-2"><%= t('modal.condition_hint') %></p>
-            </div>
+        <div class="grid grid-cols-1 <%= gridCols %> gap-4">
             
-            <div class="grid grid-cols-2 gap-4 text-xs">
-                <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-lg">
-                    <span class="opacity-60 block"><%= t('modal.min_label') %></span>
-                    <span id="minPrice" class="font-bold text-lg">--</span>
-                </div>
-                <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-lg">
-                    <span class="opacity-60 block"><%= t('modal.max_label') %></span>
-                    <span id="maxPrice" class="font-bold text-lg">--</span>
-                </div>
-            </div>
-        </div>
+            <% if (settings.modules.music) { %>
+                <a href="/add-vinyl" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white transition-all duration-300">
+                    <div class="w-16 h-16 rounded-full bg-primary-theme/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-compact-disc text-3xl"></i>
+                    </div>
+                    <span class="font-black text-sm uppercase tracking-widest"><%= t('perso.modules.music') %></span>
+                </a>
+            <% } %>
 
-        <div id="startEstimateBtn" class="mt-6 text-center">
-            <button onclick="startEstimation()" class="bg-primary-theme hover:brightness-110 text-white font-bold py-3 px-8 rounded-xl transition-colors">
-                <%= t('modal.start_btn') %>
-            </button>
+            <% if (settings.modules.books) { %>
+                <a href="/add-book" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-amber-500 hover:text-white transition-all duration-300">
+                    <div class="w-16 h-16 rounded-full bg-amber-500/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-book text-3xl"></i>
+                    </div>
+                    <span class="font-black text-sm uppercase tracking-widest"><%= t('perso.modules.books') %></span>
+                </a>
+            <% } %>
+
+            <% if (settings.modules.dvd) { %>
+                <a href="/add-dvd" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-red-500 hover:text-white transition-all duration-300">
+                    <div class="w-16 h-16 rounded-full bg-red-500/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-film text-3xl"></i>
+                    </div>
+                    <span class="font-black text-sm uppercase tracking-widest"><%= t('perso.modules.dvd') %></span>
+                </a>
+            <% } %>
+            
         </div>
     </div>
 </div>
 
 <script>
-    // Le script reste le même
-    const modal = document.getElementById('estimateModal');
-    const startBtn = document.getElementById('startEstimateBtn');
-    const resultDiv = document.getElementById('estimateResult');
-    const progressBar = document.getElementById('estimateProgress');
-    const countSpan = document.getElementById('estimateCount');
-    const percentSpan = document.getElementById('estimatePercent');
-    
-    const estimateErrorMsg = "<%= t('messages.estimate_error') %>";
-    const currentLocale = '<%= currentLng === "fr" ? "fr-FR" : "en-US" %>';
-    const currentCurrency = '<%= currentLng === "fr" ? "EUR" : "USD" %>';
-
-    let totalAlbums = 0;
-    let currentProcessed = 0;
-    let totalPriceVG = 0;
-    let totalPriceMin = 0;
-    let totalPriceMax = 0;
-
-    function openEstimateModal() {
-        modal.classList.remove('hidden');
+    function toggleAddModal() {
+        const modal = document.getElementById('addHubModal');
+        modal.classList.toggle('hidden');
     }
 
-    function closeEstimateModal() {
-        modal.classList.add('hidden');
-    }
-
-    async function startEstimation() {
-        startBtn.classList.add('hidden');
-        try {
-            const res = await fetch('/api/collection/ids');
-            const data = await res.json();
-            
-            if(!data.success) throw new Error("Server Error");
-            
-            const albums = data.albums;
-            totalAlbums = albums.length;
-            currentProcessed = 0;
-            totalPriceVG = 0;
-            totalPriceMin = 0;
-            totalPriceMax = 0;
-
-            for (const album of albums) {
-                await estimateOneAlbum(album.discogs_id);
-                currentProcessed++;                
-
-                const percent = Math.round((currentProcessed / totalAlbums) * 100);
-                if (progressBar) progressBar.style.width = percent + '%';
-                if (percentSpan) percentSpan.innerText = percent + '%';
-                if (countSpan) countSpan.innerText = `${currentProcessed} / ${totalAlbums}`;
-
-                await new Promise(r => setTimeout(r, 500));
-            }
-
-            showResults();
-        } catch (err) {
-            alert(`${estimateErrorMsg} : ${err.message}`);
-            startBtn.classList.remove('hidden');
-        }
-    }
-
-    async function estimateOneAlbum(id) {
-        try {
-            const res = await fetch(`/api/estimate/${id}`);
-            const data = await res.json();
-            if (data.success && data.price) {
-                const val = data.price.value;
-                totalPriceVG += val;
-                totalPriceMin += val; 
-                totalPriceMax += (val * 1.3);
-            }
-        } catch (e) {}
-    }
-
-    function showResults() {
-        const fmt = (val) => new Intl.NumberFormat(currentLocale, { 
-            style: 'currency', 
-            currency: currentCurrency 
-        }).format(val);
-
-        document.getElementById('finalPrice').innerText = fmt(totalPriceVG);
-        document.getElementById('minPrice').innerText = fmt(totalPriceMin);
-        document.getElementById('maxPrice').innerText = fmt(totalPriceMax);
-
-        document.getElementById('progressContainer').classList.add('hidden');
-        resultDiv.classList.remove('hidden');
-    }
+    document.getElementById('addHubModal').addEventListener('click', function(e) {
+        if (e.target === this) toggleAddModal();
+    });
 </script>
 
 <%- include('partials/footer') %>

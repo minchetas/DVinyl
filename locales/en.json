@@ -105,7 +105,7 @@
     "welcome": "Hello",
     "hero_subtitle": "Something new in the collection?",
     "search_placeholder": "Search...",
-    "nav_add_full": "Add a record",
+    "nav_add_full": "Add an item",
     "nav_add_short": "Add",
     "nav_view_all": "View all",
     "section_latest": "Latest Additions",
@@ -114,7 +114,7 @@
     "view_everything": "See all",
     "empty_collection": "Nothing here yet!",
     "empty_wishlist": "No pending wishes.",
-    "btn_estimate": "Estimate my collection's value"
+    "btn_estimate": "Estimate"
   },
   "stats": {
     "total_label": "Total Collection",
@@ -133,7 +133,9 @@
     "condition_hint": "Based on \"Very Good+\" condition",
     "min_label": "Minimum (G)",
     "max_label": "Maximum (Mint)",
-    "start_btn": "Start Analysis"
+    "start_btn": "Start Analysis",
+    "add_hub_title": "What do you want to add?",
+    "add_hub_subtitle": "Select the type of media to add to your collection"
   },
   "add_vinyl": {
     "title": "Add a Record",
@@ -151,6 +153,7 @@
   "admin": {
     "title": "Administration",
     "add_user_btn": "Add User",
+    "modules": "Modules",
     "temp_password_hint": "Here is the temporary password (copy it, it won't be shown again):",
     "users_title": "Users",
     "users_count": "Users ({{count}})",
@@ -163,6 +166,7 @@
     "confirm_delete_user": "PERMANENTLY DELETE {{name}}?",
     "confirm_block_ip": "BLOCK IP {{ip}}?\nThey will no longer be able to access the site.",
     "import_discogs_btn": "Discogs Import",
+    "modules_description": "Activate or deactivate DVinyl's modules",
     "table": {
       "user": "User",
       "email": "Email",
@@ -211,6 +215,9 @@
       "subtitle": "Import your Discogs collection or Discogs wantlist",
       "collection": "Import collection",
       "wantlist": "Import wantlist"
+    },
+    "errors": {
+      "at_least_one_module": "At least one module must be active."
     }
   },
   "collection": {
@@ -333,7 +340,7 @@
     "perso": {
     "title": "Personnalisation",
     "subtitle": "Customize the appearance of your DVinyl interface.",
-    "backAdmin": "Back to Admin Panel",
+    "backHome": "Back to home",
     "save": "Save Preferences",
     "nav_title": "Navigation Configuration",
     "nav_desc": "Choose up to 6 shortcuts to display in your navigation bar.",
@@ -343,8 +350,8 @@
     "modules": {
       "title": "Active Modules",
       "music": "Music",
-      "books": "Library",
-      "dvd": "DVD Collection",
+      "books": "Books",
+      "dvd": "DVDs",
       "global": "General"
     },
     "themes": {
