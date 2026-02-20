@@ -59,7 +59,12 @@
                             <input type="text" name="variant_color" value="<%= vinyl.variant_color %>" class="bg-black/5 dark:bg-white/5 border border-primary-theme/30 text-sm rounded-lg focus:ring-primary-theme block w-full p-2.5 transition-colors outline-none">
                         </div>
                     </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_quantity') %></label>
+                            <input type="number" name="quantity" value="<%= vinyl.quantity || 1 %>" min="1" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none">
+                        </div>
+                    </div>
                     <hr class="border-black/10 dark:border-white/10 my-6 transition-colors">
 
                     <div>

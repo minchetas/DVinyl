@@ -79,6 +79,12 @@
                             <i class="fa-solid fa-palette"></i> <%= album.variant_color %>
                         </span>
                     <% } %>
+                        <span class="px-3 py-1 bg-black/5 dark:bg-white/10 border border-transparent rounded-full text-xs opacity-80 transition-colors">
+                            x<%= album.quantity || 1 %>
+                        </span>
+
+                    <div>
+                    </div>
                 </div>
             </div>
 
@@ -117,7 +123,7 @@
                 <div class="col-span-2 border-t border-black/10 dark:border-white/10 mt-2 pt-4 transition-colors">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs opacity-50 uppercase font-bold"><%= t('detail.estimation_title') %></span>
-                        <button id="btnEstimate" onclick="fetchEstimation('<%= album.discogs_id %>')" class="text-xs bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1 border border-transparent">
+                        <button id="btnEstimate" onclick="fetchEstimation('<%= album.discogs_id %>', '<%= album.quantity || 1 %>')" class="text-xs bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1 border border-transparent">
                             <i class="fa-solid fa-calculator"></i> <%= t('detail.calculate_btn') %>
                         </button>
                     </div>
@@ -271,7 +277,7 @@
         }
     }
 
-    async function fetchEstimation(id) {
+    async function fetchEstimation(id, quantity) {
         const btn = document.getElementById('btnEstimate');
         const resultDiv = document.getElementById('priceResult');
         const loader = document.getElementById('priceLoader');
@@ -284,23 +290,45 @@
             const data = await res.json();
 
             if (data.success && data.price) {
-                const fmtPrice = new Intl.NumberFormat(currentLocale, { 
+                const individualPrice = data.price.value;
+                const currency = data.price.currency;
+                
+                const fmtIndividual = new Intl.NumberFormat(currentLocale, { 
                     style: 'currency', 
-                    currency: data.price.currency 
-                }).format(data.price.value);
+                    currency: currency 
+                }).format(individualPrice);
 
                 const isMarket = data.source === 'market';
                 const labelText = isMarket ? translations.market_price : translations.historical_estimate;
                 const colorClass = isMarket ? "text-primary-theme" : "text-blue-500";
                 const icon = isMarket ? '<i class="fa-solid fa-shop mr-1"></i>' : '<i class="fa-solid fa-history mr-1"></i>';
 
+                let quantityMarkup = '';
+                let finalDisplayPrice = fmtIndividual;
+
+                if (quantity > 1) {
+                    const totalValue = individualPrice * quantity;
+                    const fmtTotal = new Intl.NumberFormat(currentLocale, { 
+                        style: 'currency', 
+                        currency: currency 
+                    }).format(totalValue);
+                    
+                    finalDisplayPrice = fmtTotal;
+                    quantityMarkup = `
+                        <div class="text-[10px] opacity-60 mt-1">
+                            ${fmtIndividual} x ${quantity}
+                        </div>
+                    `;
+                }
+
                 resultDiv.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-4 bg-black/5 dark:bg-white/5 rounded-lg border border-transparent mt-2 transition-colors">
                         <span class="text-[10px] opacity-60 uppercase font-bold mb-1 flex items-center">
                             ${icon} ${labelText}
                         </span>
-                        <span class="text-3xl font-black ${colorClass} mb-1 transition-colors">${fmtPrice}*</span>
-                        <span class="text-xs opacity-60 mb-1 transition-colors">${data.details}</span>
+                        <span class="text-3xl font-black ${colorClass} mb-0 transition-colors">${finalDisplayPrice}*</span>
+                        ${quantityMarkup}
+                        <span class="text-xs opacity-60 mb-1 mt-1 transition-colors">${data.details}</span>
                         <span class="text-[9px] opacity-50 mb-2 transition-colors">
                             ${translations.shipping_hint}
                         </span>
@@ -309,7 +337,6 @@
                         </a>
                     </div>
                 `;
-
                 loader.classList.add('hidden');
                 resultDiv.classList.remove('hidden');
             }

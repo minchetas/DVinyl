@@ -377,7 +377,7 @@
             countSpan.innerText = `0 / ${totalAlbums}`; 
 
             for (const album of albumsToEstimate) {
-                await estimateOneAlbum(album.discogs_id);
+                await estimateOneAlbum(album.discogs_id, album.quantity || 1);
                 currentProcessed++;                
 
                 const percent = Math.round((currentProcessed / totalAlbums) * 100);
@@ -395,12 +395,12 @@
         }
     }
 
-    async function estimateOneAlbum(id) {
+    async function estimateOneAlbum(id, quantity) {
         try {
             const res = await fetch(`/api/estimate/${id}`);
             const data = await res.json();
             if (data.success && data.price) {
-                const val = data.price.value;
+                const val = data.price.value * quantity;
                 totalPriceVG += val;
                 totalPriceMin += val; 
                 totalPriceMax += (val * 1.3);

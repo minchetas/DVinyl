@@ -28,7 +28,8 @@ const formatForView = (item) => {
         year: obj.year || '',
         format_type: obj.format_type || '',
         variant_color: obj.variant_color || '',
-        location: obj.location || ''
+        location: obj.location || '',
+        quantity: obj.quantity || 1
     };
 };
 
@@ -42,24 +43,24 @@ router.get('/', requireAuth, async (req, res) => {
         const allItems = await Item.find({ owner: adminId, in_wishlist: false });
 
         const stats = {
-            total: allItems.length,
+            total: allItems.reduce((acc, i) => acc + (i.quantity || 1), 0),
 
-            vinyl: allItems.filter(i => i.media_type === 'vinyl').length,
-            cd: allItems.filter(i => i.media_type === 'cd').length,
-            cassette: allItems.filter(i => i.media_type === 'cassette').length,
+            vinyl: allItems.filter(i => i.media_type === 'vinyl').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            cd: allItems.filter(i => i.media_type === 'cd').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            cassette: allItems.filter(i => i.media_type === 'cassette').reduce((acc, i) => acc + (i.quantity || 1), 0),
 
-            book_total: allItems.filter(i => i.kind === 'Book').length,
-            book_hardcover: allItems.filter(i => i.kind === 'Book' && i.format === 'hardcover').length,
-            book_paperback: allItems.filter(i => i.kind === 'Book' && i.format === 'paperback').length,
-            book_manga: allItems.filter(i => i.kind === 'Book' && i.format === 'manga').length,
-            book_comic: allItems.filter(i => i.kind === 'Book' && i.format === 'comic').length,
+            book_total: allItems.filter(i => i.kind === 'Book').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            book_hardcover: allItems.filter(i => i.kind === 'Book' && i.format === 'hardcover').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            book_paperback: allItems.filter(i => i.kind === 'Book' && i.format === 'paperback').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            book_manga: allItems.filter(i => i.kind === 'Book' && i.format === 'manga').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            book_comic: allItems.filter(i => i.kind === 'Book' && i.format === 'comic').reduce((acc, i) => acc + (i.quantity || 1), 0),
 
-            dvd_total: allItems.filter(i => i.kind === 'Dvd').length,
-            dvd_dvd: allItems.filter(i => i.kind === 'Dvd' && i.format === 'dvd').length,
-            dvd_bluray: allItems.filter(i => i.kind === 'Dvd' && i.format === 'bluray').length,
-            dvd_4k: allItems.filter(i => i.kind === 'Dvd' && i.format === '4k').length,
-            dvd_vhs: allItems.filter(i => i.kind === 'Dvd' && i.format === 'vhs').length,
-            dvd_laserdisc: allItems.filter(i => i.kind === 'Dvd' && i.format === 'laserdisc').length
+            dvd_total: allItems.filter(i => i.kind === 'Dvd').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            dvd_dvd: allItems.filter(i => i.kind === 'Dvd' && i.format === 'dvd').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            dvd_bluray: allItems.filter(i => i.kind === 'Dvd' && i.format === 'bluray').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            dvd_4k: allItems.filter(i => i.kind === 'Dvd' && i.format === '4k').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            dvd_vhs: allItems.filter(i => i.kind === 'Dvd' && i.format === 'vhs').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            dvd_laserdisc: allItems.filter(i => i.kind === 'Dvd' && i.format === 'laserdisc').reduce((acc, i) => acc + (i.quantity || 1), 0)
         };
 
         const getTop = (items, field) => {
@@ -266,7 +267,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
         const { 
             mongo_id, title, artist, year, label, catalog_number, 
             format_type, variant_color, cover_image, user_image, discogs_id, tracklist_json,
-            media_type, in_wishlist, comments, location
+            media_type, in_wishlist, comments, location, quantity
         } = req.body;
         
         const tracklist = tracklist_json ? JSON.parse(tracklist_json) : [];
@@ -298,6 +299,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
             album.media_type = media_type || 'vinyl';
             album.comments = comments || '';
             album.location = location || '';
+            album.quantity = parseInt(quantity) || 1;
             
             if (user_image && user_image.length > 0) {
                 album.user_image = user_image;
@@ -316,7 +318,8 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 in_wishlist: isWishlist,
                 owner: adminId,
                 comments: comments || '',
-                location: location || ''
+                location: location || '',
+                quantity: parseInt(quantity) || 1
             });
         }
 
@@ -349,7 +352,7 @@ router.get('/api/collection/ids', requireAuth, async (req, res) => {
         const albums = await Vinyl.find({ 
             owner: adminId, 
             in_wishlist: false 
-        }).select('discogs_id');
+        }).select('discogs_id quantity');
         
         console.log(`📦 Global estimate: ${albums.length} albums sent to front-end.`);
         res.json({ success: true, albums });
