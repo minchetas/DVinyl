@@ -1,5 +1,9 @@
 <%- include('partials/header') %>
 
+<div class="fixed inset-0 -z-10 opacity-10 dark:opacity-20 blur-3xl pointer-events-none transition-opacity duration-1000">
+    <img src="<%= album.cover_image %>" class="w-full h-full object-cover">
+</div>
+
 <div class="max-w-screen-xl mx-auto px-4 pb-20">
     
     <nav class="flex py-6 text-sm opacity-60 transition-colors">
@@ -79,16 +83,12 @@
                             <i class="fa-solid fa-palette"></i> <%= album.variant_color %>
                         </span>
                     <% } %>
-                        <span class="px-3 py-1 bg-black/5 dark:bg-white/10 border border-transparent rounded-full text-xs opacity-80 transition-colors">
-                            x<%= album.quantity || 1 %>
-                        </span>
-
-                    <div>
-                    </div>
+                    <span class="px-3 py-1 bg-black/5 dark:bg-white/10 border border-transparent rounded-full text-xs opacity-80 transition-colors">
+                        x<%= album.quantity || 1 %>
+                    </span>
                 </div>
             </div>
 
-            
             <div class="flex flex-col ml-2">
                 <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-1">
                     <%= t('common.location') %>
@@ -98,7 +98,6 @@
                     <%= album.location || t('common.not_specified') %>
                 </span>
             </div>
-
 
             <div class="card-theme rounded-xl p-6 grid grid-cols-2 gap-y-6 gap-x-4 transition-colors shadow-sm">
                 <div>
@@ -136,16 +135,13 @@
 
             <% if (album.comments) { %>
                 <div class="card-theme rounded-xl p-6 border border-black/10 dark:border-white/10 relative overflow-hidden shadow-sm transition-colors">
-                    
                     <div class="absolute -right-2 -top-2 text-black/5 dark:text-white/5 text-6xl">
                         <i class="fa-solid fa-quote-right"></i>
                     </div>
-
                     <h3 class="text-xs uppercase font-bold opacity-50 mb-3 flex items-center gap-2 relative z-10">
                         <i class="fa-regular fa-comment-dots"></i> 
                         <%= t('detail.personal_notes') %>
                     </h3>
-
                     <p class="text-sm leading-relaxed whitespace-pre-line relative z-10 transition-colors">
                         <%= album.comments %>
                     </p>
@@ -243,11 +239,9 @@
         }, 150);
 
         document.querySelectorAll('.thumb-btn').forEach(btn => {
-            // Reset
             btn.classList.remove('border-primary-theme', 'opacity-100', 'ring-2', 'ring-primary-theme/50');
             btn.classList.add('border-transparent', 'opacity-70');
             
-            // Active state
             if(btn.querySelector('img').src === url) {
                 btn.classList.remove('border-transparent', 'opacity-70');
                 btn.classList.add('border-primary-theme', 'opacity-100', 'ring-2', 'ring-primary-theme/50');

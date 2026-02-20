@@ -411,7 +411,7 @@ router.delete('/api/album/:id', requireAuth, requireAdmin, async (req, res) => {
         await Item.deleteOne({ _id: req.params.id });
 
         // Respond to the frontend with the redirect URL
-        res.json({ success: true, redirectUrl: `/collection?type=${typeRedirect}` });
+        res.json({ success: true, redirectUrl: `/collection?type=music` });
 
     } catch (err) {
         console.error(err);

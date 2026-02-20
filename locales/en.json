@@ -19,7 +19,12 @@
     "or": "OR",
     "all": "All",
     "items": "items",
-    "back_home": "Back to Home"
+    "back_home": "Back to Home",
+    "back_to_collection": "Back to collection",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm_delete": "Are you sure?",
+    "show": "Show"
   },
   "settings": {
     "page_title": "Account Settings",
@@ -107,7 +112,8 @@
     "dvds": "DVDs",
     "4k_pl": "4K Ultra HDs",
     "vhss": "VHS tapes",
-    "laserdiscs": "Laserdiscs"
+    "laserdiscs": "Laserdiscs",
+    "graphic_novel": "Graphic Novel"
   },
   "index": {
     "welcome": "Hello",
@@ -197,7 +203,7 @@
       "email": "Email address",
       "submit": "Create and generate password",
       "import_title": "Import Collection",
-      "import_subtitle": "Enter the URL of the public Discogs collection (e.g., https://www.discogs.com/user/username/collection).",
+      "import_subtitle": "Enter the URL of the public Discogs collection",
       "discogs_url": "Collection URL",
       "import_submit": "Start Import",
       "import_loading": "Importing...",
@@ -230,7 +236,9 @@
   },
   "collection": {
     "title": "My Collection",
-    "filter_placeholder": "Filter..."
+    "filter_placeholder": "Filter...",
+    "refresh_tooltip": "Refresh from Discogs",
+    "refresh": "Refresh"
   },
   "confirm_vinyl": {
     "cover_preview": "Cover Preview",
@@ -254,8 +262,13 @@
     "btn_collection": "Collection",
     "api_error": "API Error.",
     "no_images": "No images found.",
-    "field_quantity": "Quantity"
-
+    "field_quantity": "Quantity",
+    "source_local": "Local",
+    "source_url": "URL",
+    "source_search": "Search",
+    "browse_files": "Browse files",
+    "no_results": "No visuals found.",
+    "network_error": "Network error."
   },
   "edit_vinyl": {
     "title": "Edit Album",
@@ -371,5 +384,64 @@
       "books": "Books",
       "dvd": "Movies / DVD"
     }
+  },
+  "add_book": {
+    "title": "Add a Book",
+    "desc": "Search by title, author or scan the barcode (ISBN).",
+    "search_placeholder": "Title, Author or ISBN...",
+    "btn_scan": "Scan an ISBN",
+    "results_title": "Results",
+    "no_results": "No books found."
+  },
+  "confirm_book": {
+    "publisher_label": "Publisher",
+    "isbn_label": "ISBN",
+    "year_label": "Year",
+    "pages_label": "Pages",
+    "description_title": "Summary",
+    "config_title": "Verify and complete",
+    "field_title": "Title",
+    "field_author": "Author(s)",
+    "field_publisher": "Publisher",
+    "field_year": "Year",
+    "field_isbn": "ISBN",
+    "field_format": "Format",
+    "field_pages": "Pages",
+    "field_language": "Language",
+    "field_series": "Series",
+    "field_volume": "Volume",
+    "reading_tracking": "Reading tracking",
+    "field_status": "Status",
+    "field_rating": "Rating (out of 5)",
+    "comments_hint": "(Book condition, special edition, signed...)",
+    "btn_collection": "Add to Library",
+    "cover_preview": "Cover Preview"
+  },
+  "edit_book": {
+    "title": "Edit book"
+  },
+  "book_detail": {
+    "volume": "Volume",
+    "added_on": "Added on",
+    "delete_warning": "This action is irreversible. The book will be removed from your collection."
+  },
+  "format": {
+    "paperback": "Paperback",
+    "hardcover": "Hardcover",
+    "graphic_novel": "Graphic Novel"
+  },
+  "status": {
+    "to_read": "To read",
+    "reading": "Reading",
+    "read": "Read"
+  },
+  "image_source": {
+    "local": "Local file",
+    "url": "URL",
+    "search": "Search",
+    "hint": "Click to browse files",
+    "url_hint": "Image will be previewed automatically.",
+    "url_label": "Direct link to the image"
   }
+  
 }

@@ -1,7 +1,6 @@
 <%- include('partials/header') %>
 
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0">
-    
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
         <a href="/album/<%= vinyl._id %>" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.cancel_back') %>
@@ -9,7 +8,6 @@
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         <div class="lg:col-span-4 space-y-6">
             <div class="card-theme rounded-xl p-6 sticky top-24 transition-colors shadow-sm">
                 <div class="aspect-square rounded-lg overflow-hidden mb-4 shadow-lg relative group bg-black/5 dark:bg-white/5">
@@ -27,106 +25,140 @@
                 </h1>
 
                 <form action="/save-vinyl" method="POST" class="space-y-6">
-                    
                     <div class="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/30 p-4 rounded-lg transition-colors">
-                        <label class="block mb-2 text-sm font-bold text-yellow-700 dark:text-yellow-500 transition-colors">
-                            <%= t('edit_vinyl.discogs_id_label') %>
-                        </label>
-                        <div class="text-xs text-yellow-800/80 dark:text-yellow-200/60 mb-2 transition-colors">
-                            <%= t('edit_vinyl.discogs_id_hint') %>
-                        </div>
-                        <input type="number" name="discogs_id" value="<%= vinyl.discogs_id %>" class="bg-white dark:bg-black/20 border border-yellow-300 dark:border-yellow-600/50 text-sm rounded-lg focus:ring-yellow-500 block w-full p-2.5 font-mono transition-colors">
+                        <label class="block mb-2 text-sm font-bold text-yellow-700 dark:text-yellow-500"><%= t('edit_vinyl.discogs_id_label') %></label>
+                        <div class="text-xs text-yellow-800/80 dark:text-yellow-200/60 mb-2"><%= t('edit_vinyl.discogs_id_hint') %></div>
+                        <input type="number" name="discogs_id" value="<%= vinyl.discogs_id %>" class="bg-white dark:bg-black/20 border border-yellow-300 dark:border-yellow-600/50 text-sm rounded-lg focus:ring-yellow-500 block w-full p-2.5 font-mono outline-none">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_title') %></label>
-                            <input type="text" name="title" value="<%= vinyl.title %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none">
+                            <input type="text" name="title" value="<%= vinyl.title %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 outline-none">
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_artist') %></label>
-                            <input type="text" name="artist" value="<%= vinyl.artist %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none">
+                            <input type="text" name="artist" value="<%= vinyl.artist %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_format') %></label>
-                            <input type="text" name="format_type" value="<%= vinyl.format_type %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none">
+                            <input type="text" name="format_type" value="<%= vinyl.format_type %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 outline-none">
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest text-primary-theme"><%= t('confirm_vinyl.field_edition') %></label>
-                            <input type="text" name="variant_color" value="<%= vinyl.variant_color %>" class="bg-black/5 dark:bg-white/5 border border-primary-theme/30 text-sm rounded-lg focus:ring-primary-theme block w-full p-2.5 transition-colors outline-none">
+                            <input type="text" name="variant_color" value="<%= vinyl.variant_color %>" class="bg-black/5 dark:bg-white/5 border border-primary-theme/30 text-sm rounded-lg focus:ring-primary-theme block w-full p-3 outline-none">
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_quantity') %></label>
-                            <input type="number" name="quantity" value="<%= vinyl.quantity || 1 %>" min="1" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none">
-                        </div>
-                    </div>
-                    <hr class="border-black/10 dark:border-white/10 my-6 transition-colors">
 
-                    <div>
-                        <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_comments') %></label>
-                        <textarea name="comments" rows="3" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg focus:ring-primary-theme focus:border-primary-theme block w-full p-2.5 transition-colors outline-none"><%= vinyl.comments %></textarea>
+                    <div class="w-full md:w-1/2">
+                        <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_quantity') %></label>
+                        <input type="number" name="quantity" value="<%= vinyl.quantity || 1 %>" min="1" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 outline-none">
                     </div>
 
-                    <div class="mb-6">
-                        <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
-                            <i class="fa-solid fa-box-archive mr-1"></i> <%= t('common.location') %>
-                        </label>
-                        <input type="text" name="location" list="locationList" 
-                            value="<%= typeof vinyl !== 'undefined' ? (vinyl.location || '') : '' %>"
-                            placeholder="<%= t('placeholders.location') %>"
-                            class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
-                        
-                        <datalist id="locationList">
-                            <% locations.forEach(loc => { %>
-                                <option value="<%= loc %>">
-                            <% }) %>
-                        </datalist>
-                    </div>
+                    <hr class="border-black/10 dark:border-white/10 my-6">
 
-                    <hr class="border-black/10 dark:border-white/10 my-6 transition-colors">
-
-                    <div>
-                        <div class="flex items-center mb-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center">
                             <input id="checkEditCover" type="checkbox" class="w-4 h-4 text-primary-theme bg-black/5 dark:bg-white/10 border-transparent rounded focus:ring-primary-theme focus:ring-2 cursor-pointer transition-colors">
-                            <label for="checkEditCover" class="ml-2 text-sm font-bold cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+                            <label for="checkEditCover" class="ml-2 text-sm font-bold cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
                                 <%= t('edit_vinyl.change_cover') %>
                             </label>
                         </div>
                         <input type="hidden" name="cover_image" id="inputCoverImage" value="<%= vinyl.cover_image %>">
                         
-                        <div id="boxEditCover" class="hidden p-4 bg-black/5 dark:bg-white/5 rounded-lg border border-black/10 dark:border-white/10 mb-6 transition-colors">
-                            <div class="flex gap-2 mb-4">
-                                <input type="text" id="queryCover" value="<%= vinyl.artist %> <%= vinyl.title %> cover" class="flex-grow bg-white dark:bg-black/20 border border-transparent text-sm rounded-lg p-2.5 transition-colors outline-none focus:ring-1 focus:ring-primary-theme">
-                                <button type="button" onclick="searchGoogle('cover')" class="bg-primary-theme hover:brightness-110 text-white px-4 py-2 rounded-lg transition-colors shadow-md"><i class="fa-solid fa-search"></i></button>
+                        <div id="boxEditCover" class="hidden p-4 card-theme rounded-2xl border border-black/10 dark:border-white/10 shadow-inner">
+                            <div class="flex gap-1 mb-6 p-1 bg-black/5 dark:bg-white/5 rounded-xl">
+                                <button type="button" onclick="setImgTab('cover', 'local')" id="tab-cover-local" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all bg-primary-theme text-white">
+                                    <i class="fa-solid fa-upload mr-1"></i> <%= t('confirm_vinyl.source_local') %>
+                                </button>
+                                <button type="button" onclick="setImgTab('cover', 'url')" id="tab-cover-url" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all opacity-50">
+                                    <i class="fa-solid fa-link mr-1"></i> <%= t('confirm_vinyl.source_url') %>
+                                </button>
+                                <button type="button" onclick="setImgTab('cover', 'search')" id="tab-cover-search" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all opacity-50">
+                                    <i class="fa-solid fa-search mr-1"></i> <%= t('confirm_vinyl.source_search') %>
+                                </button>
                             </div>
-                            <div id="resultsCover" class="grid grid-cols-3 gap-3 max-h-40 overflow-y-auto custom-scrollbar">
-                                <p class="col-span-full text-center text-xs opacity-50 py-2"><%= t('confirm_vinyl.search_hint') %></p>
+
+                            <div id="pane-cover-local" class="img-pane-cover">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl cursor-pointer hover:bg-black/5 transition-all">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl opacity-20 mb-2"></i>
+                                    <p class="text-xs font-bold opacity-50 italic"><%= t('confirm_vinyl.browse_files') %></p>
+                                    <input type="file" id="fileInputCover" class="hidden" accept="image/*">
+                                </label>
+                            </div>
+                            <div id="pane-cover-url" class="img-pane-cover hidden">
+                                <input type="url" id="urlInputCover" placeholder="https://site.com/image.jpg" class="w-full bg-white dark:bg-black/20 border-transparent rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
+                            </div>
+                            <div id="pane-cover-search" class="img-pane-cover hidden">
+                                <div class="flex gap-2 mb-4">
+                                    <input type="text" id="queryCover" value="<%= vinyl.artist %> <%= vinyl.title %>" class="flex-grow bg-white dark:bg-black/20 border-transparent rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
+                                    <button type="button" onclick="runUniversalSearch('cover')" class="bg-primary-theme text-white px-4 rounded-lg hover:brightness-110"><i class="fa-solid fa-search"></i></button>
+                                </div>
+                                <div id="resultsCover" class="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-1"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <div class="flex items-center mb-4">
+                    <div class="mt-8 space-y-4">
+                        <div class="flex items-center">
                             <input id="checkEditDisc" type="checkbox" <%= vinyl.user_image ? 'checked' : '' %> class="w-4 h-4 text-primary-theme bg-black/5 dark:bg-white/10 border-transparent rounded focus:ring-primary-theme focus:ring-2 cursor-pointer transition-colors">
-                            <label for="checkEditDisc" class="ml-2 text-sm font-bold cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+                            <label for="checkEditDisc" class="ml-2 text-sm font-bold cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
                                 <%= t('edit_vinyl.edit_secondary_visual') %>
                             </label>
                         </div>
                         <input type="hidden" name="user_image" id="inputUserImage" value="<%= vinyl.user_image %>">
                         
-                        <div id="boxEditDisc" class="hidden p-4 bg-black/5 dark:bg-white/5 rounded-lg border border-primary-theme/30 transition-colors">
-                            <div class="flex gap-2 mb-4">
-                                <input type="text" id="queryDisc" value="<%= vinyl.artist %> <%= vinyl.title %> vinyl <%= vinyl.variant_color %>" class="flex-grow bg-white dark:bg-black/20 border border-transparent text-sm rounded-lg p-2.5 transition-colors outline-none focus:ring-1 focus:ring-primary-theme">
-                                <button type="button" onclick="searchGoogle('disc')" class="bg-primary-theme hover:brightness-110 text-white px-4 py-2 rounded-lg transition-colors shadow-md"><i class="fa-solid fa-search"></i></button>
+                        <div id="boxEditDisc" class="hidden p-4 card-theme rounded-2xl border border-primary-theme/30 shadow-inner">
+                            <div class="flex gap-1 mb-6 p-1 bg-black/5 dark:bg-white/5 rounded-xl">
+                                <button type="button" onclick="setImgTab('disc', 'local')" id="tab-disc-local" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all bg-primary-theme text-white">
+                                    <i class="fa-solid fa-upload mr-1"></i> <%= t('confirm_vinyl.source_local') %>
+                                </button>
+                                <button type="button" onclick="setImgTab('disc', 'url')" id="tab-disc-url" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all opacity-50">
+                                    <i class="fa-solid fa-link mr-1"></i> <%= t('confirm_vinyl.source_url') %>
+                                </button>
+                                <button type="button" onclick="setImgTab('disc', 'search')" id="tab-disc-search" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all opacity-50">
+                                    <i class="fa-solid fa-search mr-1"></i> <%= t('confirm_vinyl.source_search') %>
+                                </button>
                             </div>
-                            <div id="resultsDisc" class="grid grid-cols-3 gap-3 max-h-40 overflow-y-auto custom-scrollbar">
-                                <p class="col-span-full text-center text-xs opacity-50 py-2"><%= t('confirm_vinyl.search_hint') %></p>
+
+                            <div id="pane-disc-local" class="img-pane-disc">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl cursor-pointer hover:bg-black/5 transition-all">
+                                    <i class="fa-solid fa-compact-disc text-2xl opacity-20 mb-2"></i>
+                                    <p class="text-xs font-bold opacity-50 italic"><%= t('confirm_vinyl.browse_files') %></p>
+                                    <input type="file" id="fileInputDisc" class="hidden" accept="image/*">
+                                </label>
                             </div>
+                            <div id="pane-disc-url" class="img-pane-disc hidden">
+                                <input type="url" id="urlInputDisc" placeholder="https://site.com/mockup.jpg" class="w-full bg-white dark:bg-black/20 border-transparent rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
+                            </div>
+                            <div id="pane-disc-search" class="img-pane-disc hidden">
+                                <div class="flex gap-2 mb-4">
+                                    <input type="text" id="queryDisc" value="<%= vinyl.artist %> <%= vinyl.title %> <%= vinyl.variant_color %>" class="flex-grow bg-white dark:bg-black/20 border-transparent rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
+                                    <button type="button" onclick="runUniversalSearch('disc')" class="bg-primary-theme text-white px-4 rounded-lg hover:brightness-110"><i class="fa-solid fa-search"></i></button>
+                                </div>
+                                <div id="resultsDisc" class="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-black/10 dark:border-white/10 my-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
+                                <i class="fa-solid fa-box-archive mr-1"></i> <%= t('common.location') %>
+                            </label>
+                            <input type="text" name="location" list="locationList" value="<%= vinyl.location || '' %>" placeholder="<%= t('placeholders.location') %>" class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none">
+                            <datalist id="locationList">
+                                <% locations.forEach(loc => { %> <option value="<%= loc %>"> <% }) %>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_comments') %></label>
+                            <textarea name="comments" rows="2" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg focus:ring-primary-theme block w-full p-3 outline-none"><%= vinyl.comments %></textarea>
                         </div>
                     </div>
 
@@ -141,7 +173,6 @@
                     <button type="submit" class="w-full text-white bg-primary-theme hover:brightness-110 font-bold rounded-xl text-lg px-5 py-4 transition-transform hover:scale-[1.01] flex items-center justify-center gap-2 shadow-lg shadow-primary-theme/20">
                         <i class="fa-solid fa-save"></i> <%= t('common.save_changes') %>
                     </button>
-
                 </form>
             </div>
         </div>
@@ -150,60 +181,99 @@
 
 <script>
     const translations = {
-        searching: "<%= t('common.searching') %>",
-        no_results: "<%= t('common.no_results') %>",
-        api_error: "<%= t('confirm_vinyl.api_error') %>"
+        noResults: "<%= t('confirm_vinyl.no_results') %>",
+        networkError: "<%= t('confirm_vinyl.network_error') %>",
+        loadingHtml: '<div class="col-span-full py-8 text-center opacity-50"><i class="fa-solid fa-spinner fa-spin text-xl"></i></div>'
     };
 
-    const toggleBox = (chk, box) => box.classList.toggle('hidden', !chk.checked);
-    
-    document.getElementById('checkEditCover').addEventListener('change', (e) => toggleBox(e.target, document.getElementById('boxEditCover')));
-    document.getElementById('checkEditDisc').addEventListener('change', (e) => toggleBox(e.target, document.getElementById('boxEditDisc')));
-    
-    toggleBox(document.getElementById('checkEditCover'), document.getElementById('boxEditCover'));
-    toggleBox(document.getElementById('checkEditDisc'), document.getElementById('boxEditDisc'));
+    const nodes = {
+        checkCover: document.getElementById('checkEditCover'),
+        boxCover: document.getElementById('boxEditCover'),
+        checkDisc: document.getElementById('checkEditDisc'),
+        boxDisc: document.getElementById('boxEditDisc'),
+        livePreview: document.getElementById('livePreview')
+    };
 
-    async function searchGoogle(type) {
-        const query = document.getElementById(type === 'cover' ? 'queryCover' : 'queryDisc').value;
-        const resultsDiv = document.getElementById(type === 'cover' ? 'resultsCover' : 'resultsDisc');
-        const hiddenInput = document.getElementById(type === 'cover' ? 'inputCoverImage' : 'inputUserImage');
-        const livePreview = document.getElementById('livePreview');
+    const toggleBox = (chk, box) => { if(chk && box) box.classList.toggle('hidden', !chk.checked); };
+    
+    if (nodes.checkCover) {
+        toggleBox(nodes.checkCover, nodes.boxCover);
+        nodes.checkCover.addEventListener('change', (e) => toggleBox(e.target, nodes.boxCover));
+    }
+    if (nodes.checkDisc) {
+        toggleBox(nodes.checkDisc, nodes.boxDisc);
+        nodes.checkDisc.addEventListener('change', (e) => toggleBox(e.target, nodes.boxDisc));
+    }
 
-        resultsDiv.innerHTML = `<div class="col-span-full text-center py-2"><i class="fa-solid fa-circle-notch fa-spin text-primary-theme text-xl"></i> ${translations.searching}</div>`;
+    function setImgTab(type, mode) {
+        document.querySelectorAll(`.img-pane-${type}`).forEach(p => p.classList.add('hidden'));
+        const target = document.getElementById(`pane-${type}-${mode}`);
+        if(target) target.classList.remove('hidden');
         
-        try {
-            const res = await fetch(`/api/google-images?q=${encodeURIComponent(query)}`);
-            const images = await res.json();
-            resultsDiv.innerHTML = '';
-            
-            if(images.length === 0) {
-                 resultsDiv.innerHTML = `<div class="col-span-full text-center text-xs opacity-50">${translations.no_results}</div>`;
-                 return;
-            }
+        document.querySelectorAll(`[id^="tab-${type}-"]`).forEach(btn => {
+            btn.classList.remove('bg-primary-theme', 'text-white');
+            btn.classList.add('opacity-50');
+        });
+        const active = document.getElementById(`tab-${type}-${mode}`);
+        if(active) { active.classList.add('bg-primary-theme', 'text-white'); active.classList.remove('opacity-50'); }
+    }
 
-            images.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                img.className = 'w-full h-24 object-cover rounded cursor-pointer border-2 border-transparent hover:border-primary-theme transition-all bg-black/5 dark:bg-white/5';
-                img.onclick = () => {
-                    hiddenInput.value = url;
-                    if(type === 'cover') livePreview.src = url;
-                    Array.from(resultsDiv.children).forEach(c => c.classList.remove('border-primary-theme'));
-                    img.classList.add('border-primary-theme');
-                };
-                resultsDiv.appendChild(img);
+    function updateImageValue(type, source, element = null) {
+        const inputId = (type === 'cover') ? 'inputCoverImage' : 'inputUserImage';
+        const resultsId = (type === 'cover') ? 'resultsCover' : 'resultsDisc';
+        const hiddenInput = document.getElementById(inputId);
+        if (hiddenInput) hiddenInput.value = source;
+        if (type === 'cover' && nodes.livePreview) nodes.livePreview.src = source;
+
+        if (element) {
+            document.getElementById(resultsId).querySelectorAll('img').forEach(img => {
+                img.classList.remove('ring-4', 'ring-primary-theme');
             });
-        } catch(e) { 
-            resultsDiv.innerHTML = `<div class="col-span-full text-center text-xs text-red-500">${translations.api_error}</div>`; 
+            element.classList.add('ring-4', 'ring-primary-theme');
         }
     }
-</script>
 
-<style>
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(100,100,100,0.2); border-radius: 2px; }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-</style>
+    async function runUniversalSearch(type) {
+        const query = document.getElementById(type === 'cover' ? 'queryCover' : 'queryDisc').value;
+        const resultsDiv = document.getElementById(type === 'cover' ? 'resultsCover' : 'resultsDisc');
+        resultsDiv.innerHTML = translations.loadingHtml;
+
+        try {
+            const endpoint = (type === 'disc') ? `/admin/api/search-discogs-gallery?q=${encodeURIComponent(query)}` : `/admin/api/search-image-universal?q=${encodeURIComponent(query)}&type=music`;
+            const res = await fetch(endpoint);
+            const urls = await res.json();
+
+            resultsDiv.innerHTML = '';
+            if (urls.length === 0) {
+                resultsDiv.innerHTML = `<p class="col-span-full text-xs text-center opacity-50 py-8">${translations.noResults}</p>`;
+                return;
+            }
+
+            urls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = "aspect-square object-contain bg-black/5 dark:bg-white/5 rounded-xl cursor-pointer border-2 border-transparent hover:border-primary-theme transition-all p-1";
+                img.onclick = () => updateImageValue(type, url, img);
+                resultsDiv.appendChild(img);
+            });
+        } catch (e) {
+            resultsDiv.innerHTML = `<p class="col-span-full text-xs text-red-500 text-center py-8">${translations.networkError}</p>`;
+        }
+    }
+
+    ['Cover', 'Disc'].forEach(type => {
+        const urlInput = document.getElementById(`urlInput${type}`);
+        const fileInput = document.getElementById(`fileInput${type}`);
+        if (urlInput) urlInput.addEventListener('input', (e) => { if (e.target.value.startsWith('http')) updateImageValue(type.toLowerCase(), e.target.value); });
+        if (fileInput) fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => updateImageValue(type.toLowerCase(), ev.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
 
 <%- include('partials/footer') %>

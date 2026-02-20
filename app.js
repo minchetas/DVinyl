@@ -35,6 +35,7 @@ const albumRoutes = require('./routes/albumRoutes.js');
 const adminRoutes = require('./routes/adminRoutes.js');
 const settingsRoutes = require('./routes/settingsRoutes.js');
 const backupRoutes = require('./routes/backupRoutes.js');
+const bookRoutes = require('./routes/bookRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -134,10 +135,7 @@ app.use(async (req, res, next) => {
 
     try {
         const count = await User.countDocuments();
-        console.log(`[DEBUG] Number of users in DB: ${count}`);
-
         if (count === 0) {
-            console.log("[DEBUG] DB empty -> redirecting to /setup");
             return res.redirect('/setup');
         }
     } catch (e) {
@@ -160,6 +158,7 @@ app.use(albumRoutes);
 app.use('/admin', adminRoutes);
 app.use('/settings', settingsRoutes);
 app.use('/backup', backupRoutes);
+app.use(bookRoutes);
 
 app.use((req, res) => {
     res.status(404).render('404');

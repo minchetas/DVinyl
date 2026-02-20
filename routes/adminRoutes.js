@@ -7,6 +7,8 @@ const LoginLog = require('../models/LoginLog');
 const Settings = require('../models/Settings');
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 const PRESETS = require('../config/themes');
+const axios = require('axios');
+const https = require('https');
 
 /**
  * routes/adminRoutes.js
@@ -216,6 +218,73 @@ router.post('/modules/save', requireAuth, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error("[ERR] modules save", err);
         res.status(500).send("[ERR] modules save failed.");
+    }
+});
+
+router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req, res) => {
+    const { q, type } = req.query;
+    console.log(`[SEARCH] Query: "${q}" | Type: ${type}`);
+
+    const axiosConfig = {
+        headers: { 'User-Agent': 'DVinylApp/2.0' },
+        timeout: 10000,
+        httpsAgent: new https.Agent({ family: 4, keepAlive: true })
+    };
+
+    try {
+        if (type === 'book') {
+            const response = await axios.get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=10`, axiosConfig);
+            const results = (response.data.docs || [])
+                .filter(doc => doc.cover_i)
+                .map(doc => `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`);
+            
+            return res.json(results);
+        }
+
+        const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=12`;
+        const response = await axios.get(itunesUrl, axiosConfig);
+        
+        const results = (response.data.results || []).map(item => {
+            return item.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+        });
+        
+        console.log(`[SEARCH] iTunes found: ${results.length}`);
+        res.json(results);
+
+    } catch (err) {
+        console.error("[ERR] search image universal:", err.message);
+        res.status(500).json({ error: "Erreur de connexion" });
+    }
+});
+
+
+router.get('/api/search-discogs-gallery', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { q } = req.query;
+        const axiosConfig = {
+            headers: { 
+                'User-Agent': 'DVinylApp/2.0',
+                'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN || ''}`
+            }
+        };
+
+        const searchRes = await axios.get(`https://api.discogs.com/database/search?q=${encodeURIComponent(q)}&type=release&per_page=3`, axiosConfig);
+        const results = searchRes.data.results || [];
+        const galleryPromises = results.map(async (item) => {
+            try {
+                const detail = await axios.get(`https://api.discogs.com/releases/${item.id}`, axiosConfig);
+                return (detail.data.images || []).map(img => img.resource_url);
+            } catch (e) { return []; }
+        });
+
+        const allGalleries = await Promise.all(galleryPromises);
+        
+        const finalImages = [...new Set(allGalleries.flat())];
+        
+        res.json(finalImages);
+    } catch (err) {
+        console.error("[ERR] Discogs Global Gallery:", err.message);
+        res.status(500).json({ error: "ERROR Discogs search" });
     }
 });
 

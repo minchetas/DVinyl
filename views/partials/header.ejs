@@ -8,7 +8,7 @@
 
   let themeKey = 'home'; 
   
-  const musicTypes = ['music', 'vinyl', 'cd', 'cassette', 'collection', 'wishlist', 'add-vinyl', 'album'];
+  const musicTypes = ['music', 'vinyl', 'cd', 'cassette', 'add-vinyl', 'album'];
   const bookTypes  = ['books', 'add-book', 'book'];
   const dvdTypes   = ['dvd', 'add-dvd'];
 
@@ -155,11 +155,6 @@
               <span class="block text-xs opacity-60 truncate text-[var(--text-sub)]"><%= user.email %></span>
             </div>
             <ul class="py-2">
-              <li>
-                <a href="/settings" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
-                  <i class="fa-solid fa-user-gear w-5 text-center opacity-70"></i> <span><%= t('nav.settings') %></span>
-                </a>
-              </li>
               <% if (user.isAdmin) { %>
               <li>
                 <a href="/admin" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
@@ -172,6 +167,11 @@
                 </a>
               </li>
               <% } %>
+              <li>
+                <a href="/settings" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
+                  <i class="fa-solid fa-user-gear w-5 text-center opacity-70"></i> <span><%= t('nav.settings') %></span>
+                </a>
+              </li>
               <li>
                 <button id="theme-toggle" class="w-[calc(100%-1rem)] text-left block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
                     <i id="theme-icon" class="fa-solid fa-moon w-5 text-center"></i> 

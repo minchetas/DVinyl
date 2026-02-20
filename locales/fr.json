@@ -19,7 +19,12 @@
     "or": "OU",
     "all": "Tout",
     "items": "éléments",
-    "back_home": "Retourner à l'accueil"
+    "back_home": "Retourner à l'accueil",
+    "back_to_collection": "Retour à la collection",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "confirm_delete": "Êtes-vous sûr ?",
+    "show": "Afficher"
   },
   "settings": {
     "page_title": "Paramètres du compte",
@@ -107,7 +112,8 @@
     "dvds": "DVDs",
     "4k_pl": "4K Ultra HDs",
     "vhss": "VHS",
-    "laserdiscs": "Laserdiscs"
+    "laserdiscs": "Laserdiscs",
+    "graphic_novel": "Roman Graphique"
   },
   "index": {
     "welcome": "Salut",
@@ -197,7 +203,7 @@
       "email": "Email",
       "submit": "Créer et générer mot de passe",
       "import_title": "Importer une collection",
-      "import_subtitle": "Entrez l'URL de la collection Discogs publique (ex: https://www.discogs.com/user/username/collection).",
+      "import_subtitle": "Entrez l'URL de la collection Discogs publique",
       "discogs_url": "URL de la collection",
       "import_submit": "Lancer l'importation",
       "import_loading": "Importation en cours...",
@@ -230,7 +236,9 @@
   },
   "collection": {
     "title": "Ma Collection",
-    "filter_placeholder": "Filtrer..."
+    "filter_placeholder": "Filtrer...",
+    "refresh_tooltip": "Rafraîchir depuis Discogs",
+    "refresh": "Rafraîchir"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",
@@ -254,7 +262,13 @@
     "btn_collection": "Collection",
     "api_error": "Erreur lors de l'appel à l'API.",
     "no_images": "Aucune image trouvée.",
-    "field_quantity": "Quantité"
+    "field_quantity": "Quantité",
+    "source_local": "Local",
+    "source_url": "URL",
+    "source_search": "Recherche",
+    "browse_files": "Parcourir les fichiers",
+    "no_results": "Aucun visuel trouvé.",
+    "network_error": "Erreur réseau."
   },
   "edit_vinyl": {
     "title": "Modifier l'album",
@@ -370,5 +384,63 @@
       "books": "Livres",
       "dvd": "Films / DVD"
     }
+  },
+  "add_book": {
+    "title": "Ajouter un Livre",
+    "desc": "Recherchez par titre, auteur ou scannez le code-barres (ISBN).",
+    "search_placeholder": "Titre, Auteur ou ISBN...",
+    "btn_scan": "Scanner un ISBN",
+    "results_title": "Résultats",
+    "no_results": "Aucun livre trouvé."
+  },
+  "confirm_book": {
+    "publisher_label": "Éditeur",
+    "isbn_label": "ISBN",
+    "year_label": "Année",
+    "pages_label": "Pages",
+    "description_title": "Résumé",
+    "config_title": "Vérifier et compléter",
+    "field_title": "Titre",
+    "field_author": "Auteur(s)",
+    "field_publisher": "Éditeur",
+    "field_year": "Année",
+    "field_isbn": "ISBN",
+    "field_format": "Format",
+    "field_pages": "Pages",
+    "field_language": "Langue",
+    "field_series": "Série / Saga",
+    "field_volume": "Tome / Volume",
+    "reading_tracking": "Suivi de lecture",
+    "field_status": "Statut",
+    "field_rating": "Note (sur 5)",
+    "comments_hint": "(État du livre, édition spéciale, dédicace...)",
+    "btn_collection": "Ajouter à la Bibliothèque",
+    "cover_preview": "Aperçu de la couverture"
+  },
+  "edit_book": {
+    "title": "Modifier le livre"
+  },
+  "book_detail": {
+    "volume": "Tome",
+    "added_on": "Ajouté le",
+    "delete_warning": "Cette action est irréversible. Le livre sera retiré de votre collection."
+  },
+  "format": {
+    "paperback": "Broché",
+    "hardcover": "Relié",
+    "graphic_novel": "Roman Graphique"
+  },
+  "status": {
+    "to_read": "À lire",
+    "reading": "En cours de lecture",
+    "read": "Terminé"
+  },
+  "image_source": {
+    "local": "Fichier local",
+    "url": "URL",
+    "search": "Rechercher",
+    "hint": "Cliquez pour parcourir les fichiers",
+    "url_hint": "L'image sera prévisualisée automatiquement.",
+    "url_label": "Lien direct vers l'image"
   }
 }

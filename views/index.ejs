@@ -50,25 +50,48 @@
                 <%= t('index.view_everything') %> <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </a>
         </div>
+
         <% if (latestCollection.length > 0) { %>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 <% latestCollection.forEach(album => { %>
-                    <a href="/album/<%= album._id %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all hover:shadow-lg hover:-translate-y-1">
-                        <div class="aspect-square relative overflow-hidden">
-                            <img src="<%= album.cover_image %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            <% 
-                                let badgeColor = 'bg-green-600/90 text-white';
-                                let badgeLabel = t('media.vinyl');
-                                if (album.media_type === 'cd') { badgeColor = 'bg-blue-600/90 text-white'; badgeLabel = t('media.cd'); }
-                                else if (album.media_type === 'cassette') { badgeColor = 'bg-orange-600/90 text-white'; badgeLabel = t('media.cassette'); }
-                            %>
-                            <span class="absolute top-2 right-2 text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
-                                <%= badgeLabel %>
+                    <% 
+                        const isBook = album.kind === 'Book';
+                        const detailUrl = isBook ? `/book/${album._id}` : `/album/${album._id}`;
+                        
+                        const aspectClass = 'aspect-square';
+                        
+                        const formatKey = album.media_type || album.format;
+                        const badgeColors = {
+                            'vinyl': 'bg-green-600/90',
+                            'cd': 'bg-blue-600/90',
+                            'cassette': 'bg-orange-600/90',
+                            'manga': 'bg-pink-600/90',
+                            'comic': 'bg-indigo-600/90',
+                            'hardcover': 'bg-purple-600/90',
+                            'paperback': 'bg-amber-600/90',
+                            'book': 'bg-amber-700/90'
+                        };
+                        let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
+                    %>
+                    <a href="<%= detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all hover:shadow-lg hover:-translate-y-1">
+                        
+                        <div class="<%= aspectClass %> relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                            
+                            <% if (isBook) { %>
+                                <img src="<%= album.cover_image %>" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
+                            <% } %>
+
+                            <img src="<%= album.cover_image %>" 
+                                class="relative z-10 w-full h-full <%= isBook ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
+                            
+                            <span class="absolute top-2 right-2 z-20 text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
+                                <%= t('media.' + formatKey) %>
                             </span>                         
                         </div>
+
                         <div class="p-3 md:p-4">
                             <h3 class="font-bold truncate text-sm md:text-base"><%= album.title %></h3>
-                            <p class="text-xs opacity-60 truncate"><%= album.artist %></p>
+                            <p class="text-xs opacity-60 truncate"><%= isBook ? album.author : (album.artist || 'Inconnu') %></p>
                         </div>
                     </a>
                 <% }) %>
@@ -89,15 +112,46 @@
             </a>
         </div>
         <% if (latestWishlist.length > 0) { %>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 items-end">
                 <% latestWishlist.forEach(album => { %>
-                    <a href="/album/<%= album._id %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-pink-500 transition-all hover:shadow-lg hover:-translate-y-1">
-                        <div class="aspect-square relative overflow-hidden">
-                            <img src="<%= album.cover_image %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <% 
+                        const isBook = album.kind === 'Book';
+                        const detailUrl = isBook ? `/book/${album._id}` : `/album/${album._id}`;
+                        const aspectClass =  'aspect-square';
+                        
+                        const formatKey = album.media_type || album.format;
+                        const badgeColors = {
+                            'vinyl': 'bg-green-600/90',
+                            'cd': 'bg-blue-600/90',
+                            'cassette': 'bg-orange-600/90',
+                            'manga': 'bg-pink-600/90',
+                            'comic': 'bg-indigo-600/90',
+                            'hardcover': 'bg-purple-600/90',
+                            'paperback': 'bg-amber-600/90',
+                            'book': 'bg-amber-700/90'
+                        };
+                        let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
+                    %>
+                    <a href="<%= detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-pink-500 transition-all hover:shadow-lg hover:-translate-y-1">
+                        
+                        <div class="aspect-square relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                            
+                            <% if (isBook) { %>
+                                <img src="<%= album.cover_image %>" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
+                            <% } %>
+
+                            <img src="<%= album.cover_image %>" 
+                                class="relative z-10 w-full h-full <%= isBook ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
+                            
+                            <span class="absolute top-2 right-2 z-20 text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
+                                <%= t('media.' + formatKey) %>
+                            </span>                         
                         </div>
+
                         <div class="p-3 md:p-4">
                             <h3 class="font-bold truncate text-sm md:text-base"><%= album.title %></h3>
-                            <p class="text-xs opacity-60 truncate"><%= album.artist %></p>
+                            <p class="text-xs opacity-60 truncate"><%= isBook ? album.author : (album.artist || 'Inconnu') %></p>
+                            
                             <% if(album.variant_color) { %>
                                 <div class="flex items-center gap-1 mt-1">
                                     <span class="w-2 h-2 rounded-full bg-pink-500 inline-block flex-shrink-0"></span>
