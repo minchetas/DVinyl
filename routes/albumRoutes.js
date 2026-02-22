@@ -40,15 +40,23 @@ router.get('/', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
         const settings = res.locals.settings;
-
         const allItems = await Item.find({ owner: adminId, in_wishlist: false });
+
+        const countByFormat = (items, format) => {
+            return items
+                .filter(i => {
+                    const f = (i.media_type || i.format || '').toLowerCase();
+                    return f === format.toLowerCase();
+                })
+                .reduce((acc, i) => acc + Number(i.quantity || 1), 0);
+        };
 
         const stats = {
             total: allItems.reduce((acc, i) => acc + (i.quantity || 1), 0),
 
-            vinyl: allItems.filter(i => i.media_type === 'vinyl').reduce((acc, i) => acc + (i.quantity || 1), 0),
-            cd: allItems.filter(i => i.media_type === 'cd').reduce((acc, i) => acc + (i.quantity || 1), 0),
-            cassette: allItems.filter(i => i.media_type === 'cassette').reduce((acc, i) => acc + (i.quantity || 1), 0),
+            vinyl: countByFormat(allItems, 'vinyl'),
+            cd: countByFormat(allItems, 'cd'),
+            cassette: countByFormat(allItems, 'cassette'),
 
             book_total: allItems.filter(i => i.kind === 'Book').reduce((acc, i) => acc + (i.quantity || 1), 0),
             book_hardcover: allItems.filter(i => i.kind === 'Book' && i.format === 'hardcover').reduce((acc, i) => acc + (i.quantity || 1), 0),
@@ -81,7 +89,7 @@ router.get('/', requireAuth, async (req, res) => {
             return { name: topName, count: topCount };
         };
 
-        stats.artist = getTop(allItems.filter(i => i.kind === 'Music'), 'artist');
+        stats.artist = getTop(allItems.filter(i => i.kind === 'Music' || (!i.kind && i.artist)), 'artist');
         stats.author = getTop(allItems.filter(i => i.kind === 'Book'), 'author');
         stats.director = getTop(allItems.filter(i => i.kind === 'Dvd'), 'director');
 
