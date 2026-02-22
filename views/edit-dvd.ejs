@@ -106,10 +106,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_book.field_status') %></label>
-                            <select name="watchStatus" class="bg-black/5 dark:bg-white/5 border border-transparent text-sm rounded-lg focus:ring-primary-theme block w-full p-3 transition-colors outline-none cursor-pointer">
-                                <option value="to_watch" <%= dvd.watchStatus === 'to_watch' ? 'selected' : '' %>><%= t('confirm_dvd.status_to_watch') %></option>
-                                <option value="watching" <%= dvd.watchStatus === 'watching' ? 'selected' : '' %>><%= t('confirm_dvd.status_watching') %></option>
-                                <option value="watched" <%= dvd.watchStatus === 'watched' ? 'selected' : '' %>><%= t('confirm_dvd.status_watched') %></option>
+                            <select name="watchStatus" class="bg-black/5 dark:bg-white/5 border border-transparent text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary-theme focus:border-primary-theme block w-full p-3 transition-colors outline-none cursor-pointer">
+                                <option class="bg-white dark:bg-[#1a1a1a]" value="to_watch" <%= dvd.watchStatus === 'to_watch' ? 'selected' : '' %>><%= t('confirm_dvd.status_to_watch') %></option>
+                                <option class="bg-white dark:bg-[#1a1a1a]" value="watching" <%= dvd.watchStatus === 'watching' ? 'selected' : '' %>><%= t('confirm_dvd.status_watching') %></option>
+                                <option class="bg-white dark:bg-[#1a1a1a]" value="watched" <%= dvd.watchStatus === 'watched' ? 'selected' : '' %>><%= t('confirm_dvd.status_watched') %></option>
                             </select>
                         </div>
                         <div>
@@ -161,7 +161,7 @@
 
                             <div id="pane-search" class="img-pane hidden">
                                 <div class="flex gap-2 mb-4">
-                                    <input type="text" id="queryCover" value="<%= dvd.title %> poster" class="flex-grow bg-white dark:bg-black/20 border-transparent rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
+                                    <input type="text" id="queryCover" value="<%= dvd.title %>" class="flex-grow bg-white dark:bg-black/20 border-transparent rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-primary-theme">
                                     <button type="button" onclick="runUniversalSearch()" class="bg-primary-theme text-white px-4 rounded-lg">
                                         <i class="fa-solid fa-search"></i>
                                     </button>

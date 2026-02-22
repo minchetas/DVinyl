@@ -100,7 +100,7 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const { search, type, format } = req.query;
+        const { search, type, format, location } = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 25;
 
@@ -108,12 +108,11 @@ router.get('/collection', requireAuth, async (req, res) => {
 
         if (search) {
             const regex = new RegExp(search, 'i');
-            query.$or = [
-                { title: regex },
-                { artist: regex },
-                { author: regex },
-                { director: regex }
-            ];
+            query.$or = [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }];
+        }
+
+        if (location) {
+            query.location = new RegExp(location, 'i');
         }
 
         if (type && type !== 'all') {
@@ -122,13 +121,7 @@ router.get('/collection', requireAuth, async (req, res) => {
         }
 
         if (format && format !== 'all') {
-            const formatFilter = { $or: [{ media_type: format }, { format: format }] };
-            if (query.$or) {
-                query.$and = [{ $or: query.$or }, formatFilter];
-                delete query.$or;
-            } else {
-                Object.assign(query, formatFilter);
-            }
+            query.$or = [{ media_type: format }, { format: format }];
         }
 
         const totalItems = await Item.countDocuments(query);
@@ -137,15 +130,36 @@ router.get('/collection', requireAuth, async (req, res) => {
             .skip((page - 1) * limit)
             .limit(limit);
 
+        const filterMap = {
+            music: [
+                { id: 'vinyl', label: req.t('media.vinyl') },
+                { id: 'cd', label: req.t('media.cd') },
+                { id: 'cassette', label: req.t('media.cassette') }
+            ],
+            books: [
+                { id: 'manga', label: req.t('media.manga') },
+                { id: 'comic', label: req.t('media.comic') },
+                { id: 'hardcover', label: req.t('media.hardcover') },
+                { id: 'paperback', label: req.t('media.paperback') }
+            ],
+            dvd: [
+                { id: 'dvd', label: req.t('media.dvd') },
+                { id: 'bluray', label: req.t('media.bluray') },
+                { id: '4k', label: req.t('media.4k') }
+            ]
+        };
+
         res.render('collection', {
             albums: albums.map(formatForView),
             totalItems,
             totalPages: Math.ceil(totalItems / limit),
             currentPage: page,
             queryLimit: limit,
-            queryType: type || 'all',
-            queryFormat: format || 'all',
+            currentType: type || 'all',
+            currentFormat: format || 'all',
             querySearch: search || '',
+            queryLocation: location || '',
+            activeFilters: filterMap[type] || [],
             locations: await Item.distinct('location', { owner: adminId })
         });
 

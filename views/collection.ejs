@@ -9,39 +9,28 @@
     </div>
 
     <div class="space-y-6 mb-8">
-                
+                        
         <div class="flex flex-wrap gap-2 mb-8" id="formatFilters">
             <% 
-            const filtersByType = {
-                'music': [
-                    { id: 'vinyl', label: t('media.vinyls') },
-                    { id: 'cd', label: t('media.cds') },
-                    { id: 'cassette', label: t('media.cassettes') }
-                ],
-                'books': [
-                    { id: 'hardcover', label: t('media.hardcover') },
-                    { id: 'paperback', label: t('media.paperback') },
-                    { id: 'manga', label: t('media.mangas') },
-                    { id: 'comic', label: t('media.comics') },
-                    { id: 'graphic_novel', label: t('media.graphic_novel') }
-                ],
-                'dvd': [
-                    { id: 'dvd', label: t('media.dvds') },
-                    { id: 'bluray', label: t('media.blurays') },
-                    { id: '4k', label: t('media.4k_pl') },
-                    { id: 'vhs', label: t('media.vhss') },
-                    { id: 'laserdisc', label: t('media.laserdiscs') }
-                ]
-            };
-            const currentType = locals.queryType || 'all';
-            const currentFormat = locals.queryFormat || 'all'; // On récupère le format actuel
-            const activeFilters = filtersByType[currentType] || [];
+            const mainTypes = [
+                { id: 'all', label: t('common.all') },
+                { id: 'music', label: t('media.music') },
+                { id: 'books', label: t('media.books') },
+                { id: 'dvd', label: t('media.dvds') }
+            ];
             %>
 
-            <% if (activeFilters.length > 0) { %>
-                <button onclick="updateURLParams('format', 'all')" 
-                    class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 <%= currentFormat === 'all' ? 'bg-primary-theme text-white shadow-lg' : 'bg-black/5 dark:bg-white/10 opacity-60' %>">
-                    <%= t('common.all') %>
+            <% if (currentType === 'all') { %>
+                <% mainTypes.forEach(type => { %>
+                    <button onclick="updateURLParams('type', '<%= type.id %>')" 
+                        class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 <%= currentType === type.id ? 'bg-primary-theme text-white shadow-lg' : 'bg-black/5 dark:bg-white/10 opacity-60' %>">
+                        <%= type.label %>
+                    </button>
+                <% }) %>
+            <% } else { %>
+                <button onclick="updateURLParams('type', 'all')" 
+                    class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 bg-black/5 dark:bg-white/10 opacity-60">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.all') %>
                 </button>
 
                 <% activeFilters.forEach(filter => { %>
@@ -68,16 +57,14 @@
                 </datalist>
             </div>
 
-            <% if (user.isAdmin) { %>
+            <% if (user.isAdmin && currentType === 'music') { %>
                 <div class="flex gap-2">
-                    <% if (locals.queryType === 'music' || !locals.queryType || locals.queryType === 'all') { %>
-                        <button onclick="openEstimateModal()" 
-                            class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group" 
-                            title="<%= t('index.btn_estimate') %>">
-                            <i class="fa-solid fa-calculator group-hover:scale-110 transition-transform"></i>
-                            <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('index.btn_estimate') %></span>
-                        </button>
-                    <% } %>
+                    <button onclick="openEstimateModal()" 
+                        class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group" 
+                        title="<%= t('index.btn_estimate') %>">
+                        <i class="fa-solid fa-calculator group-hover:scale-110 transition-transform"></i>
+                        <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('index.btn_estimate') %></span>
+                    </button>
 
                     <% if (user.discogsUsername) { %>
                         <button onclick="refreshCollection()" id="refreshBtn" 
@@ -89,6 +76,14 @@
                             </span>
                         </button>
                     <% } %>
+                </div>
+            <% } else if (user.isAdmin && user.discogsUsername) { %>
+                <div class="flex gap-2">
+                    <button onclick="refreshCollection()" id="refreshBtn" 
+                        class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-sync group-hover:rotate-180 transition-transform duration-500"></i>
+                        <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('collection.refresh') %></span>
+                    </button>
                 </div>
             <% } %>
         </div>
@@ -202,32 +197,73 @@
     </div>
 </div>
 
+<div id="estimateModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="card-theme rounded-2xl w-full max-w-lg p-6 md:p-8 shadow-2xl relative">
+        <button onclick="closeEstimateModal()" class="absolute top-4 right-4 opacity-50 hover:opacity-100">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+
+        <h3 class="text-2xl font-bold mb-2"><%= t('modal.estimate_title') %></h3>
+        <p class="opacity-60 text-sm mb-6"><%= t('modal.estimate_desc') %></p>
+
+        <div id="progressContainer" class="mb-6">
+            <div class="w-full bg-gray-200 dark:bg-black/30 rounded-full h-4 mb-2 overflow-hidden">
+                <div id="estimateProgress" class="bg-primary-theme h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-xs opacity-60 font-mono">
+                <span id="estimateCount">0 / --</span> 
+                <span id="estimatePercent">0%</span>
+            </div>
+        </div>
+
+        <div id="estimateResult" class="hidden text-center space-y-4">
+            <div class="p-6 bg-primary-theme/10 border border-primary-theme/30 rounded-xl">
+                <p class="text-primary-theme text-sm font-bold uppercase tracking-wider mb-1"><%= t('modal.avg_label') %></p>
+                <h4 id="finalPrice" class="text-4xl md:text-5xl font-black">--</h4>
+                <p class="text-xs opacity-60 mt-2"><%= t('modal.condition_hint') %></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-lg">
+                    <span class="opacity-60 block text-[10px] uppercase font-bold"><%= t('modal.min_label') %></span>
+                    <span id="minPrice" class="font-bold text-lg">--</span>
+                </div>
+                <div class="bg-gray-100 dark:bg-black/20 p-3 rounded-lg">
+                    <span class="opacity-60 block text-[10px] uppercase font-bold"><%= t('modal.max_label') %></span>
+                    <span id="maxPrice" class="font-bold text-lg">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="startEstimateBtn" class="mt-6 text-center">
+            <button onclick="startEstimation()" class="bg-primary-theme hover:brightness-110 text-white font-bold py-3 px-8 rounded-xl transition-colors">
+                <%= t('modal.start_btn') %>
+            </button>
+        </div>
+    </div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const filterInput = document.getElementById('filterInput');
     const locationInput = document.getElementById('locationInput');
-    let selectedFormat = 'all';
-
-    function changeLimit(val) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('limit', val);
-        url.searchParams.set('page', 1);
-        window.location.href = url.toString();
-    }
+    let searchTimeout;
 
     function updateURLParams(key, value) {
         const url = new URL(window.location.href);
         
         if (value === 'all' || !value) {
             url.searchParams.delete(key);
+            if (key === 'type') url.searchParams.delete('format');
         } else {
             url.searchParams.set(key, value);
         }
 
         url.searchParams.set('page', 1);
-        
         window.location.href = url.toString();
+    }
+
+    function changeLimit(val) {
+        updateURLParams('limit', val);
     }
 
     function changePage(page) {
@@ -236,87 +272,146 @@
         window.location.href = url.toString();
     }
 
-    function filterByFormat(format) {
-        selectedFormat = format;
-        
-        document.querySelectorAll('.format-btn').forEach(btn => {
-            btn.classList.remove('bg-primary-theme', 'text-white', 'shadow-lg');
-            btn.classList.add('bg-black/5', 'dark:bg-white/10', 'opacity-60');
-        });
-
-        event.currentTarget.classList.add('bg-primary-theme', 'text-white', 'shadow-lg');
-        event.currentTarget.classList.remove('bg-black/5', 'dark:bg-white/10', 'opacity-60');
-
-        applyFilters();
-    }
-
-    function applyFilters() {
-        const term = filterInput.value.toLowerCase();
-        const targetLoc = locationInput.value.toLowerCase().trim();
-        
-        document.querySelectorAll('.album-card').forEach(card => {
-            const cardText = card.innerText.toLowerCase();
-            const cardLoc = (card.getAttribute('data-location') || '').toLowerCase();
-            
-            const matchesTerm = cardText.includes(term);
-            const matchesLoc = targetLoc === '' || cardLoc.includes(targetLoc);
-
-            card.style.display = (matchesTerm && matchesLoc) ? 'block' : 'none';
+    if (filterInput) {
+        filterInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                updateURLParams('search', e.target.value);
+            }, 500);
         });
     }
 
-    if(filterInput) filterInput.addEventListener('keyup', applyFilters);
-    if(locationInput) locationInput.addEventListener('input', applyFilters);
+    if (locationInput) {
+        locationInput.addEventListener('change', (e) => {
+            updateURLParams('location', e.target.value);
+        });
+    }
 
     <% if (user.isAdmin) { %>
         const socket = io();
-
         async function refreshCollection() {
             const btn = document.getElementById('refreshBtn');
             const icon = btn.querySelector('i');
-            
             icon.classList.add('fa-spin');
             btn.disabled = true;
             
-            socket.once('import_finished', (data) => {
-                window.location.reload();
-            });
-
+            socket.once('import_finished', () => window.location.reload());
             socket.once('import_error', (data) => {
-                alert("import error: " + data.message);
+                alert("Erreur : " + data.message);
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
             });
-            try {
-                const pseudo = "<%= user.discogsUsername %>";
-                let fakeUrl = `https://www.discogs.com/user/${pseudo}`;
-                
-                const isWishlistPage = window.location.pathname.includes('wishlist');
-                const type = isWishlistPage ? 'wishlist' : 'collection';
 
-                const res = await fetch('/import/discogs', {
+            try {
+                const isWishlist = window.location.pathname.includes('wishlist');
+                await fetch('/import/discogs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        discogsUrl: fakeUrl,
+                        discogsUrl: `https://www.discogs.com/user/<%= user.discogsUsername %>`,
                         full: false,
-                        type: type
+                        type: isWishlist ? 'wishlist' : 'collection'
                     })
                 });
-
-                if(!res.ok) {
-                    socket.off('import_finished');
-                    socket.off('import_error');
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
-                }
-            } catch(e) {
-                console.error(e);
+            } catch (e) {
                 icon.classList.remove('fa-spin');
                 btn.disabled = false;
             }
         }
     <% } %>
+
+    const modal = document.getElementById('estimateModal');
+    const startBtn = document.getElementById('startEstimateBtn');
+    const resultDiv = document.getElementById('estimateResult');
+    const progressBar = document.getElementById('estimateProgress');
+    const countSpan = document.getElementById('estimateCount');
+    const percentSpan = document.getElementById('estimatePercent');
+    const estimateErrorMsg = "<%= t('messages.estimate_error') %>";
+    const currentLocale = '<%= currentLng === "fr" ? "fr-FR" : "en-US" %>';
+    const currentCurrency = '<%= user.currency || "USD" %>';
+
+    let totalAlbums = 0;
+    let currentProcessed = 0;
+    let totalPriceVG = 0;
+    let totalPriceMin = 0;
+    let totalPriceMax = 0;
+
+    function openEstimateModal() {
+        modal.classList.remove('hidden');
+    }
+
+    function closeEstimateModal() {
+        modal.classList.add('hidden');
+    }
+
+  async function startEstimation() {
+        startBtn.classList.add('hidden');
+        try {
+            const res = await fetch('/api/collection/ids?type=music'); 
+            const data = await res.json();
+            
+            if(!data.success) throw new Error("Server Error");
+            
+            const albumsToEstimate = data.albums;
+            totalAlbums = albumsToEstimate.length;
+            currentProcessed = 0;
+            totalPriceVG = 0;
+            totalPriceMin = 0;
+            totalPriceMax = 0;
+
+            countSpan.innerText = `0 / ${totalAlbums}`; 
+
+            for (const album of albumsToEstimate) {
+                await estimateOneAlbum(album.discogs_id, album.quantity || 1);
+                currentProcessed++;                
+
+                const percent = Math.round((currentProcessed / totalAlbums) * 100);
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (percentSpan) percentSpan.innerText = percent + '%';
+                
+                if (countSpan) countSpan.innerText = `${currentProcessed} / ${totalAlbums}`;
+
+                await new Promise(r => setTimeout(r, 500));
+            }
+            showResults();
+        } catch (err) {
+            alert(`${estimateErrorMsg} : ${err.message}`);
+            startBtn.classList.remove('hidden');
+        }
+    }
+
+    async function estimateOneAlbum(id, quantity) {
+        try {
+            const res = await fetch(`/api/estimate/${id}`);
+            const data = await res.json();
+            if (data.success && data.price) {
+                const val = data.price.value * quantity;
+                totalPriceVG += val;
+                totalPriceMin += val; 
+                totalPriceMax += (val * 1.3);
+            }
+        } catch (e) {}
+    }
+
+    function showResults() {
+    const fmt = (val) => {
+        try {
+            return new Intl.NumberFormat(currentLocale, { 
+                style: 'currency', 
+                currency: currentCurrency 
+            }).format(val);
+        } catch (e) {
+            return val.toFixed(2) + ' ' + currentCurrency;
+        }
+    };
+
+        document.getElementById('finalPrice').innerText = fmt(totalPriceVG);
+        document.getElementById('minPrice').innerText = fmt(totalPriceMin);
+        document.getElementById('maxPrice').innerText = fmt(totalPriceMax);
+
+        document.getElementById('progressContainer').classList.add('hidden');
+        resultDiv.classList.remove('hidden');
+    }
 </script>
 
 <%- include('partials/footer') %>
