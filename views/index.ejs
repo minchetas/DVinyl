@@ -56,11 +56,15 @@
                 <% latestCollection.forEach(album => { %>
                     <% 
                         const isBook = album.kind === 'Book';
-                        const detailUrl = isBook ? `/book/${album._id}` : `/album/${album._id}`;
+                        const isDvd = album.kind === 'Dvd' || (album.tmdb_id !== undefined && album.tmdb_id !== null);
+                        
+                        let detailUrl = `/album/${album._id}`;
+                        if (isBook) detailUrl = `/book/${album._id}`;
+                        if (isDvd) detailUrl = `/dvd/${album._id}`;
                         
                         const aspectClass = 'aspect-square';
                         
-                        const formatKey = album.media_type || album.format;
+                        const formatKey = isDvd ? album.format : (album.media_type || album.format);
                         const badgeColors = {
                             'vinyl': 'bg-green-600/90',
                             'cd': 'bg-blue-600/90',
@@ -69,7 +73,12 @@
                             'comic': 'bg-indigo-600/90',
                             'hardcover': 'bg-purple-600/90',
                             'paperback': 'bg-amber-600/90',
-                            'book': 'bg-amber-700/90'
+                            'book': 'bg-amber-700/90',
+                            'dvd': 'bg-sky-600/90',
+                            'bluray': 'bg-indigo-700/90',
+                            '4k': 'bg-red-600/90',
+                            'vhs': 'bg-amber-600/90',
+                            'laserdisc': 'bg-purple-600/90'
                         };
                         let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
                     %>
@@ -77,12 +86,12 @@
                         
                         <div class="<%= aspectClass %> relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             
-                            <% if (isBook) { %>
+                            <% if (isBook || isDvd) { %>
                                 <img src="<%= album.cover_image %>" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
                             <% } %>
 
                             <img src="<%= album.cover_image %>" 
-                                class="relative z-10 w-full h-full <%= isBook ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
+                                class="relative z-10 w-full h-full <%= (isBook || isDvd) ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
                             
                             <span class="absolute top-2 right-2 z-20 text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
                                 <%= t('media.' + formatKey) %>
@@ -90,8 +99,10 @@
                         </div>
 
                         <div class="p-3 md:p-4">
-                            <h3 class="font-bold truncate text-sm md:text-base"><%= album.title %></h3>
-                            <p class="text-xs opacity-60 truncate"><%= isBook ? album.author : (album.artist || 'Inconnu') %></p>
+                            <h3 class="font-bold truncate text-sm md:text-base leading-tight"><%= album.title %></h3>
+                            <p class="text-xs opacity-60 truncate">
+                                <%= isBook ? album.author : (isDvd ? (album.director) : (album.artist)) %>
+                            </p>
                         </div>
                     </a>
                 <% }) %>
@@ -116,19 +127,19 @@
                 <% latestWishlist.forEach(album => { %>
                     <% 
                         const isBook = album.kind === 'Book';
-                        const detailUrl = isBook ? `/book/${album._id}` : `/album/${album._id}`;
-                        const aspectClass =  'aspect-square';
+                        const isDvd = album.kind === 'Dvd' || (album.tmdb_id !== undefined && album.tmdb_id !== null);
                         
-                        const formatKey = album.media_type || album.format;
+                        let detailUrl = `/album/${album._id}`;
+                        if (isBook) detailUrl = `/book/${album._id}`;
+                        if (isDvd) detailUrl = `/dvd/${album._id}`;
+
+                        const formatKey = isDvd ? album.format : (album.media_type || album.format);
                         const badgeColors = {
-                            'vinyl': 'bg-green-600/90',
-                            'cd': 'bg-blue-600/90',
-                            'cassette': 'bg-orange-600/90',
-                            'manga': 'bg-pink-600/90',
-                            'comic': 'bg-indigo-600/90',
-                            'hardcover': 'bg-purple-600/90',
-                            'paperback': 'bg-amber-600/90',
-                            'book': 'bg-amber-700/90'
+                            'vinyl': 'bg-green-600/90', 'cd': 'bg-blue-600/90', 'cassette': 'bg-orange-600/90',
+                            'manga': 'bg-pink-600/90', 'comic': 'bg-indigo-600/90', 'hardcover': 'bg-purple-600/90',
+                            'paperback': 'bg-amber-600/90', 'book': 'bg-amber-700/90',
+                            'dvd': 'bg-sky-600/90', 'bluray': 'bg-indigo-700/90', '4k': 'bg-red-600/90',
+                            'vhs': 'bg-amber-600/90', 'laserdisc': 'bg-purple-600/90'
                         };
                         let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
                     %>
@@ -136,12 +147,12 @@
                         
                         <div class="aspect-square relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             
-                            <% if (isBook) { %>
+                            <% if (isBook || isDvd) { %>
                                 <img src="<%= album.cover_image %>" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
                             <% } %>
 
                             <img src="<%= album.cover_image %>" 
-                                class="relative z-10 w-full h-full <%= isBook ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
+                                class="relative z-10 w-full h-full <%= (isBook || isDvd) ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-700 group-hover:scale-105">
                             
                             <span class="absolute top-2 right-2 z-20 text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
                                 <%= t('media.' + formatKey) %>
@@ -149,15 +160,17 @@
                         </div>
 
                         <div class="p-3 md:p-4">
-                            <h3 class="font-bold truncate text-sm md:text-base"><%= album.title %></h3>
-                            <p class="text-xs opacity-60 truncate"><%= isBook ? album.author : (album.artist || 'Inconnu') %></p>
+                            <h3 class="font-bold truncate text-sm md:text-base leading-tight"><%= album.title %></h3>
+                            <p class="text-xs opacity-60 truncate mb-1">
+                                <%= isBook ? album.author : (isDvd ? (album.director || 'Inconnu') : (album.artist || 'Inconnu')) %>
+                            </p>
                             
-                            <% if(album.variant_color) { %>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="w-2 h-2 rounded-full bg-pink-500 inline-block flex-shrink-0"></span>
-                                    <span class="text-[10px] opacity-60 truncate"><%= album.variant_color %></span>
-                                </div>
-                            <% } %>
+                            <div class="flex items-center gap-1 h-4"> 
+                                <% if(album.variant_color) { %>
+                                    <span class="w-2 h-2 rounded-full bg-primary-theme inline-block flex-shrink-0"></span>
+                                    <span class="text-[9px] md:text-[10px] opacity-60 truncate"><%= album.variant_color %></span>
+                                <% } %>
+                            </div>
                         </div>
                     </a>
                 <% }) %>
@@ -173,7 +186,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <% 
             const widgetConfig = {
-                'total': { label: t('stats.total_label'), val: stats.total, unit: t('stats.albums_unit'), icon: 'fa-database', color: 'bg-primary-theme/20', wide: true },
+                'total': { label: t('stats.total_label'), val: stats.total, unit: t('common.items'), icon: 'fa-database', color: 'bg-primary-theme/20', wide: true },
                 
                 'vinyl': { label: t('media.vinyls'), val: stats.vinyl, icon: 'fa-record-vinyl', color: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600' },
                 'cd': { label: t('media.cds'), val: stats.cd, icon: 'fa-compact-disc', color: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600' },

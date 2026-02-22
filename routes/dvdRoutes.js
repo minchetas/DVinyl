@@ -1,0 +1,237 @@
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+const Dvd = require('../models/Dvd');
+const Item = require('../models/Item');
+const User = require('../models/User');
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
+
+async function getAdminId() {
+    const admin = await User.findOne({ isAdmin: true }).select('_id');
+    return admin ? admin._id : null;
+}
+
+const formatTMDBItem = (item) => {
+    const isTv = item.media_type === 'tv';
+    let cover = '/ressources/no_file.png';
+
+    if (item.poster_path) {
+        cover = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+    }
+
+    return {
+        tmdb_id: item.id,
+        media_type: item.media_type || 'movie',
+        title: isTv ? item.name : item.title,
+        year: isTv ? (item.first_air_date ? item.first_air_date.substring(0, 4) : '') : (item.release_date ? item.release_date.substring(0, 4) : ''),
+        cover_image: cover,
+        description: item.overview || ''
+    };
+};
+
+
+router.get('/add-dvd', requireAuth, requireAdmin, (req, res) => {
+    res.render('add-dvd', { results: null, user: res.locals.user });
+});
+
+router.post('/search-dvds', requireAuth, requireAdmin, async (req, res) => {
+    let query = req.body.query.trim();
+    let searchQuery = query;
+    let barcodeScanned = '';
+
+    try {
+        const tmdbApiKey = process.env.TMDB_API_KEY;
+        if (!tmdbApiKey) throw new Error("TMDB_API_KEY missing");
+
+        const isBarcode = /^\d{12,13}$/.test(query.replace(/[- ]/g, ''));
+
+        if (isBarcode) {
+            barcodeScanned = query.replace(/[- ]/g, '');
+            try {
+                const upcResponse = await axios.get(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcodeScanned}`);
+                if (upcResponse.data.items && upcResponse.data.items.length > 0) {
+                    searchQuery = upcResponse.data.items[0].title;
+                    searchQuery = searchQuery.replace(/DVD|Blu-ray|Blu Ray|Coffret|Edition/gi, '').trim();
+                }
+            } catch (upcErr) {
+                console.error("[ERR] UPC Lookup:", upcErr.message);
+            }
+        }
+
+        const url = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=fr-FR&page=1`;
+        const response = await axios.get(url);
+        
+        const filteredResults = response.data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+        const results = filteredResults.map(formatTMDBItem);
+
+        res.render('add-dvd', { 
+            results, 
+            scanned_barcode: barcodeScanned,
+            user: res.locals.user 
+        });
+
+    } catch (err) {
+        console.error("[ERR] DVD seaarch :", err);
+        res.render('add-dvd', { results: [], scanned_barcode: '', error: req.t('errors.api_error'), user: res.locals.user });
+    }
+});
+
+router.get('/confirm-dvd/:media_type/:tmdb_id', requireAuth, requireAdmin, async (req, res) => {
+    const tmdbId = req.params.tmdb_id;
+    const mediaType = req.params.media_type;
+
+    try {
+        const tmdbApiKey = process.env.TMDB_API_KEY;
+        const url = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${tmdbApiKey}&language=fr-FR&append_to_response=credits`;
+        
+        const response = await axios.get(url);
+        const data = response.data;
+        
+        let director = 'Inconnu';
+        if (mediaType === 'movie' && data.credits && data.credits.crew) {
+            const dirObj = data.credits.crew.find(member => member.job === 'Director');
+            if (dirObj) director = dirObj.name;
+        } else if (mediaType === 'tv' && data.created_by && data.created_by.length > 0) {
+            director = data.created_by.map(c => c.name).join(', ');
+        }
+
+        const studio = data.production_companies && data.production_companies.length > 0 
+            ? data.production_companies[0].name : '';
+
+        const dvdData = {
+            tmdb_id: data.id,
+            media_type: mediaType,
+            title: mediaType === 'tv' ? data.name : data.title,
+            director: director,
+            studio: studio,
+            year: mediaType === 'tv' ? (data.first_air_date || '').substring(0, 4) : (data.release_date || '').substring(0, 4),
+            duration: mediaType === 'tv' ? `${data.number_of_seasons} Saison(s)` : `${data.runtime || '?'} min`,
+            cover_image: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '/ressources/no-pp.jpg',
+            description: data.overview || ''
+        };
+
+        const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
+        const locations = await Item.distinct('location', { owner: adminId ? adminId._id : null, location: { $ne: "" } });
+
+        res.render('confirm-dvd', { 
+            dvd: dvdData, 
+            scanned_barcode: req.query.barcode || '',
+            user: res.locals.user, 
+            locations 
+        });
+    } catch (err) {
+        console.error("[ERR] DVD retrieval:", err);
+        res.status(500).send(req.t('errors.generic_server_error'));
+    } 
+});
+
+router.post('/save-dvd', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { 
+            mongo_id, title, director, studio, year, duration, 
+            tmdb_id, media_type, format, zone, barcode, is_boxset,
+            cover_image, in_wishlist, comments, location, watchStatus, user_rating, quantity
+        } = req.body;
+        
+        const adminId = req.user._id;
+        const isWishlist = in_wishlist === 'true';
+        let dvd;
+
+        if (mongo_id) {
+            dvd = await Item.findById(mongo_id);
+        }
+        
+        if (dvd) {
+            dvd.title = title;
+            dvd.director = director;
+            dvd.studio = studio;
+            dvd.year = year;
+            dvd.duration = duration;
+            dvd.format = format;
+            dvd.zone = zone;
+            dvd.barcode = barcode;
+            dvd.is_boxset = is_boxset === 'true';
+            dvd.cover_image = cover_image;
+            dvd.in_wishlist = isWishlist;
+            dvd.comments = comments || '';
+            dvd.location = location || '';
+            dvd.watchStatus = watchStatus || 'to_watch';
+            dvd.user_rating = user_rating || 0;
+            dvd.quantity = quantity || 1;
+            
+            await dvd.save();
+        } else {
+            await Dvd.create({
+                title, director, studio, year, duration,
+                tmdb_id, media_type, format, zone, barcode,
+                is_boxset: is_boxset === 'true',
+                cover_image,
+                kind: 'Dvd',
+                in_wishlist: isWishlist,
+                owner: adminId,
+                comments: comments || '',
+                location: location || '',
+                watchStatus: watchStatus || 'to_watch',
+                user_rating: user_rating || 0,
+                quantity: quantity || 1,
+            });
+        }
+
+        if (isWishlist) {
+            res.redirect('/wishlist');
+        } else {
+            res.redirect(`/collection?type=dvd`);
+        }
+
+    } catch (err) {
+        console.error("[ERR] DVD save:", err);
+        res.status(500).send(req.t('errors.generic_server_error'));
+    }
+});
+
+router.get('/dvd/edit/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const dvd = await Item.findById(req.params.id);
+        if (!dvd || dvd.kind !== 'Dvd') {
+            return res.redirect('/collection?type=dvd');
+        }
+
+        const adminId = await getAdminId();
+        const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
+        
+        res.render('edit-dvd', { dvd: dvd.toObject(), user: res.locals.user, locations });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/collection?type=dvd');
+    }
+});
+
+router.get('/dvd/:id', requireAuth, async (req, res) => {
+    try {
+        const dvd = await Item.findById(req.params.id);
+        if (!dvd || dvd.kind !== 'Dvd') return res.redirect('/collection?type=dvd');
+
+        res.render('dvd-detail', { dvd: dvd.toObject(), user: res.locals.user });
+    } catch (err) {
+        res.redirect('/collection?type=dvd');
+    }
+});
+
+router.delete('/api/dvd/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const dvd = await Item.findOne({ _id: req.params.id, owner: res.locals.user._id });
+
+        if (!dvd) {
+            return res.status(404).json({ error: "DVD not found or you are not the owner." });
+        }
+
+        await Item.deleteOne({ _id: req.params.id });
+        res.json({ success: true, redirectUrl: `/collection?type=dvds` });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(req.t('errors.generic_server_error'));
+    }
+});
+
+module.exports = router;

@@ -44,6 +44,7 @@
                             label: t('perso.modules.music'),
                             active: settings.modules.music,
                             options: [
+                                { id: 'music', label: t('media.music') },
                                 { id: 'music_vinyl', label: t('media.vinyls') },
                                 { id: 'music_cd', label: t('media.cds') },
                                 { id: 'music_cassette', label: t('media.cassettes') }
@@ -53,16 +54,19 @@
                             label: t('perso.modules.books'),
                             active: settings.modules.books,
                             options: [
+                                { id: 'books', label: t('media.books') },
                                 { id: 'book_hardcover', label: t('media.hardcover') },
                                 { id: 'book_paperback', label: t('media.paperback') },
                                 { id: 'book_manga', label: t('media.manga') },
-                                { id: 'book_comic', label: t('media.comic') }
+                                { id: 'book_comic', label: t('media.comic') },
+                                { id: 'book_graphic_novel', label: t('media.graphic_novel') }
                             ]
                         },
                         { 
                             label: t('perso.modules.dvd'),
                             active: settings.modules.dvd,
                             options: [
+                                { id: 'dvd', label: t('media.dvd_gen') },
                                 { id: 'dvd_dvd', label: t('media.dvd') },
                                 { id: 'dvd_bluray', label: t('media.bluray') },
                                 { id: 'dvd_4k', label: t('media.4k') },

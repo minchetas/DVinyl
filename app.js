@@ -36,6 +36,7 @@ const adminRoutes = require('./routes/adminRoutes.js');
 const settingsRoutes = require('./routes/settingsRoutes.js');
 const backupRoutes = require('./routes/backupRoutes.js');
 const bookRoutes = require('./routes/bookRoutes');
+const dvdRoutes = require('./routes/dvdRoutes.js');
 
 const app = express();
 const server = http.createServer(app);
@@ -159,6 +160,7 @@ app.use('/admin', adminRoutes);
 app.use('/settings', settingsRoutes);
 app.use('/backup', backupRoutes);
 app.use(bookRoutes);
+app.use(dvdRoutes);
 
 app.use((req, res) => {
     res.status(404).render('404');

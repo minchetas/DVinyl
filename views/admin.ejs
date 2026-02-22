@@ -28,27 +28,40 @@
             </div>
 
             <form action="/admin/modules/save" method="POST" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <% const mods = [
-                        {key: 'music', label: t('perso.modules.music'), icon: 'fa-music'},
-                        {key: 'books', label: t('perso.modules.books'), icon: 'fa-book'},
-                        {key: 'dvd', label: t('media.dvds'), icon: 'fa-film'}
+                        {key: 'music', label: t('perso.modules.music'), icon: 'fa-music', needsKey: false},
+                        {key: 'books', label: t('perso.modules.books'), icon: 'fa-book', needsKey: true},
+                        {key: 'dvd', label: t('media.dvds'), icon: 'fa-film', needsKey: true}
                     ] %>
                     
                     <% mods.forEach((mod) => { %>
-                        <label class="group flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-transparent hover:border-primary-theme/30 transition-all cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-black/20 shadow-sm group-hover:text-primary-theme transition-colors">
-                                    <i class="fa-solid <%= mod.icon %> text-sm"></i>
+                        <div class="flex flex-col gap-2">
+                            <label class="group flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-transparent hover:border-primary-theme/30 transition-all cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-black/20 shadow-sm group-hover:text-primary-theme transition-colors">
+                                        <i class="fa-solid <%= mod.icon %> text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-bold opacity-70 group-hover:opacity-100 transition-opacity"><%= mod.label %></span>
                                 </div>
-                                <span class="text-sm font-bold opacity-70 group-hover:opacity-100 transition-opacity"><%= mod.label %></span>
-                            </div>
-                            
-                            <div class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="<%= mod.key %>Active" <%= settings.modules[mod.key] ? 'checked' : '' %> class="sr-only peer">
-                                <div class="w-11 h-6 bg-black/10 dark:bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-theme"></div>
-                            </div>
-                        </label>
+                                
+                                <div class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="<%= mod.key %>Active" <%= settings.modules[mod.key] ? 'checked' : '' %> class="sr-only peer">
+                                    <div class="w-11 h-6 bg-black/10 dark:bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-theme"></div>
+                                </div>
+                            </label>
+
+                            <% if (mod.needsKey) { %>
+                                <div id="error-<%= mod.key %>" class="hidden p-3 bg-red-500/10 border border-red-500/20 rounded-xl animate-in fade-in slide-in-from-top-1 duration-300">
+                                    <p class="text-[10px] text-red-500 font-bold flex items-center gap-2">
+                                        <i class="fa-solid fa-circle-exclamation"></i> <%= t('admin.errors.missing_api_key') %>
+                                    </p>
+                                    <a href="https://github.com/Kyonew/DVinyl/blob/main/docs/api-keys.md" target="_blank" class="text-[9px] text-primary-theme underline mt-1 block font-bold uppercase tracking-tighter">
+                                        <%= t('admin.errors.help_link') %>
+                                    </a>
+                                </div>
+                            <% } %>
+                        </div>
                     <% }) %>
                 </div>
 
@@ -383,7 +396,11 @@
 
             <div class="space-y-2">
                 <label class="block text-[10px] font-black uppercase tracking-widest opacity-50 ml-1"><%= t('admin.modal.discogs_url') %></label>
-                <input type="text" id="discogsUrl" placeholder="https://www.discogs.com/user/..." class="w-full bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-primary-theme/30 rounded-2xl p-4 outline-none transition-all placeholder:opacity-30">
+                <% if (user.discogsUsername) { %>
+                    <input type="text" value="https://www.discogs.com/user/<%= user.discogsUsername %>/collection" id="discogsUrl" placeholder="https://www.discogs.com/user/..." class="w-full bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-primary-theme/30 rounded-2xl p-4 outline-none transition-all placeholder:opacity-30">
+                <% } else { %>
+                    <input type="text" id="discogsUrl" placeholder="https://www.discogs.com/user/..." class="w-full bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-primary-theme/30 rounded-2xl p-4 outline-none transition-all placeholder:opacity-30">
+                <% } %>
             </div>
             
             <div class="flex flex-col gap-3 mt-6">
@@ -531,18 +548,31 @@
             });
         }
     }
-    document.addEventListener('DOMContentLoaded', () => {
-        const moduleCheckboxes = document.querySelectorAll('input[name="musicActive"], input[name="booksActive"], input[name="dvdActive"]');
 
-        moduleCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const checkedModules = document.querySelectorAll('input[name="musicActive"]:checked, input[name="booksActive"]:checked, input[name="dvdActive"]:checked');
-                
-                if (checkedModules.length === 0) {
-                    this.checked = true;
-                    alert("<%= t('admin.errors.at_least_one_module') %>");
-                }
-            });
+    document.addEventListener('DOMContentLoaded', () => {
+        const hasGoogleKey = <%= locals.hasGoogleKey || false %>;
+        const hasTmdbKey = <%= locals.hasTmdbKey || false %>;
+
+        const modulesWithKeys = [
+            { name: 'booksActive', hasKey: hasGoogleKey, errorId: 'error-books' },
+            { name: 'dvdActive', hasKey: hasTmdbKey, errorId: 'error-dvd' }
+        ];
+
+        modulesWithKeys.forEach(mod => {
+            const checkbox = document.querySelector(`input[name="${mod.name}"]`);
+            const errorBox = document.getElementById(mod.errorId);
+
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked && !mod.hasKey) {
+                        this.checked = false;
+                        if (errorBox) {
+                            errorBox.classList.remove('hidden');
+                            setTimeout(() => errorBox.classList.add('hidden'), 5000);
+                        }
+                    }
+                });
+            }
         });
     });
 </script>

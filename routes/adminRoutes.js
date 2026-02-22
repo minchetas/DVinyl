@@ -53,7 +53,9 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
             ...data,
             user: res.locals.user,
             successMessage: msgKey ? req.t(`messages.${msgKey}`) : null,
-            newPassword: null
+            newPassword: null, 
+            hasGoogleKey: !!process.env.GOOGLE_BOOKS_API_KEY,
+            hasTmdbKey: !!process.env.TMDB_API_KEY
         });
     } catch (err) {
         console.error(err);
@@ -241,6 +243,24 @@ router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req,
             return res.json(results);
         }
 
+        if (type === 'movie') {
+            const tmdbApiKey = process.env.TMDB_API_KEY;
+            if (!tmdbApiKey) {
+                console.error("[ERR] TMDB_API_KEY missing");
+                return res.status(500).json({ error: "Missing TMDB API Key" });
+            }
+
+            const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=fr-FR`;
+            const response = await axios.get(tmdbUrl, axiosConfig);
+            
+            const results = (response.data.results || [])
+                .filter(item => item.poster_path)
+                .map(item => `https://image.tmdb.org/t/p/w500${item.poster_path}`);
+
+            console.log(`[SEARCH] TMDB found: ${results.length} posters`);
+            return res.json(results);
+        }
+
         const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=12`;
         const response = await axios.get(itunesUrl, axiosConfig);
         
@@ -253,7 +273,7 @@ router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req,
 
     } catch (err) {
         console.error("[ERR] search image universal:", err.message);
-        res.status(500).json({ error: "Erreur de connexion" });
+        res.status(500).json({ error: "[ERR] connexion error" });
     }
 });
 

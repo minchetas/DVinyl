@@ -162,7 +162,7 @@ router.get('/book/edit/:id', requireAuth, async (req, res) => {
     try {
         const book = await Item.findById(req.params.id);
         if (!book || book.kind !== 'Book') {
-            return res.redirect('/collection');
+            return res.redirect('/collection?type=books');
         }
 
         const adminId = await getAdminId();
@@ -171,18 +171,18 @@ router.get('/book/edit/:id', requireAuth, async (req, res) => {
         res.render('edit-book', { book: book.toObject(), user: res.locals.user, locations });
     } catch (err) {
         console.error(err);
-        res.redirect('/collection');
+        res.redirect('/collection?type=books');
     }
 });
 
 router.get('/book/:id', requireAuth, async (req, res) => {
     try {
         const book = await Item.findById(req.params.id);
-        if (!book || book.kind !== 'Book') return res.redirect('/collection');
+        if (!book || book.kind !== 'Book') return res.redirect('/collection?type=books');
 
         res.render('book-detail', { book: book.toObject(), user: res.locals.user });
     } catch (err) {
-        res.redirect('/collection');
+        res.redirect('/collection?type=books');
     }
 });
 

@@ -166,7 +166,7 @@ router.get('/album/edit/:id', requireAuth, async (req, res) => {
     try {
         const album = await Item.findById(req.params.id);
         if (!album) {
-            return res.redirect('/collection');
+            return res.redirect('/collection?type=music');
         }
         const albumFormatted = formatForView(album);
         console.log(albumFormatted)
@@ -176,7 +176,7 @@ router.get('/album/edit/:id', requireAuth, async (req, res) => {
         res.render('edit-vinyl', { vinyl: albumFormatted, user: res.locals.user, locations });
     } catch (err) {
         console.error(err);
-        res.redirect('/collection');
+        res.redirect('/collection?type=music');
     }
 });
 
@@ -419,12 +419,12 @@ router.get('/wishlist', requireAuth, async (req, res) => {
 router.get('/album/:id', requireAuth, async (req, res) => {
     try {
         const album = await Item.findById(req.params.id);
-        if (!album) return res.redirect('/collection');
+        if (!album) return res.redirect('/collection?type=music');
         const albumFormatted = formatForView(album);
 
         res.render('vinyl-detail', { album: albumFormatted, vinyl: albumFormatted, user: res.locals.user });
     } catch (err) {
-        res.redirect('/collection');
+        res.redirect('/collection?type=music');
     }
 });
 
