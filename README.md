@@ -2,7 +2,7 @@
 
 --- 
 
-**DVinyl** is a modern, self-hostable music collection manager. It allows you to catalog, value, and manage your Vinyls, CDs, and Cassettes in one interface.
+**DVinyl** is a modern, self-hostable collection manager designed for physical media enthusiasts. From Vinyls and CDs to Books and Movies, catalog, value, and organize your entire physical library through a single, customizable interface.
 
 Built in JavaScript.
 
@@ -74,7 +74,7 @@ Access the application at `http://localhost:3099`.
 | **Frontend**     | EJS Templates                  |
 | **Styling**      | Tailwind CSS                   |
 | **Localization** | i18next                        |
-| **API**          | Discogs / Google Custom Search |
+| **API**          | Discogs / Google Books / TMDB  |
 
 # Screenshots
 
