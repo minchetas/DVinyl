@@ -360,7 +360,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
         }
         
         if (!album && discogs_id) {
-            album = await Vinyl.findOne({ discogs_id: discogs_id, owner: adminId });
+            album = await Item.findOne({ discogs_id: discogs_id, owner: adminId });
         }
 
         if (album) {
@@ -430,10 +430,11 @@ router.post('/api/album/:id/move-to-collection', requireAuth, requireAdmin, asyn
 router.get('/api/collection/ids', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const albums = await Vinyl.find({ 
+        const albums = await Item.find({ 
             owner: adminId, 
-            in_wishlist: false 
-        }).select('discogs_id quantity');
+            in_wishlist: false,
+            $or: [{ kind: 'Music' }, { kind: { $exists: false } }] 
+        }).select('discogs_id quantity').lean();
         
         console.log(`📦 Global estimate: ${albums.length} albums sent to front-end.`);
         res.json({ success: true, albums });
@@ -634,7 +635,7 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
             for (const item of listItems) {
 
                 const info = item.basic_information;
-                const existing = await Vinyl.findOne({ discogs_id: info.id, owner: userId });
+                const existing = await Item.findOne({ discogs_id: info.id, owner: userId });
                 if (existing) continue;
 
                 let tracklist = [];
@@ -717,7 +718,7 @@ router.post('/api/album/:id/import-tracklist', requireAuth, requireAdmin, async 
             return res.status(404).json({ success: false, error: "No tracklist found on Discogs" });
         }
 
-        await Vinyl.findByIdAndUpdate(albumId, { tracklist: tracklist });
+        await Item.findByIdAndUpdate(albumId, { tracklist: tracklist });
         res.status(200).json({ success: true });
 
     } catch (err) {
