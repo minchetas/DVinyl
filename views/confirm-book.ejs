@@ -60,8 +60,9 @@
                 </h1>
 
                 <form action="/save-book" method="POST" class="space-y-6">
-                    <input type="hidden" name="google_id" value="<%= book.google_id %>">
-                    
+                    <input type="hidden" name="hardcover_id" value="<%= book.hardcover_id %>">
+                    <input type="hidden" name="hardcover_slug" value="<%= book.hardcover_slug %>">
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_book.field_title') %></label>

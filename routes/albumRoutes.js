@@ -508,27 +508,6 @@ router.delete('/api/album/:id', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
-// Internal API to search Google Images
-router.get('/api/google-images', requireAuth, async (req, res) => {
-    const query = req.query.q;
-    const apiKey = process.env.GOOGLE_API_KEY; // Google Custom Search API key
-    const cx = process.env.GOOGLE_CSE_ID; // Custom Search Engine ID
-
-    if (!query) return res.status(400).json([]);
-
-    try {
-        const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${cx}&searchType=image&key=${apiKey}&num=8`;
-        const response = await axios.get(url);
-        
-        // Return only the image links
-        const images = response.data.items.map(item => item.link);
-        res.json(images);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(req.t('errors.generic_server_error'));
-    }
-});
-
 // Estimate route (Discogs API)
 router.get('/api/estimate/:discogsId', requireAuth, async (req, res) => {
     try {

@@ -184,6 +184,13 @@
     "confirm_block_ip": "BLOCK IP {{ip}}?\nThey will no longer be able to access the site.",
     "import_discogs_btn": "Discogs Import",
     "modules_description": "Activate or deactivate DVinyl's modules",
+    "delete_last.title": "Delete last items",
+    "delete_last.subtitle": "Useful after a failed import. Deletes the N last items of the selected type.",
+    "delete_last.kind": "Item type",
+    "delete_last.count": "Number to delete",
+    "delete_last.btn": "Delete",
+    "areyousure": "Delete the last {{count}} items of type \"{{kindLabel}}\"? This action is irreversible.",
+    "delete_confirm":"{{count}} item(s) deleted.",
     "table": {
       "user": "User",
       "email": "Email",
@@ -210,7 +217,7 @@
       "discogs_url": "Collection URL",
       "import_submit": "Start Import",
       "import_loading": "Importing...",
-      "import_done": "albums added!",
+      "import_done": "items added!",
       "import_error_msg": "An error occurred during import. Check the URL or your API token.",
       "import_fast": "Fast Import",
       "import_full": "Complete Import",
@@ -225,7 +232,9 @@
       "json_error": "Invalid JSON file.",
       "confirm_import": "WARNING: This will delete all your current data (albums, users, logs) and replace it with the content of the file. You will be logged out. Continue?",
       "subtitle": "Backup your collection or restore an existing database.",
-      "title": "System Maintenance"
+      "title": "System Maintenance",
+      "section_title": "Database Backup",
+      "section_subtitle": "Export or restore your entire collection."
     },
     "import": {
       "title": "Discogs import",
@@ -237,6 +246,32 @@
       "at_least_one_module": "At least one module must be active.",
       "missing_api_key": "Unable to activate this module: the API key is missing.",
       "help_link": "Consult the configuration guide"
+    },
+    "external_imports": {
+      "title": "Imports from external services",
+      "subtitle": "Import your collection from your preferred servicesx."
+    },
+    "goodreads": {
+      "title": "GoodReads",
+      "subtitle": "Import your GoodReads library",
+      "btn": "Import CSV",
+      "modal_subtitle": "Import your read, currently reading, and to-read books.",
+      "how_to": "How to export from GoodReads?",
+      "step1": "Go to My Books",
+      "step2": "Click on the orange button at the bottom of the page with the 🛜 icon",
+      "drop_hint": "Drag your file here or click to browse",
+      "file_ready": "File ready to be imported",
+      "btn_import": "Start Import",
+      "default_format": "Default Format",
+      "default_format_hint": "Used if no GoodReads shelf allows automatic detection.",
+      "rss_url_label": "RSS Feed URL",
+      "rss_url_hint": "Find this URL on your GoodReads profile → RSS feed of your library",
+      "step3": "Copy the RSS feed URL",
+      "step4": "Paste it below and start the import",
+      "warning_title": "Import potentially long",
+      "warning_body": "Expect ~1-2 min for 200 books, ~10 min for 2000. The import runs in the background, so you can navigate freely.",
+      "default_language": "Default Language",
+      "default_language_hint": "Used if Open Library doesn't detect the language. Example: fr, en, ja, es..."
     }
   },
   "collection": {
@@ -504,5 +539,9 @@
   "duration_label": "Duration",
   "zone_label": "Zone / RRegion",
   "barcode_label": "Barcode"
+},
+"book": {
+  "source_hardcover": "View on Hardcover",
+  "source_goodreads": "View on GoodReads"
 }
 }

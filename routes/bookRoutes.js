@@ -5,41 +5,56 @@ const Book = require('../models/Book');
 const Item = require('../models/Item');
 const User = require('../models/User');
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
+const xml2js = require('xml2js');
 
 async function getAdminId() {
     const admin = await User.findOne({ isAdmin: true }).select('_id');
     return admin ? admin._id : null;
 }
 
-const formatGoogleBook = (item) => {
-    const volumeInfo = item.volumeInfo || {};
-    const isbnObj = volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_13') 
-                 || volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_10');
-    const isbn = isbnObj ? isbnObj.identifier : '';
 
-    let cover = '/ressources/no_book.png';
-
-    if (volumeInfo.imageLinks) {
-        cover = (volumeInfo.imageLinks.medium || 
-                 volumeInfo.imageLinks.small || 
-                 volumeInfo.imageLinks.thumbnail)
-                 .replace('http:', 'https:')
-                 .replace('&zoom=1', '&zoom=2');
-    } else if (isbn) {
-        cover = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`;
+const formatHardcoverBook = (book) => {
+    if (!book || !book.id) return null;
+    
+    let authors = 'Unknown';
+    
+    if (book.author_names?.length > 0) {
+        authors = book.author_names.join(', ');
     }
 
+    else if (book.cached_contributors) {
+        let contributors = book.cached_contributors;
+        if (typeof contributors === 'string') {
+            try { contributors = JSON.parse(contributors); } catch(e) { contributors = null; }
+        }
+        if (Array.isArray(contributors)) {
+            const names = contributors.map(c => c?.author?.name || c?.name).filter(Boolean);
+            if (names.length > 0) authors = names.join(', ');
+        } else if (contributors && typeof contributors === 'object') {
+            const names = Object.values(contributors).filter(Boolean);
+            if (names.length > 0) authors = names.join(', ');
+        }
+    }
+
+    let cover = '/ressources/no_book.png';
+    if (book.image) {
+        cover = typeof book.image === 'string' ? book.image : (book.image.url || cover);
+    }
+
+    const bestEdition = book.editions?.[0];
+
     return {
-        google_id: item.id,
-        title: volumeInfo.title || 'Titre inconnu',
-        author: volumeInfo.authors ? volumeInfo.authors.join(', ') : 'Auteur inconnu',
-        publisher: volumeInfo.publisher || '',
-        year: volumeInfo.publishedDate ? volumeInfo.publishedDate.substring(0, 4) : '',
-        isbn: isbn,
-        pages: volumeInfo.pageCount || null,
-        language: volumeInfo.language || '',
+        hardcover_id: book.id,
+        hardcover_slug: book.slug || '',
+        title: book.title || 'Untitled',
+        author: authors,
+        publisher: bestEdition?.publisher?.name || '',
+        year: book.release_year || '',
+        isbn: bestEdition?.isbn_13 || bestEdition?.isbn_10 || '',
+        pages: bestEdition?.pages || book.pages || 0,
+        language: bestEdition?.language?.language || '',
         cover_image: cover,
-        description: volumeInfo.description || ''
+        description: book.description || ''
     };
 };
 
@@ -47,49 +62,119 @@ router.get('/add-book', requireAuth, requireAdmin, (req, res) => {
     res.render('add-book', { results: null, user: res.locals.user });
 });
 
+
 router.post('/search-books', requireAuth, requireAdmin, async (req, res) => {
     let query = req.body.query;
-    
     const cleanQuery = query.replace(/[- ]/g, '');
-    if (/^\d{10,13}$/.test(cleanQuery)) {
-        query = `isbn:${cleanQuery}`;
-    } else {
-        query = `intitle:${query}`;
-    }
+    const isIsbn = /^\d{10,13}$/.test(cleanQuery);
 
     try {
-        const apiKey = process.env.GOOGLE_BOOKS_API_KEY ? `&key=${process.env.GOOGLE_BOOKS_API_KEY}` : '';
-        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}${apiKey}&maxResults=12`;
-        
-        const response = await axios.get(url);
-        const results = response.data.items ? response.data.items.map(formatGoogleBook) : [];
+        const apiKey = process.env.HARDCOVER_API_KEY;
+        let graphqlQuery;
+        let variables = {};
+
+        if (isIsbn) {
+            graphqlQuery = `
+                query SearchByIsbn($isbn: String!) {
+                    editions(where: { _or: [{ isbn_13: { _eq: $isbn } }, { isbn_10: { _eq: $isbn } }] }, limit: 5) {
+                        book {
+                            id
+                            title
+                            cached_contributors
+                            release_year
+                            pages
+                            image { url }
+                        }
+                    }
+                }
+            `;
+            variables = { isbn: cleanQuery };
+        } else {
+            graphqlQuery = `
+                query SearchByTitle($searchTerm: String!) {
+                    search(query: $searchTerm, query_type: "Book", per_page: 12) {
+                        results
+                    }
+                }
+            `;
+            variables = { searchTerm: query };
+        }
+
+        const response = await axios.post(
+            'https://api.hardcover.app/v1/graphql',
+            { query: graphqlQuery, variables },
+            { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+        );
+
+        const data = response.data.data;
+        let rawResults = [];
+
+        if (isIsbn) {
+            const books = data?.editions?.map(e => e.book).filter(Boolean) || [];
+            rawResults = Array.from(new Map(books.map(b => [b.id, b])).values());
+        } else {
+            const hits = data?.search?.results?.hits || [];
+            rawResults = hits
+                .map(hit => hit?.document)
+                .filter(doc => doc && doc.id);
+        }
+
+        const results = rawResults.map(formatHardcoverBook).filter(Boolean);
 
         res.render('add-book', { 
             results, 
             user: res.locals.user 
         });
+
     } catch (err) {
-        console.error("[ERR] Google Books:", err);
-        res.render('add-book', { results: [], error: req.t('errors.api_error'), user: res.locals.user });
+        console.error("[ERR] Hardcover API Error:", err.message);
+        res.render('add-book', { results: [], error: "Search error", user: res.locals.user });
     }
 });
 
-router.get('/confirm-book/:google_id', requireAuth, async (req, res) => {
-    const googleId = req.params.google_id;
+router.get('/confirm-book/:id', requireAuth, async (req, res) => {
+    const bookId = req.params.id; 
 
     try {
-        const apiKey = process.env.GOOGLE_BOOKS_API_KEY ? `?key=${process.env.GOOGLE_BOOKS_API_KEY}` : '';
-        const url = `https://www.googleapis.com/books/v1/volumes/${googleId}${apiKey}`;
+        const apiKey = process.env.HARDCOVER_API_KEY;
         
-        const response = await axios.get(url);
-        const bookData = formatGoogleBook(response.data);
+        const graphqlQuery = `
+            query GetBook($id: Int!) {
+                books_by_pk(id: $id) {
+                    id
+                    slug
+                    title
+                    description
+                    cached_contributors
+                    release_year
+                    pages
+                    image { url }
+                    editions(limit: 5, order_by: { users_count: desc }) {
+                        isbn_13
+                        isbn_10
+                        publisher { name }
+                        language { language }
+                        pages
+                        reading_format_id
+                    }
+                }
+            }
+        `;
+
+        const response = await axios.post(
+            'https://api.hardcover.app/v1/graphql',
+            { query: graphqlQuery, variables: { id: parseInt(bookId) } },
+            { headers: { 'Authorization': `Bearer ${apiKey}` } }
+        );
+
+        const bookData = formatHardcoverBook(response.data.data.books_by_pk);
 
         const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
         const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
 
         res.render('confirm-book', { book: bookData, user: res.locals.user, locations });
     } catch (err) {
-        console.error("Erreur récupération livre:", err);
+        console.error("[ERR] Hardcover API Error:", err?.response?.data || err.message);
         res.status(500).send(req.t('errors.generic_server_error'));
     } 
 });
@@ -98,7 +183,7 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { 
             mongo_id, title, author, publisher, year, isbn, pages, language, 
-            format, series, volume, cover_image, google_id, 
+            format, series, volume, cover_image, hardcover_id, hardcover_slug,
             in_wishlist, comments, location, readingStatus, rating, quantity
         } = req.body;
         
@@ -143,6 +228,8 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
                 readingStatus: readingStatus || 'to_read',
                 rating: rating || 0,
                 quantity: quantity || 1,
+                hardcover_slug: hardcover_slug || '',
+                source: 'hardcover',
             });
         }
 
@@ -201,6 +288,160 @@ router.delete('/api/book/:id', requireAuth, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send(req.t('errors.generic_server_error'));
+    }
+});
+
+
+
+router.post('/import/goodreads', requireAuth, requireAdmin, async (req, res) => {
+    const { rss_url, default_format, default_language } = req.body;
+    if (!rss_url || !rss_url.includes('goodreads.com')) {
+        return res.status(400).json({ error: "Invalid GoodReads RSS URL" });
+    }
+
+    const userId          = req.user._id;
+    const defaultFormat   = default_format   || 'paperback';
+    const defaultLanguage = default_language || '';
+
+    res.status(202).json({ success: true, message: "Import started" });
+
+    try {
+        let page          = 1;
+        let totalImported = 0;
+        let totalFetched  = 0;
+        let hasMore       = true;
+
+        while (hasMore) {
+            const url      = `${rss_url}&shelf=%23ALL%23&per_page=200&page=${page}`;
+            const response = await axios.get(url, { timeout: 15000 });
+            const parsed   = await xml2js.parseStringPromise(response.data, { explicitArray: false });
+
+            const items = parsed?.rss?.channel?.item;
+            if (!items) break;
+            const books = Array.isArray(items) ? items : [items];
+            if (books.length === 0) break;
+            totalFetched += books.length;
+
+            for (const item of books) {
+                const title  = item['title']?.trim();
+                const author = item['author_name']?.trim() || '';
+                if (!title || !author) continue;
+
+                const existing = await Item.findOne({ owner: userId, title, author, kind: 'Book' });
+                if (existing) continue;
+
+                const isbn = item['isbn13']?.trim() || item['isbn']?.trim() || '';
+
+                const shelf  = (item['user_shelves'] || '').toLowerCase();
+                
+                let readingStatus = 'read';
+                if  (shelf.includes('currently')) readingStatus = 'reading';
+                else if (shelf.includes('to-read'))   readingStatus = 'to_read';
+
+                const hasAsianChars = /[\u3000-\u9fff\uac00-\ud7af]/.test(title);
+                let format = hasAsianChars ? 'manga' : defaultFormat;
+
+                if (shelf.includes('manga')) format = 'manga';
+                else if (shelf.includes('comic') || shelf.includes('bd')) format = 'comic';
+                else if (shelf.includes('graphic')) format = 'graphic_novel';
+                else if (shelf.includes('hardcover') || shelf.includes('relié')) format = 'hardcover';
+                else if (shelf.includes('paperback') || shelf.includes('broché')) format = 'paperback';
+
+                const cover_image = item['book_large_image_url']?.trim() || item['book_medium_image_url']?.trim() || '/ressources/no_book.png';
+
+                const pages = parseInt(item['book']?.num_pages) || 0;
+
+                const dateAdded = item['user_date_added']?.trim()
+                    ? new Date(item['user_date_added'].trim())
+                    : new Date();
+
+                const rating = parseFloat(item['user_rating']) || 0;
+                const year   = item['book_published']?.trim() || '';
+
+                let publisher = '';
+                let language  = defaultLanguage;
+
+                if (isbn) {
+                    try {
+                        const olRes  = await axios.get(
+                            `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`,
+                            { timeout: 4000 }
+                        );
+                        const olBook = olRes.data?.[`ISBN:${isbn}`];
+
+                        if (olBook) {
+                            publisher = olBook.publishers?.[0]?.name || '';
+
+                            const langKey = (olBook.languages?.[0]?.key || '').split('/').pop();
+                            const langMap = {
+                                fre: 'fr', fra: 'fr',
+                                eng: 'en',
+                                spa: 'es',
+                                deu: 'de',
+                                ita: 'it',
+                                jpn: 'ja',
+                                por: 'pt',
+                                nld: 'nl',
+                                kor: 'ko',
+                                zho: 'zh',
+                            };
+                            language = langMap[langKey] || langKey || defaultLanguage;
+
+                            if (format === defaultFormat && !hasAsianChars) {
+                                const pub = publisher.toLowerCase();
+                                const mangaPublishers = [
+                                    'viz', 'kana', 'glénat manga', 'glenat manga',
+                                    'pika', 'ki-oon', 'kurokawa', 'delcourt manga',
+                                    'tonkam', 'shueisha', 'kodansha', 'square enix'
+                                ];
+                                const comicPublishers = [
+                                    'marvel', 'dc comics', 'image comics',
+                                    'dark horse', 'urban comics', 'panini comics'
+                                ];
+                                if      (mangaPublishers.some(p => pub.includes(p))) format = 'manga';
+                                else if (comicPublishers.some(p => pub.includes(p))) format = 'comic';
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Error fetching Open Library data:", err.message);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+
+                await Book.create({
+                    kind:        'Book',
+                    media_type:  'book',
+                    owner:       userId,
+                    title,
+                    author,
+                    isbn,
+                    publisher,
+                    language,
+                    year,
+                    pages,
+                    format,
+                    rating,
+                    readingStatus,
+                    cover_image,
+                    source:      'goodreads',
+                    in_wishlist: false,
+                    comments:    item['user_review']?.trim() || '',
+                    added_at:    dateAdded,
+                });
+
+                totalImported++;
+                req.io.emit('import_progress', { current: totalImported, total: totalFetched });
+            }
+
+            if (books.length < 200) hasMore = false;
+            else page++;
+        }
+
+        req.io.emit('import_finished', { count: totalImported });
+
+    } catch (err) {
+        console.error("[ERR] GoodReads RSS import:", err.message);
+        req.io.emit('import_error', { message: err.message });
     }
 });
 

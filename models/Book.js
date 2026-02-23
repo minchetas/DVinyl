@@ -1,9 +1,10 @@
-// models/Book.js
 const mongoose = require('mongoose');
 const Item = require('./Item');
 
 const bookSchema = new mongoose.Schema({
   author: { type: String, required: true },
+  hardcover_slug: { type: String, default: '' },
+  source: { type: String, enum: ['hardcover', 'goodreads', 'manual'], default: 'manual' },
   publisher: String,
   isbn: String,
   pages: Number,

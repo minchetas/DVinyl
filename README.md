@@ -14,7 +14,7 @@ Built in JavaScript.
 
 ## Overview
 
-DVinyl allows you to keep track of your physical music, books or even DVD collection. It uses the Discogs API, Google Books API & TMDB API to retrieve important metadata and, for music, market valuations for your collection. This provides you with a convenient and full customizable dashboard for your home server.
+DVinyl allows you to keep track of your physical music, books or even DVD collection. It uses the Discogs API, Hardcover API & TMDB API to retrieve important metadata and, for music, market valuations for your collection. This provides you with a convenient and full customizable dashboard for your home server.
 
 ## ✨ Key Features
 
@@ -48,7 +48,7 @@ To keep things organized, I have split the documentation into specialized guides
 
 * 🏁 [**Getting Started**](./docs/getting-started.md) - Manual installation and requirements.
 * 🐳 [**Docker Deployment**](./docs/docker.md) - Deploying via Docker Compose *(Recommended)*.
-* 🔑 [**API Configuration**](./docs/api-keys.md) - How to obtain your Discogs and Google API keys.
+* 🔑 [**API Configuration**](./docs/api-keys.md) - How to obtain your Discogs, Hardcover and TMDB API keys.
 
 ---
 
@@ -74,7 +74,7 @@ Access the application at `http://localhost:3099`.
 | **Frontend**     | EJS Templates                  |
 | **Styling**      | Tailwind CSS                   |
 | **Localization** | i18next                        |
-| **API**          | Discogs / Google Books / TMDB  |
+| **API**          | Discogs / Hardcover / TMDB     |
 
 # Screenshots <small>with Ocean theme</small>
 

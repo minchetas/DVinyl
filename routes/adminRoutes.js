@@ -9,6 +9,7 @@ const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 const PRESETS = require('../config/themes');
 const axios = require('axios');
 const https = require('https');
+const Item = require('../models/Item');
 
 /**
  * routes/adminRoutes.js
@@ -54,7 +55,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
             user: res.locals.user,
             successMessage: msgKey ? req.t(`messages.${msgKey}`) : null,
             newPassword: null, 
-            hasGoogleKey: !!process.env.GOOGLE_BOOKS_API_KEY,
+            hasHardcoverKey: !!process.env.HARDCOVER_API_KEY,
             hasTmdbKey: !!process.env.TMDB_API_KEY
         });
     } catch (err) {
@@ -305,6 +306,30 @@ router.get('/api/search-discogs-gallery', requireAuth, requireAdmin, async (req,
     } catch (err) {
         console.error("[ERR] Discogs Global Gallery:", err.message);
         res.status(500).json({ error: "ERROR Discogs search" });
+    }
+});
+
+
+router.post('/delete-last-items', requireAuth, requireAdmin, async (req, res) => {
+    const { count, kind } = req.body;
+    const n = parseInt(count);
+
+    if (!n || n < 1) return res.status(400).json({ error: 'Invalid count' });
+    if (!['Book', 'Music', 'Dvd'].includes(kind)) return res.status(400).json({ error: 'Invalid kind' });
+
+    try {
+        const items = await Item.find({ owner: req.user._id, kind })
+            .sort({ added_at: -1, _id: -1 })
+            .limit(n)
+            .select('_id');
+
+        const ids = items.map(i => i._id);
+        const result = await Item.deleteMany({ _id: { $in: ids } });
+
+        res.json({ deleted: result.deletedCount });
+    } catch (err) {
+        console.error("[ERR] delete-last-items:", err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 

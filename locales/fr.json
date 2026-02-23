@@ -184,6 +184,13 @@
     "confirm_block_ip": "BLOQUER L'IP {{ip}} ?\nIl ne pourra plus accéder au site.",
     "import_discogs_btn": "Import Discogs",
     "modules_description": "Activez ou désactivez les modules de DVinyl",
+    "delete_last.title": "Supprimer les derniers éléments",
+    "delete_last.subtitle": "Utile après un import raté. Supprime les N derniers éléments ajoutés du type choisi.",
+    "delete_last.kind": "Type d'élément",
+    "delete_last.count": "Nombre à supprimer",
+    "delete_last.btn": "Supprimer",
+    "areyousure": "Supprimer les {{count}} derniers éléments de type \"{{kindLabel}}\" ? Cette action est irréversible.",
+    "delete_confirm":"{{count}} élément(s) supprimé(s).",
     "table": {
       "user": "Utilisateur",
       "email": "Email",
@@ -210,7 +217,7 @@
       "discogs_url": "URL de la collection",
       "import_submit": "Lancer l'importation",
       "import_loading": "Importation en cours...",
-      "import_done": "albums ajoutés !",
+      "import_done": "items ajoutés !",
       "import_error_msg": "Une erreur est survenue lors de l'importation. Vérifiez l'URL ou votre jeton API.",
       "import_fast": "Importation Rapide",
       "import_full": "Importation Complète",
@@ -225,7 +232,9 @@
       "json_error": "Fichier JSON invalide.",
       "confirm_import": "ATTENTION : Cela va supprimer toutes vos données actuelles (albums, utilisateurs, logs) pour les remplacer par le contenu du fichier. Vous serez déconnecté. Continuer ?",
       "subtitle": "Sauvegardez votre collection ou restaurez une base de données existante.",
-      "title": "Maintenance du système"
+      "title": "Maintenance du système",
+      "section_title": "Sauvegarde de la base de données",
+      "section_subtitle": "Exportez ou restaurez l'intégralité de vos données."
     },
     "import": {
       "title": "Importation Discogs",
@@ -237,6 +246,32 @@
       "at_least_one_module": "Au moins un module doit être actif.",
       "missing_api_key": "Impossible d'activer ce module : la clé API est manquante.",
       "help_link": "Consulter le guide de configuration"
+    },
+    "external_imports": {
+      "title": "Imports depuis des services externes",
+      "subtitle": "Importez votre bibliothèque depuis vos services préférés."
+    },
+    "goodreads": {
+      "title": "GoodReads",
+      "subtitle": "Importer votre bibliothèque GoodReads",
+      "btn": "Importer un CSV",
+      "modal_subtitle": "Importez vos livres lus, en cours et à lire.",
+      "how_to": "Comment exporter depuis GoodReads ?",
+      "step1": "Allez dans My Books",
+      "step2": "Chercher un bouton orange en bas de la page avec l'icone 🛜",
+      "drop_hint": "Glissez votre fichier ici ou cliquez pour parcourir",
+      "file_ready": "Fichier prêt à être importé",
+      "btn_import": "Lancer l'import",
+      "default_format": "Format par défaut",
+      "default_format_hint": "Utilisé si aucune étagère GoodReads ne permet de le détecter automatiquement.",
+      "rss_url_label": "Lien RSS GoodReads",
+      "rss_url_hint": "Trouvez ce lien sur votre profil GoodReads → flux RSS de votre bibliothèque",
+      "step3": "Copiez l'URL du flux RSS",
+      "step4": "Collez-la ci-dessous et lancez l'import",
+      "warning_title": "Import potentiellement long",
+      "warning_body": "Comptez ~1-2 min pour 200 livres, ~10 min pour 2000. L'import tourne en arrière-plan, vous pouvez naviguer librement.",
+      "default_language": "Langue par défaut",
+      "default_language_hint": "Utilisée si Open Library ne trouve pas la langue. Ex: fr, en, ja, es..."
     }
   },
   "collection": {
@@ -504,5 +539,9 @@
   "duration_label": "Durée",
   "zone_label": "Zone / Région",
   "barcode_label": "Code-barres"
+},
+"book": {
+  "source_hardcover": "Voir sur Hardcover",
+  "source_goodreads": "Voir sur GoodReads"
 }
 }

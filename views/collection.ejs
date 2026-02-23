@@ -15,8 +15,8 @@
             const mainTypes = [
                 { id: 'all', label: t('common.all') },
                 { id: 'music', label: t('media.music') },
-                { id: 'books', label: t('media.books') },
-                { id: 'dvd', label: t('media.dvds') }
+                ...(settings.modules.books ? [{ id: 'books', label: t('media.books') }] : []),
+                ...(settings.modules.dvd   ? [{ id: 'dvd',   label: t('media.dvds')  }] : []),
             ];
             %>
 

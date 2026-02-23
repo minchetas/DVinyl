@@ -95,7 +95,7 @@
                     </span>
 
                     <span class="px-3 py-1 bg-black/5 dark:bg-white/10 border border-transparent rounded-full text-xs opacity-80 transition-colors">
-                        <%= t('confirm_book.field_quantity') %> : <%= book.quantity || 1 %>
+                        <%= t('confirm_vinyl.field_quantity') %> : <%= book.quantity || 1 %>
                     </span>
                 </div>
             </div>
@@ -129,9 +129,17 @@
                 </div>
                 <div class="col-span-2 border-t border-black/10 dark:border-white/10 mt-2 pt-4 transition-colors">
                     <span class="block text-xs opacity-50 uppercase font-bold mb-1"><%= t('detail.source') %></span>
-                    <a href="https://books.google.com/books?id=<%= book.google_id %>" target="_blank" class="text-primary-theme hover:underline text-sm inline-flex items-center gap-1 transition-colors">
-                        Google Books <i class="fa-solid fa-external-link-alt text-[10px]"></i>
-                    </a>
+                    <% if (book.source === 'hardcover' && book.hardcover_slug) { %>
+                        <a href="https://hardcover.app/books/<%= book.hardcover_slug %>" target="_blank" 
+                        class="text-primary-theme hover:underline text-sm inline-flex items-center gap-1">
+                            <i class="fa-solid fa-book"></i> <%= t('book.source_hardcover') %>
+                        </a>
+                    <% } else if (book.source === 'goodreads') { %>
+                        <a href="https://www.goodreads.com/search?q=<%= encodeURIComponent(book.isbn || book.title) %>" target="_blank"
+                        class="text-[#553B08] dark:text-yellow-600 hover:underline text-sm inline-flex items-center gap-1">
+                            <i class="fa-solid fa-book-open"></i> <%= t('book.source_goodreads') %>
+                        </a>
+                    <% } %>
                 </div>
             </div>
 
@@ -165,6 +173,14 @@
 </div>
 
 <script>
+    const translations = {
+        official_cover: "<%= t('detail.official_cover') %>",
+        additional_image: "<%= t('detail.additional_image') %>",
+        confirm_delete: "<%= t('detail.confirm_delete') %>",
+        unavailable_data: "<%= t('detail.unavailable_data') %>",
+        error_server: "<%= t('messages.generic_error') %>"
+    };
+
     async function confirmDelete(id) {
         if (confirm(translations.confirm_delete)) {
             try {
@@ -174,7 +190,6 @@
                 });
 
                 const data = await response.json();
-
                 if (data.success) {
                     window.location.href = data.redirectUrl;
                 } else {
