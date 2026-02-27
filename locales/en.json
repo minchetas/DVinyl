@@ -401,7 +401,7 @@
   "placeholders": {
     "location": "e.g. Shelf A - Box 3"
   },
-    "perso": {
+  "perso": {
     "title": "Personnalisation",
     "subtitle": "Customize the appearance of your DVinyl interface.",
     "backHome": "Back to home",
@@ -411,6 +411,9 @@
     "nav_max": "You cannot select more than 6 shortcuts.",
     "widgets_title": "Statistics Widgets",
     "widgets_desc": "Select the statistics you want to see on your dashboard",
+    "fastAdd_title": "Quick add",
+    "fastAdd_desc": "If enabled, the \"Add an item\" button redirects directly to the chosen form, bypassing the selection menu.",
+    "fastAdd_disabled": "Disabled (modal)",
     "modules": {
       "title": "Active Modules",
       "music": "Music",

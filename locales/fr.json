@@ -344,7 +344,7 @@
     "no_tracklist": "Aucune tracklist enregistrée."
   },
   "wishlist": {
-    "title": "Ma Liste de Souhaits",
+    "title": "Liste de Souhaits",
     "empty_msg": "Ta liste de souhaits est vide.",
     "search_link": "Chercher un album",
     "btn_received": "Je l'ai reçu !",
@@ -411,6 +411,9 @@
     "nav_max": "Vous ne pouvez pas sélectionner plus de 6 raccourcis.",
     "widgets_title": "Widgets de Statistiques",
     "widgets_desc": "Sélectionnez les statistiques que vous souhaitez voir sur la page d'accueil",
+    "fastAdd_title": "Ajout rapide",
+    "fastAdd_desc": "Si activé, le bouton \"Ajouter un élément\" redirige directement vers le formulaire choisi, sans passer par le menu de sélection.",
+    "fastAdd_disabled": "Désactivé (modal)",
     "modules": {
       "title": "Modules Actifs",
       "music": "Musique",

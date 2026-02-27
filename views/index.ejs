@@ -27,10 +27,27 @@
 
             <div class="flex flex-wrap justify-center gap-4 pt-4 text-sm opacity-80">
                 <% if (user.isAdmin) { %>
-                    <button onclick="toggleAddModal()" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
-                        <i class="fa-solid fa-plus-circle"></i> 
-                        <span class="hidden sm:inline"><%= t('index.nav_add_full') %></span>
-                    </button>
+                    <%
+                        const fastAddRoutes = {
+                            vinyl: '/add-vinyl?type=vinyl',
+                            cd: '/add-vinyl?type=cd',
+                            cassette: '/add-vinyl?type=cassette',
+                            book: '/add-book',
+                            dvd: '/add-dvd'
+                        };
+                        const fastAddUrl = settings.fastAdd ? fastAddRoutes[settings.fastAdd] : null;
+                    %>
+                    <% if (fastAddUrl) { %>
+                        <a href="<%= fastAddUrl %>" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span class="hidden sm:inline"><%= t('index.nav_add_full') %></span>
+                        </a>
+                    <% } else { %>
+                        <button onclick="toggleAddModal()" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span class="hidden sm:inline"><%= t('index.nav_add_full') %></span>
+                        </button>
+                    <% } %>
                     <span class="opacity-30">|</span>
                 <% } %>
                 <a href="/collection" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">

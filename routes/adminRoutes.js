@@ -181,14 +181,18 @@ router.post('/personnalisation/save', requireAuth, requireAdmin, async (req, res
 
         const shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);        
         const stats = Array.isArray(statsWidgets) ? statsWidgets : (statsWidgets ? [statsWidgets] : []);
-
+        
+        const validFastAdd = ['', 'vinyl', 'cd', 'cassette', 'book', 'dvd'];
+        const fastAdd = validFastAdd.includes(req.body.fastAdd) ? req.body.fastAdd : '';
+        
         const update = {
             'theme.home.preset':  homePreset,
             'theme.music.preset': musicPreset,
             'theme.books.preset': booksPreset,
             'theme.dvd.preset':   dvdPreset,
             'navbarShortcuts':    shortcuts,
-            'statsWidgets':       stats
+            'statsWidgets':       stats,
+            'fastAdd':           fastAdd
         };
 
         await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });

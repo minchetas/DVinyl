@@ -97,6 +97,53 @@
             </div>
         </div>
 
+
+        <div class="card-theme rounded-3xl p-6 shadow-xl transition-colors mt-8">
+            <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary-theme/10 text-primary-theme flex items-center justify-center">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <%= t('perso.fastAdd_title') %>
+            </h2>
+            <p class="text-sm opacity-60 mb-6"><%= t('perso.fastAdd_desc') %></p>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <% 
+                const fastAddOptions = [
+                    { value: '', label: t('perso.fastAdd_disabled'), icon: 'fa-xmark', color: 'peer-checked:bg-gray-500' },
+                ];
+                if (settings.modules.music) {
+                    fastAddOptions.push(
+                        { value: 'vinyl', label: t('media.vinyls'), icon: 'fa-record-vinyl', color: 'peer-checked:bg-green-600' },
+                        { value: 'cd', label: t('media.cds'), icon: 'fa-compact-disc', color: 'peer-checked:bg-blue-600'  },
+                        { value: 'cassette', label: t('media.cassettes'), icon: 'fa-tape', color: 'peer-checked:bg-orange-600'}
+                    );
+                }
+                if (settings.modules.books) {
+                    fastAddOptions.push(
+                        { value: 'book', label: t('media.books'), icon: 'fa-book', color: 'peer-checked:bg-amber-600' }
+                    );
+                }
+                if (settings.modules.dvd) {
+                    fastAddOptions.push(
+                        { value: 'dvd', label: t('media.dvd_gen'), icon: 'fa-film', color: 'peer-checked:bg-red-600'   }
+                    );
+                }
+                %>
+                <% fastAddOptions.forEach(opt => { %>
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="fastAdd" value="<%= opt.value %>" class="peer sr-only"
+                            <%= (settings.fastAdd === opt.value || (!settings.fastAdd && opt.value === '')) ? 'checked' : '' %>>
+                        <div class="flex items-center gap-3 p-3 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 transition-all peer-checked:text-white opacity-60 peer-checked:opacity-100 peer-checked:shadow-md <%= opt.color %>">
+                            <i class="fa-solid <%= opt.icon %> text-base w-4 text-center"></i>
+                            <span class="text-sm font-medium"><%= opt.label %></span>
+                        </div>
+                    </label>
+                <% }) %>
+            </div>
+        </div>
+
+
         <div class="card-theme rounded-3xl p-6 shadow-xl transition-colors mt-8">
             <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-primary-theme/10 text-primary-theme flex items-center justify-center">

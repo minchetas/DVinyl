@@ -37,34 +37,26 @@
                     const isBook = album.kind === 'Book';
                     const isDvd = album.kind === 'Dvd' || (album.tmdb_id !== undefined && album.tmdb_id !== null);
                     
+                    const rawFormat = isDvd ? album.format : (album.media_type || album.format);
+                    const formatKey = rawFormat ? rawFormat.toLowerCase() : (isBook ? 'book' : 'vinyl');
+
                     let detailUrl = `/album/${album._id}`;
                     if (isBook) detailUrl = `/book/${album._id}`;
                     if (isDvd) detailUrl = `/dvd/${album._id}`;
-                    
-                    const aspectClass = 'aspect-square';
-                    
-                    const formatKey = isDvd ? album.format : (album.media_type || album.format);
-                    const badgeColors = {
-                        'vinyl': 'bg-green-600/90',
-                        'cd': 'bg-blue-600/90',
-                        'cassette': 'bg-orange-600/90',
-                        'manga': 'bg-pink-600/90',
-                        'comic': 'bg-indigo-600/90',
-                        'hardcover': 'bg-purple-600/90',
-                        'paperback': 'bg-amber-600/90',
-                        'book': 'bg-amber-700/90',
-                        'dvd': 'bg-sky-600/90',
-                        'bluray': 'bg-indigo-700/90',
-                        '4k': 'bg-red-600/90',
-                        'vhs': 'bg-amber-600/90',
-                        'laserdisc': 'bg-purple-600/90'
+
+                    const badgeMap = {
+                        'vinyl': 'bg-green-600/90', 'cd': 'bg-blue-600/90', 'cassette': 'bg-orange-600/90',
+                        'manga': 'bg-pink-600/90', 'comic': 'bg-indigo-600/90', 'hardcover': 'bg-purple-600/90',
+                        'paperback': 'bg-amber-600/90', 'book': 'bg-amber-700/90',
+                        'dvd': 'bg-sky-600/90', 'bluray': 'bg-indigo-700/90', '4k': 'bg-red-600/90',
+                        'vhs': 'bg-amber-600/90', 'laserdisc': 'bg-purple-600/90'
                     };
-                    let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
+                    let badgeClass = (badgeMap[formatKey] || 'bg-gray-600/90') + ' text-white';
                 %>
+
                 <div class="group relative card-theme rounded-xl hover:border-primary-theme transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col justify-between overflow-hidden">
-                    
                     <a href="<%= detailUrl %>" class="block flex-grow">
-                        <div class="<%= aspectClass %> w-full relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                        <div class="aspect-square w-full relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             
                             <% if (isBook || isDvd) { %>
                                 <img src="<%= album.cover_image %>" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
@@ -74,15 +66,15 @@
                                 class="relative z-10 w-full h-full <%= (isBook || isDvd) ? 'object-contain p-3' : 'object-cover' %> transition-transform duration-500 group-hover:scale-105" 
                                 loading="lazy">
                             
-                            <span class="absolute top-1.5 right-1.5 md:top-2 md:right-2 z-20 text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeColor %>">
+                            <span class="absolute top-1.5 right-1.5 md:top-2 md:right-2 z-20 text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeClass %>">
                                 <%= t('media.' + formatKey) %>
                             </span>
                         </div>
 
                         <div class="p-2 md:p-3">
-                            <h3 class="font-bold text-xs md:text-sm truncate leading-tight mb-0.5"><%= album.title %></h3>
+                            <h3 class="font-bold text-xs md:text-sm truncate leading-tight mb-0.5" title="<%= album.title %>"><%= album.title %></h3>
                             <p class="text-[10px] md:text-xs opacity-60 truncate mb-2">
-                                <%= isBook ? album.author : (isDvd ? (album.director) : (album.artist)) %>
+                                <%= album.author || album.artist || album.director || album.artists_sort || 'Unknow' %>
                             </p>
 
                             <% if(album.variant_color) { %>
@@ -100,7 +92,6 @@
                             <span><%= t('wishlist.btn_received') %></span>
                         </button>
                     <% } %>
-
                 </div>
             <% }) %>
         </div>

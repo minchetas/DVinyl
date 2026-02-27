@@ -204,9 +204,11 @@ router.get('/collection', requireAuth, async (req, res) => {
 
 // Add-vinyl search page (view)
 router.get('/add-vinyl', requireAuth, requireAdmin, (req, res) => {
-    res.render('add-vinyl', { results: null, user: res.locals.user });
+    const validTypes = ['vinyl', 'cd', 'cassette'];
+    const searchType = validTypes.includes(req.query.type) ? req.query.type : 'vinyl';
+    const searchQuery = req.query.search || '';
+    res.render('add-vinyl', { searchType, searchQuery });
 });
-
 
 // route for editing an existing album
 router.get('/album/edit/:id', requireAuth, async (req, res) => {
@@ -375,6 +377,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 variant_color: variant_color,
                 tracklist: tracklist,
                 cover_image: cover_image,
+                user_image: user_image,
                 in_wishlist: isWishlist,
                 media_type: media_type || 'vinyl',
                 comments: comments || '',
@@ -455,13 +458,13 @@ router.get('/api/collection/ids', requireAuth, async (req, res) => {
 router.get('/wishlist', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const albums = await Item.find({ 
+        const items = await Item.find({ 
             owner: adminId,
             in_wishlist: true 
         }).sort({ added_at: -1 });
 
         res.render('wishlist', { 
-            albums, 
+            albums: items.map(formatForView), 
             user: res.locals.user 
         });
     } catch (err) {

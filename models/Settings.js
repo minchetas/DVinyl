@@ -24,7 +24,8 @@ const settingsSchema = new mongoose.Schema({
     statsWidgets: { 
         type: [String], 
         default: ['total', 'vinyl', 'cd', 'cassette', 'artist'] 
-    }
+    },
+    fastAdd: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);
