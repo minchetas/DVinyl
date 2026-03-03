@@ -117,7 +117,167 @@ const PRESETS = {
             subtext: '#f3e8ff', 
             highlight: '#a78bfa' 
         }
-    }
+    },
+
+    bubblegum: {
+        label: 'Bubblegum',
+        light: {
+            bg: '#fce8f3',
+            card: '#ffffff',
+            navbar: '#f5d0e8',
+            text: '#4a1a35',
+            subtext: '#8b4a6b',
+            highlight: '#d4679a'
+        },
+        dark: {
+            bg: '#a8527a',
+            card: '#be6a90',
+            navbar: '#963d6b',
+            text: '#fff0f8',
+            subtext: '#ffd6ed',
+            highlight: '#ffb3d9'
+        }
+    },
+    
+    cyan: {
+        label: 'Cyan',
+        light: {
+            bg: '#ecfeff',
+            card: '#ffffff',
+            navbar: '#cffafe',
+            text: '#083344',
+            subtext: '#0e7490',
+            highlight: '#06b6d4'
+        },
+        dark: {
+            bg: '#061d27',
+            card: '#083344',
+            navbar: '#164e63',
+            text: '#ecfeff',
+            subtext: '#ecfeff',
+            highlight: '#22d3ee'
+        }
+    },
+
+    slate: {
+        label: 'Slate',
+        light: {
+            bg: '#f8fafc',
+            card: '#ffffff',
+            navbar: '#e2e8f0',
+            text: '#0f172a',
+            subtext: '#334155',
+            highlight: '#64748b'
+        },
+        dark: {
+            bg: '#0f172a',
+            card: '#1e293b',
+            navbar: '#020617',
+            text: '#f8fafc',
+            subtext: '#f8fafc',
+            highlight: '#94a3b8'
+        }
+    },
+
+    forest: {
+        label: 'Forest',
+        light: {
+            bg: '#f1f8f1',
+            card: '#ffffff',
+            navbar: '#d8eeda',
+            text: '#1a3a1a',
+            subtext: '#3a6b3a',
+            highlight: '#4a8c4a'
+        },
+        dark: {
+            bg: '#111f11',
+            card: '#1a3a1a',
+            navbar: '#0d160d',
+            text: '#e8f5e8',
+            subtext: '#e8f5e8',
+            highlight: '#6abf6a'
+        }
+    },
+
+    sunset: {
+        label: 'Sunset',
+        light: {
+            bg: '#fff7ed',
+            card: '#ffffff',
+            navbar: '#ffedd5',
+            text: '#431407',
+            subtext: '#c2410c',
+            highlight: '#f97316'
+        },
+        dark: {
+            bg: '#2d0e04',
+            card: '#431407',
+            navbar: '#7c2d12',
+            text: '#fff7ed',
+            subtext: '#fff7ed',
+            highlight: '#fb923c'
+        }
+    },
+
+    indigo: {
+        label: 'Indigo',
+        light: {
+            bg: '#eef2ff',
+            card: '#ffffff',
+            navbar: '#e0e7ff',
+            text: '#1e1b4b',
+            subtext: '#3730a3',
+            highlight: '#6366f1'
+        },
+        dark: {
+            bg: '#1e1b4b',
+            card: '#312e81',
+            navbar: '#1e1b4b',
+            text: '#eef2ff',
+            subtext: '#eef2ff',
+            highlight: '#818cf8'
+        }
+    },
+
+    midnight: {
+        label: 'Midnight',
+        light: {
+            bg: '#f0f4ff',
+            card: '#ffffff',
+            navbar: '#dde5ff',
+            text: '#0d0d2b',
+            subtext: '#1a1a5e',
+            highlight: '#4f46e5'
+        },
+        dark: {
+            bg: '#050510',
+            card: '#0d0d2b',
+            navbar: '#07071a',
+            text: '#e8eaff',
+            subtext: '#e8eaff',
+            highlight: '#7c73f5'
+        }
+    },
+
+    sand: {
+        label: 'Sand',
+        light: {
+            bg: '#fdf8f0',
+            card: '#ffffff',
+            navbar: '#f5ece0',
+            text: '#3b2a1a',
+            subtext: '#7a5c3a',
+            highlight: '#c49a5a'
+        },
+        dark: {
+            bg: '#231a10',
+            card: '#3b2a1a',
+            navbar: '#1a1008',
+            text: '#fdf8f0',
+            subtext: '#fdf8f0',
+            highlight: '#d4aa6a'
+        }
+    },
 };
 
 module.exports = PRESETS;
