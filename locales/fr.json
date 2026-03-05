@@ -278,7 +278,8 @@
     "title": "Ma Collection",
     "filter_placeholder": "Filtrer...",
     "refresh_tooltip": "Rafraîchir depuis Discogs",
-    "refresh": "Rafraîchir"
+    "refresh": "Rafraîchir",
+    "add": "Ajouter"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",

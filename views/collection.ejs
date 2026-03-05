@@ -9,7 +9,7 @@
     </div>
 
     <div class="space-y-6 mb-8">
-                        
+                            
         <div class="flex flex-wrap gap-2 mb-8" id="formatFilters">
             <% 
             const mainTypes = [
@@ -57,33 +57,40 @@
                 </datalist>
             </div>
 
-            <% if (user.isAdmin && currentType === 'music') { %>
+            <% if (user.isAdmin) { %>
+                <%
+                const addRoutes = { music: '/add-vinyl', books: '/add-book', dvd: '/add-dvd' };
+                const addRoute = addRoutes[currentType];
+                %>
                 <div class="flex gap-2">
-                    <button onclick="openEstimateModal()" 
-                        class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group" 
-                        title="<%= t('index.btn_estimate') %>">
-                        <i class="fa-solid fa-calculator group-hover:scale-110 transition-transform"></i>
-                        <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('index.btn_estimate') %></span>
-                    </button>
 
-                    <% if (user.discogsUsername) { %>
+                    <% if (addRoute) { %>
+                        <a href="<%= addRoute %>"
+                            class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group"
+                            title="<%= t('collection.add') %>">
+                            <i class="fa-solid fa-plus group-hover:scale-110 transition-transform"></i>
+                            <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('collection.add') %></span>
+                        </a>
+                    <% } %>
+
+                    <% if (currentType === 'music') { %>
+                        <button onclick="openEstimateModal()" 
+                            class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group" 
+                            title="<%= t('index.btn_estimate') %>">
+                            <i class="fa-solid fa-calculator group-hover:scale-110 transition-transform"></i>
+                            <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('index.btn_estimate') %></span>
+                        </button>
+                    <% } %>
+
+                    <% if (user.discogsUsername && currentType === 'music') { %>
                         <button onclick="refreshCollection()" id="refreshBtn" 
                             class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group" 
                             title="<%= t('collection.refresh_tooltip') %>">
                             <i class="fa-solid fa-sync group-hover:rotate-180 transition-transform duration-500"></i>
-                            <span class="hidden md:inline text-xs font-bold uppercase tracking-widest">
-                                <%= t('collection.refresh') %>
-                            </span>
+                            <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('collection.refresh') %></span>
                         </button>
                     <% } %>
-                </div>
-            <% } else if (user.isAdmin && user.discogsUsername) { %>
-                <div class="flex gap-2">
-                    <button onclick="refreshCollection()" id="refreshBtn" 
-                        class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group">
-                        <i class="fa-solid fa-sync group-hover:rotate-180 transition-transform duration-500"></i>
-                        <span class="hidden md:inline text-xs font-bold uppercase tracking-widest"><%= t('collection.refresh') %></span>
-                    </button>
+
                 </div>
             <% } %>
         </div>

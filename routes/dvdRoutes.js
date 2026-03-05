@@ -58,10 +58,17 @@ router.post('/search-dvds', requireAuth, requireAdmin, async (req, res) => {
             }
         }
 
-        const url = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=fr-FR&page=1`;
-        const response = await axios.get(url);
-        
-        const filteredResults = response.data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+        const [page1, page2] = await Promise.all([
+            axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=fr-FR&page=1`),
+            axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=fr-FR&page=2`),
+        ]);
+
+        const allResults = [
+            ...(page1.data.results || []),
+            ...(page2.data.results || []),
+        ];
+
+        const filteredResults = allResults.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
         const results = filteredResults.map(formatTMDBItem);
 
         res.render('add-dvd', { 

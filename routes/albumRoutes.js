@@ -243,7 +243,7 @@ router.post('/search-discogs', requireAuth, requireAdmin, async (req, res) => {
         '12"', '7"', 'Limited Edition', 'Compilation', 'Deluxe Edition', 'Numbered', 'Promo'
     ];
 
-    const processedResults = response.data.results.slice(0, 10).map(item => {
+    const processedResults = response.data.results.slice(0, 100).map(item => {
         let variant_info = '';
         
         if (item.formats && item.formats[0] && item.formats[0].text) {

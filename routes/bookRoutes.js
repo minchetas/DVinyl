@@ -92,7 +92,7 @@ router.post('/search-books', requireAuth, requireAdmin, async (req, res) => {
         } else {
             graphqlQuery = `
                 query SearchByTitle($searchTerm: String!) {
-                    search(query: $searchTerm, query_type: "Book", per_page: 12) {
+                    search(query: $searchTerm, query_type: "Book", per_page: 24) {
                         results
                     }
                 }
