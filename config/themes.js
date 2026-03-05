@@ -119,8 +119,8 @@ const PRESETS = {
         }
     },
 
-    bubblegum: {
-        label: 'Bubblegum',
+    sakura: {
+        label: 'Sakura',
         light: {
             bg: '#fce8f3',
             card: '#ffffff',
