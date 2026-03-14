@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dvinyl-v2';
+const CACHE_NAME = 'dvinyl-v2.3';
 
 const STATIC_ASSETS = [
   '/',
@@ -42,7 +42,7 @@ self.addEventListener('fetch', event => {
 
   if (event.request.method !== 'GET') return;
 
-   const dynamicRoutes = [
+  const dynamicRoutes = [
     // Auth
     '/login', '/logout', '/setup',
     // Collections
