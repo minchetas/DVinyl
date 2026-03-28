@@ -10,6 +10,10 @@ const PRESETS = require('../config/themes');
 const axios = require('axios');
 const https = require('https');
 const Item = require('../models/Item');
+const Vinyl = require('../models/Vinyl');
+const Book = require('../models/Book');
+const Dvd = require('../models/Dvd');
+const { BOOK_GENRES_WHITELIST } = require('../config/constants');
 
 /**
  * routes/adminRoutes.js
@@ -54,7 +58,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
             ...data,
             user: res.locals.user,
             successMessage: msgKey ? req.t(`messages.${msgKey}`) : null,
-            newPassword: null, 
+            newPassword: null,
             hasHardcoverKey: !!process.env.HARDCOVER_API_KEY,
             hasTmdbKey: !!process.env.TMDB_API_KEY
         });
@@ -163,7 +167,7 @@ router.post('/unblock-ip', requireAuth, requireAdmin, async (req, res) => {
 
 router.get('/personnalisation', requireAuth, requireAdmin, async (req, res) => {
     try {
-        res.render('personnalisation', { 
+        res.render('personnalisation', {
             presets: PRESETS
         });
     } catch (err) {
@@ -174,29 +178,29 @@ router.get('/personnalisation', requireAuth, requireAdmin, async (req, res) => {
 
 router.post('/personnalisation/save', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { 
+        const {
             homePreset, musicPreset, booksPreset, dvdPreset,
-            navbarShortcuts, statsWidgets 
+            navbarShortcuts, statsWidgets
         } = req.body;
 
-        const shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);        
+        const shortcuts = Array.isArray(navbarShortcuts) ? navbarShortcuts : (navbarShortcuts ? [navbarShortcuts] : []);
         const stats = Array.isArray(statsWidgets) ? statsWidgets : (statsWidgets ? [statsWidgets] : []);
-        
+
         const validFastAdd = ['', 'vinyl', 'cd', 'cassette', 'book', 'dvd'];
         const fastAdd = validFastAdd.includes(req.body.fastAdd) ? req.body.fastAdd : '';
-        
+
         const update = {
-            'theme.home.preset':  homePreset,
+            'theme.home.preset': homePreset,
             'theme.music.preset': musicPreset,
             'theme.books.preset': booksPreset,
-            'theme.dvd.preset':   dvdPreset,
-            'navbarShortcuts':    shortcuts,
-            'statsWidgets':       stats,
-            'fastAdd':           fastAdd
+            'theme.dvd.preset': dvdPreset,
+            'navbarShortcuts': shortcuts,
+            'statsWidgets': stats,
+            'fastAdd': fastAdd
         };
 
         await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });
-        
+
         res.redirect('/admin/personnalisation?msg=saved');
     } catch (err) {
         console.error("[ERR] perso save", err);
@@ -216,12 +220,12 @@ router.post('/modules/save', requireAuth, requireAdmin, async (req, res) => {
         const update = {
             'modules.music': musicActive === 'on',
             'modules.books': booksActive === 'on',
-            'modules.dvd':   dvdActive === 'on',
+            'modules.dvd': dvdActive === 'on',
             'modules.advancedCD': advancedCDActive === 'on'
         };
 
         await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });
-        
+
         res.redirect('/admin?msg=saved');
     } catch (err) {
         console.error("[ERR] modules save", err);
@@ -245,7 +249,7 @@ router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req,
             const results = (response.data.docs || [])
                 .filter(doc => doc.cover_i)
                 .map(doc => `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`);
-            
+
             return res.json(results);
         }
 
@@ -258,7 +262,7 @@ router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req,
 
             const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=fr-FR`;
             const response = await axios.get(tmdbUrl, axiosConfig);
-            
+
             const results = (response.data.results || [])
                 .filter(item => item.poster_path)
                 .map(item => `https://image.tmdb.org/t/p/w500${item.poster_path}`);
@@ -269,11 +273,11 @@ router.get('/api/search-image-universal', requireAuth, requireAdmin, async (req,
 
         const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=12`;
         const response = await axios.get(itunesUrl, axiosConfig);
-        
+
         const results = (response.data.results || []).map(item => {
             return item.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
         });
-        
+
         console.log(`[SEARCH] iTunes found: ${results.length}`);
         res.json(results);
 
@@ -288,7 +292,7 @@ router.get('/api/search-discogs-gallery', requireAuth, requireAdmin, async (req,
     try {
         const { q } = req.query;
         const axiosConfig = {
-            headers: { 
+            headers: {
                 'User-Agent': 'DVinylApp/2.0',
                 'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN || ''}`
             }
@@ -304,9 +308,9 @@ router.get('/api/search-discogs-gallery', requireAuth, requireAdmin, async (req,
         });
 
         const allGalleries = await Promise.all(galleryPromises);
-        
+
         const finalImages = [...new Set(allGalleries.flat())];
-        
+
         res.json(finalImages);
     } catch (err) {
         console.error("[ERR] Discogs Global Gallery:", err.message);
@@ -335,6 +339,254 @@ router.post('/delete-last-items', requireAuth, requireAdmin, async (req, res) =>
     } catch (err) {
         console.error("[ERR] delete-last-items:", err.message);
         res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/refresh-all-music-metadata', requireAuth, requireAdmin, async (req, res) => {
+    const { mode = 'all' } = req.body;
+    const token = process.env.DISCOGS_TOKEN;
+    if (!token) return res.status(500).json({ error: 'Discogs token not configured' });
+
+    try {
+        let query = { discogs_id: { $exists: true, $ne: null } };
+
+        if (mode === 'missing') {
+            query.$or = [
+                { genres: { $exists: false } },
+                { genres: { $size: 0 } },
+                { styles: { $exists: false } },
+                { styles: { $size: 0 } },
+                { tracklist: { $exists: false } },
+                { tracklist: { $size: 0 } }
+            ];
+        }
+
+        const albums = await Vinyl.find(query).select('_id discogs_id title artist');
+        if (albums.length === 0) return res.json({ success: true, count: 0 });
+
+        res.status(202).json({ success: true, total: albums.length });
+
+        (async () => {
+            const io = req.app.get('io');
+            let current = 0;
+            for (const album of albums) {
+                current++;
+                try {
+                    if (io) {
+                        io.emit('refresh_all_progress', {
+                            current,
+                            total: albums.length,
+                            title: `${album.artist} - ${album.title}`
+                        });
+                    }
+
+                    const response = await axios.get(`https://api.discogs.com/releases/${album.discogs_id}`, {
+                        headers: { 'User-Agent': 'DVinylApp/2.0', 'Authorization': `Discogs token=${token}` }
+                    });
+
+                    const { genres = [], styles = [], tracklist = [] } = response.data;
+
+                    await Vinyl.updateOne(
+                        { _id: album._id },
+                        {
+                            $set: {
+                                genres,
+                                styles,
+                                tracklist,
+                                genre: genres[0] || ''
+                            }
+                        }
+                    );
+
+                    // Respect Discogs API limit (60 req/min)
+                    await new Promise(r => setTimeout(r, 1500));
+                } catch (err) {
+                    console.error(`[ERR] Refresh bulk ID ${album.discogs_id}:`, err.message);
+                    if (err.response && err.response.status === 429) {
+                        await new Promise(r => setTimeout(r, 10000));
+                    } else {
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+            }
+            if (io) io.emit('refresh_all_finished', { count: current });
+        })();
+    } catch (err) {
+        console.error("[ERR] Bulk refresh route:", err.message);
+        if (!res.headersSent) res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/refresh-all-books-metadata', requireAuth, requireAdmin, async (req, res) => {
+    const { mode = 'all' } = req.body;
+    const hardcoverKey = process.env.HARDCOVER_API_KEY;
+    if (!hardcoverKey) return res.status(500).json({ error: 'Hardcover API key not configured' });
+
+    try {
+        let query = { hardcover_slug: { $exists: true, $ne: null } };
+        if (mode === 'missing') {
+            query.$or = [
+                { genres: { $exists: false } },
+                { genres: { $size: 0 } },
+                { styles: { $exists: false } },
+                { styles: { $size: 0 } }
+            ];
+        }
+
+        const books = await Book.find(query).select('_id hardcover_slug title author');
+        if (books.length === 0) return res.json({ success: true, count: 0 });
+
+        res.status(202).json({ success: true, total: books.length });
+
+        (async () => {
+            const io = req.app.get('io');
+            let current = 0;
+            for (const book of books) {
+                current++;
+                try {
+                    if (io) {
+                        io.emit('refresh_all_progress', { 
+                            current, 
+                            total: books.length, 
+                            title: `${book.author} - ${book.title}` 
+                        });
+                    }
+
+                    const graphqlQuery = {
+                        query: `query bookBySlug($slug: String!) {
+                          books(where: { slug: { _eq: $slug } }, limit: 1) {
+                            taggings {
+                              tag { tag }
+                            }
+                          }
+                        }`,
+                        variables: { slug: book.hardcover_slug }
+                    };
+
+                    const authHeader = hardcoverKey.startsWith('Bearer ') ? hardcoverKey : `Bearer ${hardcoverKey}`;
+                    const response = await axios.post('https://api.hardcover.app/v1/graphql', graphqlQuery, {
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': authHeader 
+                        }
+                    });
+
+                    if (response.data.errors) {
+                        console.error(`[ERR] Bulk Refresh Book GraphQL Errors (${book.hardcover_slug}):`, response.data.errors);
+                        throw new Error(response.data.errors[0]?.message || "GraphQL Error");
+                    }
+
+                    const bookData = response.data?.data?.books?.[0];
+                    if (bookData) {
+                        let parsedTags = [];
+                        if (Array.isArray(bookData.taggings)) {
+                            parsedTags = bookData.taggings.map(bt => bt.tag?.tag);
+                        } else if (Array.isArray(bookData.cached_tags)) {
+                            parsedTags = bookData.cached_tags;
+                        } else if (typeof bookData.cached_tags === 'string') {
+                            try { parsedTags = JSON.parse(bookData.cached_tags); } 
+                            catch(e) { parsedTags = bookData.cached_tags.split(',').map(s=>s.trim()); }
+                        }
+                        
+                        const whitelistLower = BOOK_GENRES_WHITELIST.map(g => g.toLowerCase());
+                        const filteredGenres = parsedTags
+                            .filter(Boolean)
+                            .filter(tag => whitelistLower.includes(tag.toLowerCase()))
+                            .map(tag => {
+                                const index = whitelistLower.indexOf(tag.toLowerCase());
+                                return BOOK_GENRES_WHITELIST[index];
+                            });
+
+                        const genres = [...new Set(filteredGenres)];
+                        
+                        await Book.updateOne(
+                            { _id: book._id }, 
+                            { 
+                                $set: { 
+                                    genres, 
+                                    genre: genres[0] || '' 
+                                } 
+                            }
+                        );
+                    }
+
+                    await new Promise(r => setTimeout(r, 1000));
+                } catch (err) {
+                    console.error(`[ERR] Refresh bulk book ${book.hardcover_slug}:`, err.message);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            if (io) io.emit('refresh_all_finished', { count: current });
+        })();
+    } catch (err) {
+        console.error("[ERR] Bulk refresh books:", err.message);
+        if (!res.headersSent) res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/refresh-all-dvds-metadata', requireAuth, requireAdmin, async (req, res) => {
+    const { mode = 'all' } = req.body;
+    const tmdbKey = process.env.TMDB_API_KEY;
+    if (!tmdbKey) return res.status(500).json({ error: 'TMDB API key not configured' });
+
+    try {
+        let query = { tmdb_id: { $exists: true, $ne: null } };
+        if (mode === 'missing') {
+            query.$or = [
+                { genres: { $exists: false } },
+                { genres: { $size: 0 } },
+                { styles: { $exists: false } },
+                { styles: { $size: 0 } }
+            ];
+        }
+
+        const dvds = await Dvd.find(query).select('_id tmdb_id title director media_type');
+        if (dvds.length === 0) return res.json({ success: true, count: 0 });
+
+        res.status(202).json({ success: true, total: dvds.length });
+
+        (async () => {
+            const io = req.app.get('io');
+            let current = 0;
+            for (const dvd of dvds) {
+                current++;
+                try {
+                    if (io) {
+                        io.emit('refresh_all_progress', { 
+                            current, 
+                            total: dvds.length, 
+                            title: dvd.title 
+                        });
+                    }
+
+                    const type = dvd.media_type === 'tv' ? 'tv' : 'movie';
+                    const response = await axios.get(`https://api.themoviedb.org/3/${type}/${dvd.tmdb_id}?api_key=${tmdbKey}&language=fr-FR`);
+
+                    if (response.data) {
+                        const genres = (response.data.genres || []).map(g => g.name);
+                        
+                        await Dvd.updateOne(
+                            { _id: dvd._id }, 
+                            { 
+                                $set: { 
+                                    genres, 
+                                    genre: genres[0] || '' 
+                                } 
+                            }
+                        );
+                    }
+
+                    await new Promise(r => setTimeout(r, 500));
+                } catch (err) {
+                    console.error(`[ERR] Refresh bulk dvd ${dvd.tmdb_id}:`, err.message);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            if (io) io.emit('refresh_all_finished', { count: current });
+        })();
+    } catch (err) {
+        console.error("[ERR] Bulk refresh dvds:", err.message);
+        if (!res.headersSent) res.status(500).json({ error: err.message });
     }
 });
 

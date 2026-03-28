@@ -1,6 +1,13 @@
 module.exports = {
   STANDARD_FORMAT_TERMS: [
-            'Vinyl', 'LP', 'Album', 'Reissue', 'Repress', 'Stereo', 'Gatefold', 
-            '12"', '7"', 'Limited Edition', 'Compilation', 'Deluxe Edition', 'Numbered', 'Promo'
-        ]   
+    'Vinyl', 'LP', 'Album', 'Reissue', 'Repress', 'Stereo', 'Gatefold',
+    '12"', '7"', 'Limited Edition', 'Compilation', 'Deluxe Edition', 'Numbered', 'Promo'
+  ],
+  BOOK_GENRES_WHITELIST: [
+    'Fiction', 'Non-Fiction', 'Fantasy', 'Sci-Fi', 'Science Fiction', 'Mystery',
+    'Thriller', 'Horror', 'Historical', 'Romance', 'Comedy', 'Young Adult',
+    'Children', 'Biography', 'Autobiography', 'Memoir', 'Poetry', 'Essay',
+    'Self Help', 'Yuri', 'Slice of life', 'Adventure', 'Action', 'Drama', 'Crime',
+    'LGBTQ', 'LGBTQIA', 'LGBTQIA+'
+  ]
 }

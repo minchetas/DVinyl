@@ -248,6 +248,26 @@
       "collection": "Import collection",
       "wantlist": "Import wantlist"
     },
+    "maintenance": {
+      "title": "Maintenance",
+      "subtitle": "Global management of your collections metadata.",
+      "refresh_all_title": "Refresh All Metadata (Music)",
+      "refresh_all_subtitle": "This will update genres, styles, and tracklists for ALL your music using Discogs data. ⚠️ This process is slow (approx. 1.5s per item) to respect API rate limits and will overwrite your manual changes to these fields.",
+      "refresh_all_btn": "Launch Refresh",
+      "refresh_all_confirm": "Are you sure? This will update your music items based on the selected mode. It will overwrite any manual changes to genres and styles.",
+      "mode_label": "Refresh Mode",
+      "mode_all": "All items (Slow)",
+      "mode_missing": "Only items with missing genres/styles (Fastest)",
+      "status_starting": "Starting...",
+      "status_init": "Initializing...",
+      "status_processing": "Refreshing: {{current}} / {{total}}",
+      "status_finished": "Update complete!",
+      "status_error": "Refresh failed.",
+      "refresh_books_title": "Refresh All Metadata (Books)",
+      "refresh_books_subtitle": "Relaunch data retrieval (Hardcover/OpenLibrary) for books.",
+      "refresh_dvds_title": "Refresh All Metadata (DVDs)",
+      "refresh_dvds_subtitle": "Relaunch data retrieval (TMDB) for DVDs and Blu-Rays."
+    },
     "errors": {
       "at_least_one_module": "At least one module must be active.",
       "missing_api_key": "Unable to activate this module: the API key is missing.",
@@ -285,6 +305,7 @@
     "filter_placeholder": "Filter...",
     "refresh_tooltip": "Refresh from Discogs",
     "refresh": "Refresh",
+    "refresh_metadata_btn": "Refresh info",
     "add": "Add"
   },
   "confirm_vinyl": {
@@ -317,7 +338,9 @@
     "browse_files": "Browse files",
     "no_results": "No visuals found.",
     "network_error": "Network error.",
-    "country": "Country"
+    "country": "Country",
+    "field_genres": "Genres",
+    "field_styles": "Styles"
   },
   "edit_vinyl": {
     "title": "Edit Album",
@@ -349,7 +372,9 @@
     "import_tracklist_btn": "Import Tracklist",
     "tracklist_not_found": "Tracklist not found on Discogs",
     "importing": "Importing...",
-    "no_tracklist": "No tracklist available."
+    "no_tracklist": "No tracklist available.",
+    "refresh_info_success": "Metadata refreshed successfully!",
+    "refresh_info_error": "Error refreshing metadata."
   },
   "wishlist": {
     "title": "My Wishlist",

@@ -151,7 +151,17 @@ router.get('/collection', requireAuth, async (req, res) => {
         }
 
         if (genre) {
-            query.genre = new RegExp(genre, 'i');
+            const genreArr = genre.split(',').map(g => g.trim()).filter(Boolean);
+            if (genreArr.length > 0) {
+                // Return items that match ANY of the selected genres/styles
+                conditions.push({
+                    $or: [
+                        { genre: { $in: genreArr.map(g => new RegExp(g, 'i')) } },
+                        { genres: { $in: genreArr.map(g => new RegExp(g, 'i')) } },
+                        { styles: { $in: genreArr.map(g => new RegExp(g, 'i')) } }
+                    ]
+                });
+            }
         }
 
         if (formatTerms && formatTerms.length > 0) {
@@ -207,9 +217,18 @@ router.get('/collection', requireAuth, async (req, res) => {
             currentFormatTerms: formatTerms || '',
             activeFilters: filterMap[type] || [],
             locations: await Item.distinct('location', { owner: adminId }),
-            genres: (type && type !== 'all') ? await Item.distinct('genre', Object.assign({ owner: adminId, genre: { $nin: ['', null] } }, 
-                type === 'music' ? { $or: [{ kind: 'Music' }, { kind: { $exists: false } }] } : { kind: { music: 'Music', books: 'Book', dvd: 'Dvd' }[type] }
-            )) : [],
+            genres: await (async () => {
+                if (!type || type === 'all') return [];
+                const kind = { music: 'Music', books: 'Book', dvd: 'Dvd' }[type];
+                const typeQuery = type === 'music' ? { $or: [{ kind: 'Music' }, { kind: { $exists: false } }] } : { kind };
+                
+                const [gBase, gArray, sArray] = await Promise.all([
+                    Item.distinct('genre', { owner: adminId, ...typeQuery, genre: { $nin: ['', null] } }),
+                    Item.distinct('genres', { owner: adminId, ...typeQuery }),
+                    Item.distinct('styles', { owner: adminId, ...typeQuery })
+                ]);
+                return [...new Set([...gBase, ...gArray, ...sArray])].filter(Boolean).sort();
+            })(),
             standardFormatTerms: STANDARD_FORMAT_TERMS,
         });
 
@@ -404,6 +423,8 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
             cover_image: data.images && data.images.length > 0 ? data.images[0].resource_url : '',
             discogs_id: data.id, 
             country: data.country || '',
+            genres: data.genres || [],
+            styles: data.styles || [],
             media_type: finalMediaType // Pass it to the view
         };
 
@@ -421,10 +442,14 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
         const { 
             mongo_id, title, artist, year, label, catalog_number, country,
             format_type, variant_color, cover_image, user_image, discogs_id, tracklist_json,
-            media_type, in_wishlist, comments, location, genre, quantity
+            media_type, in_wishlist, comments, location, genre, quantity,
+            genres, styles
         } = req.body;
         
         const tracklist = tracklist_json ? JSON.parse(tracklist_json) : [];
+        const parsedGenres = Array.isArray(genres) ? genres : (genres ? genres.split(',').map(g => g.trim()).filter(Boolean) : []);
+        const parsedStyles = Array.isArray(styles) ? styles : (styles ? styles.split(',').map(s => s.trim()).filter(Boolean) : []);
+
         const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
         
@@ -455,7 +480,9 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 media_type: media_type || 'vinyl',
                 comments: comments || '',
                 location: location || '',
-                genre: genre || '',
+                genre: genre || (parsedGenres.length > 0 ? parsedGenres[0] : ''),
+                genres: parsedGenres,
+                styles: parsedStyles,
                 quantity: parseInt(quantity) || 1,
                 country: country || '',
                 kind: 'Music'
@@ -483,7 +510,9 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 owner: adminId,
                 comments: comments || '',
                 location: location || '',
-                genre: genre || '',
+                genre: genre || (parsedGenres.length > 0 ? parsedGenres[0] : ''),
+                genres: parsedGenres,
+                styles: parsedStyles,
                 quantity: parseInt(quantity) || 1,
                 country: country || '',
             });
@@ -761,7 +790,9 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                     owner: userId, 
                     added_at: new Date(),
                     location: '',
-                    genre: '',
+                    genre: info.genres?.[0] || '',
+                    genres: info.genres || [],
+                    styles: info.styles || [],
                     in_wishlist: isWishlist,
                     kind: 'Music'
                 });
@@ -813,6 +844,43 @@ router.post('/api/album/:id/import-tracklist', requireAuth, requireAdmin, async 
     } catch (err) {
         console.error("Erreur API Discogs:", err.message);
         res.status(500).json({ success: false, error: "Error during Discogs API call" });
+    }
+});
+
+// API route to refresh all album metadata from Discogs
+router.post('/api/album/:id/refresh-info', requireAuth, requireAdmin, async (req, res) => {
+    const albumId = req.params.id;
+    const { discogsId } = req.body;
+    const token = process.env.DISCOGS_TOKEN;
+
+    if (!discogsId) {
+        return res.status(400).json({ success: false, error: "Discogs ID missing" });
+    }
+
+    try {
+        const response = await axios.get(`https://api.discogs.com/releases/${discogsId}`, {
+            headers: { 'Authorization': `Discogs token=${token}`, 'User-Agent': 'DVinylApp/2.0' }
+        });
+        const data = response.data;
+        
+        const updateData = {
+            genres: data.genres || [],
+            styles: data.styles || [],
+            tracklist: data.tracklist || []
+        };
+
+        // For backward compatibility: update the single genre field if it's currently empty
+        const currentAlbum = await Item.findById(albumId);
+        if (currentAlbum && (!currentAlbum.genre || currentAlbum.genre === '') && data.genres && data.genres.length > 0) {
+            updateData.genre = data.genres[0];
+        }
+
+        await Item.findByIdAndUpdate(albumId, { $set: updateData }, { strict: false });
+        
+        res.json({ success: true, genres: updateData.genres, styles: updateData.styles });
+    } catch (err) {
+        console.error("Refresh info error:", err);
+        res.status(500).json({ success: false, error: req.t('detail.refresh_info_error') });
     }
 });
 

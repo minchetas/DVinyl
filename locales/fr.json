@@ -248,6 +248,26 @@
       "collection": "Importer la collection",
       "wantlist": "Importer la wishlist"
     },
+    "maintenance": {
+      "title": "Maintenance",
+      "subtitle": "Gestion globale des métadonnées de vos collections.",
+      "refresh_all_title": "Actualiser toutes les métadonnées (Musique)",
+      "refresh_all_subtitle": "Cela mettra à jour les genres, styles et tracklists pour TOUTE votre musique en utilisant les données Discogs. ⚠️ Ce processus est lent (env. 1.5s par élément) pour respecter les limites de l'API et écrasera vos modifications manuelles sur ces champs.",
+      "refresh_all_btn": "Lancer l'actualisation",
+      "refresh_all_confirm": "Êtes-vous sûr ? Cela mettra à jour vos items selon le mode choisi. Vos modifications manuelles sur les genres et styles seront écrasées.",
+      "mode_label": "Mode d'actualisation",
+      "mode_all": "Tous les items (Lent)",
+      "mode_missing": "Seulement ceux sans genre/styles (Rapide)",
+      "status_starting": "Démarrage...",
+      "status_init": "Initialisation...",
+      "status_processing": "Actualisation : {{current}} / {{total}}",
+      "status_finished": "Actualisation terminée !",
+      "status_error": "L'actualisation a échoué.",
+      "refresh_books_title": "Actualiser toutes les métadonnées (Livres)",
+      "refresh_books_subtitle": "Relancer la récupération des données (Hardcover/OpenLibrary) pour les livres.",
+      "refresh_dvds_title": "Actualiser toutes les métadonnées (DVDs)",
+      "refresh_dvds_subtitle": "Relancer la récupération des données (TMDB) pour les DVDs et Blu-Rays."
+    },
     "errors": {
       "at_least_one_module": "Au moins un module doit être actif.",
       "missing_api_key": "Impossible d'activer ce module : la clé API est manquante.",
@@ -285,6 +305,7 @@
     "filter_placeholder": "Filtrer...",
     "refresh_tooltip": "Rafraîchir depuis Discogs",
     "refresh": "Rafraîchir",
+    "refresh_metadata_btn": "Actualiser les infos",
     "add": "Ajouter"
   },
   "confirm_vinyl": {
@@ -317,7 +338,9 @@
     "browse_files": "Parcourir les fichiers",
     "no_results": "Aucun visuel trouvé.",
     "network_error": "Erreur réseau.",
-    "country": "Pays"
+    "country": "Pays",
+    "field_genres": "Genres",
+    "field_styles": "Styles"
   },
   "edit_vinyl": {
     "title": "Modifier l'album",
@@ -349,7 +372,9 @@
     "import_tracklist_btn": "Importer Tracklist",
     "tracklist_not_found": "Tracklist non trouvée sur Discogs",
     "importing": "Importation...",
-    "no_tracklist": "Aucune tracklist enregistrée."
+    "no_tracklist": "Aucune tracklist enregistrée.",
+    "refresh_info_success": "Métadonnées actualisées avec succès !",
+    "refresh_info_error": "Erreur lors de l'actualisation des métadonnées."
   },
   "wishlist": {
     "title": "Liste de Souhaits",

@@ -6,6 +6,7 @@ const Item = require('../models/Item');
 const User = require('../models/User');
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 const xml2js = require('xml2js');
+const { BOOK_GENRES_WHITELIST } = require('../config/constants');
 
 async function getAdminId() {
     const admin = await User.findOne({ isAdmin: true }).select('_id');
@@ -43,6 +44,27 @@ const formatHardcoverBook = (book) => {
 
     const bestEdition = book.editions?.[0];
 
+    let parsedTags = [];
+    if (Array.isArray(book.taggings)) {
+        parsedTags = book.taggings.map(bt => bt.tag?.tag);
+    } else if (Array.isArray(book.cached_tags)) {
+        parsedTags = book.cached_tags;
+    } else if (typeof book.cached_tags === 'string') {
+        try { parsedTags = JSON.parse(book.cached_tags); } 
+        catch(e) { parsedTags = book.cached_tags.split(',').map(s=>s.trim()); }
+    } else if (Array.isArray(book.tags)) {
+        parsedTags = book.tags.map(t => t.tag?.name || t.name);
+    }
+
+    const whitelistLower = BOOK_GENRES_WHITELIST.map(g => g.toLowerCase());
+    const filteredGenres = parsedTags
+        .filter(Boolean)
+        .filter(tag => whitelistLower.includes(tag.toLowerCase()))
+        .map(tag => {
+            const index = whitelistLower.indexOf(tag.toLowerCase());
+            return BOOK_GENRES_WHITELIST[index];
+        });
+
     return {
         hardcover_id: book.id,
         hardcover_slug: book.slug || '',
@@ -54,7 +76,8 @@ const formatHardcoverBook = (book) => {
         pages: bestEdition?.pages || book.pages || 0,
         language: bestEdition?.language?.language || '',
         cover_image: cover,
-        description: book.description || ''
+        description: book.description || '',
+        genres: [...new Set(filteredGenres)]
     };
 };
 
@@ -100,11 +123,17 @@ router.post('/search-books', requireAuth, requireAdmin, async (req, res) => {
             variables = { searchTerm: query };
         }
 
+        const authHeader = apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`;
         const response = await axios.post(
             'https://api.hardcover.app/v1/graphql',
             { query: graphqlQuery, variables },
-            { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+            { headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' } }
         );
+
+        if (response.data.errors) {
+            console.error("[ERR] Hardcover Search GraphQL Errors:", response.data.errors);
+            throw new Error(response.data.errors[0]?.message || "GraphQL Search Error");
+        }
 
         const data = response.data.data;
         let rawResults = [];
@@ -149,6 +178,9 @@ router.get('/confirm-book/:id', requireAuth, async (req, res) => {
                     release_year
                     pages
                     image { url }
+                    taggings {
+                        tag { tag }
+                    }
                     editions(limit: 5, order_by: { users_count: desc }) {
                         isbn_13
                         isbn_10
@@ -161,11 +193,22 @@ router.get('/confirm-book/:id', requireAuth, async (req, res) => {
             }
         `;
 
+        const authHeader = apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`;
         const response = await axios.post(
             'https://api.hardcover.app/v1/graphql',
             { query: graphqlQuery, variables: { id: parseInt(bookId) } },
-            { headers: { 'Authorization': `Bearer ${apiKey}` } }
+            { headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' } }
         );
+
+        if (response.data.errors) {
+            console.error("[ERR] Hardcover Detail GraphQL Errors:", response.data.errors);
+            throw new Error(response.data.errors[0]?.message || "GraphQL Detail Error");
+        }
+
+        if (!response.data?.data?.books_by_pk) {
+            console.error("[ERR] Hardcover API: Book not found for ID", bookId);
+            return res.status(404).send("Book not found on Hardcover");
+        }
 
         const bookData = formatHardcoverBook(response.data.data.books_by_pk);
 
@@ -185,8 +228,12 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
         const { 
             mongo_id, title, author, publisher, year, isbn, pages, language, 
             format, series, volume, cover_image, hardcover_id, hardcover_slug,
-            in_wishlist, comments, location, genre, readingStatus, rating, quantity
+            in_wishlist, comments, location, genre, genres, styles, readingStatus, rating, quantity
         } = req.body;
+        
+        const parsedGenres = Array.isArray(genres) ? genres : (genres ? genres.split(',').map(g => g.trim()).filter(Boolean) : []);
+        const parsedStyles = Array.isArray(styles) ? styles : (styles ? styles.split(',').map(s => s.trim()).filter(Boolean) : []);
+
         
         const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
@@ -211,7 +258,9 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
             book.in_wishlist = isWishlist;
             book.comments = comments || '';
             book.location = location || '';
-            book.genre = genre || '';
+            book.genre = genre || (parsedGenres.length > 0 ? parsedGenres[0] : '');
+            book.genres = parsedGenres;
+            book.styles = parsedStyles;
             book.readingStatus = readingStatus || 'to_read';
             book.rating = rating || 0;
             book.quantity = quantity || 1;
@@ -227,7 +276,9 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
                 owner: adminId,
                 comments: comments || '',
                 location: location || '',
-                genre: genre || '',
+                genre: genre || (parsedGenres.length > 0 ? parsedGenres[0] : ''),
+                genres: parsedGenres,
+                styles: parsedStyles,
                 readingStatus: readingStatus || 'to_read',
                 rating: rating || 0,
                 quantity: quantity || 1,
@@ -447,6 +498,85 @@ router.post('/import/goodreads', requireAuth, requireAdmin, async (req, res) => 
     } catch (err) {
         console.error("[ERR] GoodReads RSS import:", err.message);
         req.io.emit('import_error', { message: err.message });
+    }
+});
+
+router.post('/api/book/:id/refresh-info', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ success: false, error: 'Book not found' });
+        
+        if (!book.hardcover_slug) {
+            return res.status(400).json({ success: false, error: 'No Hardcover Slug to refresh' });
+        }
+
+        const apiKey = process.env.HARDCOVER_API_KEY;
+        const graphqlQuery = {
+            query: `query bookBySlug($slug: String!) {
+              books(where: { slug: { _eq: $slug } }, limit: 1) {
+                id
+                slug
+                title
+                description
+                cached_contributors
+                release_year
+                pages
+                image { url }
+                taggings {
+                  tag { tag }
+                }
+                editions(limit: 5, order_by: { users_count: desc }) {
+                    isbn_13
+                    isbn_10
+                    publisher { name }
+                    language { language }
+                    pages
+                    reading_format_id
+                }
+              }
+            }`,
+            variables: { slug: book.hardcover_slug }
+        };
+
+        const response = await axios.post('https://api.hardcover.app/v1/graphql', graphqlQuery, {
+            headers: { 
+                'Authorization': apiKey?.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
+                'Content-Type': 'application/json' 
+            }
+        });
+
+        if (response.data.errors) {
+            console.error("[ERR] Hardcover GraphQL:", response.data.errors);
+            return res.status(500).json({ success: false, error: response.data.errors[0]?.message });
+        }
+
+        const bookData = response.data?.data?.books?.[0];
+        if (!bookData) {
+             return res.status(404).json({ success: false, error: 'Not found on Hardcover API' });
+        }
+
+        const formatted = formatHardcoverBook(bookData);
+
+        await Book.updateOne(
+            { _id: book._id },
+            {
+                $set: {
+                    cover_image: formatted.cover_image,
+                    description: formatted.description,
+                    genres: formatted.genres,
+                    genre: formatted.genres[0] || '',
+                    pages: formatted.pages,
+                    language: formatted.language,
+                    isbn: formatted.isbn,
+                    publisher: formatted.publisher
+                }
+            }
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
 

@@ -6,6 +6,8 @@ const vinylSchema = new mongoose.Schema({
   label: String,
   catalog_number: String,
   genre: { type: String, default: '' },
+  genres: { type: [String], default: [] },
+  styles: { type: [String], default: [] },
   
   media_type: {
     type: String,

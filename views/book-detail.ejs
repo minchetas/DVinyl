@@ -122,9 +122,9 @@
                             </div>
                 </div>
 
-                <div class="flex gap-6 ml-2">
+                <div class="flex flex-col gap-6 ml-2">
                     <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-1">
+                        <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-2">
                             <%= t('common.location') %>
                         </span>
                         <span class="text-sm font-medium">
@@ -132,15 +132,52 @@
                             <%= book.location || t('common.not_specified') %>
                         </span>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-1">
-                            Genre
-                        </span>
-                        <span class="text-sm font-medium">
-                            <i class="fa-solid fa-book-open mr-2 opacity-50"></i>
-                            <%= book.genre || t('common.not_specified') %>
-                        </span>
-                    </div>
+
+                    <% if ((book.genres && book.genres.length > 0) || (book.styles && book.styles.length > 0)) { %>
+                        <div class="flex flex-col gap-4">
+                            <% if (book.genres && book.genres.length > 0) { %>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-2">
+                                        <%= t('confirm_vinyl.field_genres') %>
+                                    </span>
+                                    <div class="flex flex-wrap gap-2">
+                                        <% book.genres.forEach(genre => { %>
+                                            <span
+                                                class="px-2 py-0.5 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-md text-[11px] font-medium transition-colors hover:bg-primary-theme/10 hover:border-primary-theme/30 cursor-default">
+                                                <%= genre %>
+                                            </span>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (book.styles && book.styles.length > 0) { %>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-2">
+                                        <%= t('confirm_vinyl.field_styles') %>
+                                    </span>
+                                    <div class="flex flex-wrap gap-2">
+                                        <% book.styles.forEach(style => { %>
+                                            <span
+                                                class="px-2 py-0.5 bg-primary-theme/5 border border-primary-theme/10 text-primary-theme/80 rounded-md text-[11px] font-medium transition-colors hover:bg-primary-theme/10 hover:border-primary-theme/30 cursor-default">
+                                                <%= style %>
+                                            </span>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold mb-1">
+                                Genre
+                            </span>
+                            <span class="text-sm font-medium">
+                                <i class="fa-solid fa-book-open mr-2 opacity-50"></i>
+                                <%= book.genre || t('common.not_specified') %>
+                            </span>
+                        </div>
+                    <% } %>
                 </div>
 
                 <div class="card-theme rounded-xl p-6 grid grid-cols-2 gap-y-6 gap-x-4 transition-colors shadow-sm">
@@ -214,6 +251,16 @@
                         <% if (user.isAdmin) { %>
                             <div
                                 class="pt-6 border-t border-black/10 dark:border-white/10 flex justify-end gap-4 transition-colors">
+                                <div class="flex-1 flex gap-2">
+                                    <% if (book.source === 'hardcover' && book.hardcover_slug) { %>
+                                        <button id="refreshInfoBtn"
+                                            onclick="refreshMetadata('<%= book._id %>')"
+                                            class="opacity-60 hover:opacity-100 px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2">
+                                            <i class="fa-solid fa-arrows-rotate" id="refreshInfoIcon"></i>
+                                            <%= t('collection.refresh_metadata_btn') %>
+                                        </button>
+                                    <% } %>
+                                </div>
                                 <a href="/book/edit/<%= book._id %>"
                                     class="opacity-70 hover:opacity-100 hover:text-primary-theme px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
                                     <i class="fa-solid fa-pen-to-square mr-2"></i>
@@ -257,6 +304,36 @@
                     console.error(err);
                     alert(translations.error_server);
                 }
+            }
+        }
+
+        async function refreshMetadata(bookId) {
+            const btn = document.getElementById('refreshInfoBtn');
+            const icon = document.getElementById('refreshInfoIcon');
+
+            btn.disabled = true;
+            icon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(`/api/book/${bookId}/refresh-info`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.reload();
+                } else {
+                    alert("<%= t('detail.refresh_info_error') || 'Refresh failed' %>");
+                    btn.disabled = false;
+                    icon.classList.remove('fa-spin');
+                }
+            } catch (err) {
+                console.error(err);
+                alert("<%= t('detail.refresh_info_error') || 'Refresh failed' %>");
+                btn.disabled = false;
+                icon.classList.remove('fa-spin');
             }
         }
     </script>

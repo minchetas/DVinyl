@@ -16,6 +16,9 @@ const itemSchema = new mongoose.Schema({
   comments: { type: String, default: '' },
   location: { type: String, default: '' },
   quantity: { type: Number, default: 1, min: 1 },
+  genre: String,
+  genres: [String],
+  styles: [String],
   added_at: { type: Date, default: Date.now }
 
 }, options);

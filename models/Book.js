@@ -28,7 +28,9 @@ const bookSchema = new mongoose.Schema({
       max: 5,
       default: 0
   },
-  genre: { type: String, default: '' }
+  genre: { type: String, default: '' },
+  genres: { type: [String], default: [] },
+  styles: { type: [String], default: [] }
 });
 
 const Book = Item.discriminator('Book', bookSchema);

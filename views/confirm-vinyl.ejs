@@ -244,20 +244,26 @@
                                 <% }) %>
                             </datalist>
                         </div>
+                    </div>
+
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
-                                <i class="fa-solid fa-compact-disc mr-1"></i> Genre / Style
+                                <i class="fa-solid fa-compact-disc mr-1"></i> <%= t('confirm_vinyl.field_genres') %>
                             </label>
-                            <input type="text" name="genre" list="genreList" 
-                                value="<%= typeof vinyl !== 'undefined' ? (vinyl.genre || '') : '' %>"
-                                placeholder="Style..."
+                            <input type="text" name="genres" 
+                                value="<%= typeof vinyl !== 'undefined' ? (vinyl.genres ? vinyl.genres.join(', ') : '') : '' %>"
+                                placeholder="Rock, Pop..."
                                 class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
-                            
-                            <datalist id="genreList">
-                                <% genres.forEach(gen => { %>
-                                    <option value="<%= gen %>">
-                                <% }) %>
-                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
+                                <i class="fa-solid fa-tags mr-1"></i> <%= t('confirm_vinyl.field_styles') %>
+                            </label>
+                            <input type="text" name="styles" 
+                                value="<%= typeof vinyl !== 'undefined' ? (vinyl.styles ? vinyl.styles.join(', ') : '') : '' %>"
+                                placeholder="Prog Rock, Synth-pop..."
+                                class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
                         </div>
                     </div>
 

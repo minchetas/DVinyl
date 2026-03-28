@@ -212,14 +212,21 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
-                                <i class="fa-solid fa-film mr-1"></i> Genre / Style
+                                <i class="fa-solid fa-film mr-1"></i> <%= t('confirm_vinyl.field_genres') %>
                             </label>
-                            <input type="text" name="genre" list="genreList" placeholder="Style..." value="<%= typeof dvd !== 'undefined' ? (dvd.genre || '') : '' %>" class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
-                            <datalist id="genreList">
-                                <% genres.forEach(gen => { %>
-                                    <option value="<%= gen %>">
-                                <% }) %>
-                            </datalist>
+                            <input type="text" name="genres" 
+                                placeholder="Action, Sci-Fi..."
+                                value="<%= typeof dvd !== 'undefined' ? (dvd.genres ? dvd.genres.join(', ') : '') : '' %>"
+                                class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
+                                <i class="fa-solid fa-tags mr-1"></i> <%= t('confirm_vinyl.field_styles') %>
+                            </label>
+                            <input type="text" name="styles" 
+                                placeholder="Cyberpunk, Noir..."
+                                value="<%= typeof dvd !== 'undefined' ? (dvd.styles ? dvd.styles.join(', ') : '') : '' %>"
+                                class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all">
                         </div>
                     </div>
 

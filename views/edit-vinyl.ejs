@@ -162,14 +162,19 @@
                                 <% locations.forEach(loc => { %> <option value="<%= loc %>"> <% }) %>
                             </datalist>
                         </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
-                                <i class="fa-solid fa-compact-disc mr-1"></i> Genre / Style
+                                <i class="fa-solid fa-compact-disc mr-1"></i> <%= t('confirm_vinyl.field_genres') %>
                             </label>
-                            <input type="text" name="genre" list="genreList" value="<%= vinyl.genre || '' %>" placeholder="Style..." class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none">
-                            <datalist id="genreList">
-                                <% genres.forEach(gen => { %> <option value="<%= gen %>"> <% }) %>
-                            </datalist>
+                            <input type="text" name="genres" value="<%= vinyl.genres ? vinyl.genres.join(', ') : '' %>" placeholder="Rock, Pop..." class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
+                                <i class="fa-solid fa-tags mr-1"></i> <%= t('confirm_vinyl.field_styles') %>
+                            </label>
+                            <input type="text" name="styles" value="<%= vinyl.styles ? vinyl.styles.join(', ') : '' %>" placeholder="Prog Rock..." class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none">
                         </div>
                     </div>
                     <div class="mt-6">
