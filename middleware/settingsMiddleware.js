@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
 
         const path = req.path.toLowerCase();
         const queryType = req.query.type; // ex: ?type=books
-        
+
         let detectedType = 'home';
 
         if (path.includes('vinyl') || path.includes('search-discogs') || path.includes('cd') || path.includes('cassette') || path.includes('cd') || path.includes('album') || path.includes('music')) {
@@ -51,13 +51,17 @@ module.exports = async (req, res, next) => {
 
         res.locals.detectedType = detectedType;
         const activeType = queryType || detectedType;
-        
+
         res.locals.currentType = activeType;
-        
-        if (activeType === 'books' && !settings.modules.books && path !== '/') {
+
+        const isAllowedAction = req.method === 'DELETE' || path.startsWith('/api/') ||
+            path.includes('/book/') || path.includes('/dvd/') || path.includes('/album/') ||
+            path.includes('/save-');
+
+        if (activeType === 'books' && !settings.modules.books && path !== '/' && !isAllowedAction) {
             return res.status(404).render('404');
         }
-        if (activeType === 'dvd' && !settings.modules.dvd && path !== '/') {
+        if (activeType === 'dvd' && !settings.modules.dvd && path !== '/' && !isAllowedAction) {
             return res.status(404).render('404');
         }
 
