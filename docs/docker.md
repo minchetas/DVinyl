@@ -76,6 +76,13 @@ x-portals:
     scheme: http
 ```
 
+> Note: If you're using a **Raspberry Pi** and MongoDB keeps restarting, try a different version of MongoDB, such as:
+> ```yaml
+> mongodb:
+>   image: mongo:4.4.18
+> ```
+> Thank you @oliverjunker for this!
+
 ### 2. Prepare Environment
 
 If you don't use `environment` in your conf file, ensure you have a `.env` file in the root directory.  
