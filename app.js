@@ -178,11 +178,14 @@ app.use((req, res, next) => {
 
 // Dynamic manifest.json endpoint - injects BASE_URL
 app.get(BASE_URL + '/manifest.json', (req, res) => {
+    res.set('Content-Type', 'application/json');
     res.render(path.join(__dirname, 'public-tpl', 'manifest.json.ejs'));
 });
 
 // Dynamic service worker endpoint - injects BASE_URL
 app.get(BASE_URL + '/sw.js', (req, res) => {
+    res.set('Content-Type', 'application/javascript');
+    res.set('Service-Worker-Allowed', BASE_URL || '/');
     res.render(path.join(__dirname, 'public-tpl', 'sw.js.ejs'));
 });
 
