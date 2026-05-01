@@ -22,7 +22,7 @@
 
                     <div class="flex flex-col items-center text-center relative z-10">
                         <div class="relative group cursor-pointer" onclick="openModal('avatar-modal')">
-                            <img src="<%= user.img %>" id="current-avatar"
+                            <img src="<%= baseUrl + user.img %>" id="current-avatar"
                                 class="w-32 h-32 rounded-full object-cover border-4 border-black/10 dark:border-white/10 group-hover:border-primary-theme transition-colors shadow-xl">
                             <div
                                 class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -91,7 +91,7 @@
                         <span class="opacity-60 text-sm">
                             <%= t('settings.language_label') %>
                         </span>
-                        <form action="/settings/update-language" method="POST" class="flex items-center">
+                        <form action="<%= baseUrl %>/settings/update-language" method="POST" class="flex items-center">
                             <select name="language" onchange="this.form.submit()"
                                 class="bg-black/5 dark:bg-white/5 border border-transparent text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary-theme focus:border-primary-theme block w-full p-3 transition-colors outline-none cursor-pointer">
                                 <option value="fr" class="bg-white dark:bg-[#1a1a1a]" <%=currentLng==='fr' ? 'selected'
@@ -131,7 +131,7 @@
                             <%= t('settings.currency_label') %>
                         </span>
 
-                        <form action="/settings/update-currency" method="POST" class="flex items-center">
+                        <form action="<%= baseUrl %>/settings/update-currency" method="POST" class="flex items-center">
                             <select name="currency" onchange="this.form.submit()"
                                 class="bg-black/5 dark:bg-white/5 border border-transparent text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary-theme focus:border-primary-theme block w-full p-3 transition-colors outline-none cursor-pointer">
                                 <option value="EUR" class="bg-white dark:bg-[#1a1a1a]" <%=user.currency==='EUR'
@@ -194,7 +194,7 @@
                 <%= t('settings.modal_username_title') %>
             </h3>
 
-            <form action="/settings/update-username" method="POST">
+            <form action="<%= baseUrl %>/settings/update-username" method="POST">
                 <div class="mb-4">
                     <label class="block text-sm opacity-60 mb-2 transition-colors">
                         <%= t('settings.new_username_label') %>
@@ -224,7 +224,7 @@
 
             <form id="avatar-form">
                 <div class="flex justify-center mb-6">
-                    <img src="<%= user.img %>" id="avatar-preview"
+                    <img src="<%= baseUrl + user.img %>" id="avatar-preview"
                         class="w-32 h-32 rounded-full object-cover border-4 border-black/10 dark:border-white/10">
                 </div>
 
@@ -327,7 +327,7 @@
                 }
 
                 try {
-                    const res = await fetch('/settings/check-username', {
+                    const res = await fetch('<%= baseUrl %>/settings/check-username', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: val })
@@ -367,7 +367,7 @@
                 const formData = new FormData(this);
 
                 try {
-                    const res = await fetch('/settings/upload-avatar', {
+                    const res = await fetch('<%= baseUrl %>/settings/upload-avatar', {
                         method: 'POST',
                         body: formData
                     });
@@ -414,7 +414,7 @@
                 if (newP !== confP) return alert(translations.passwordMismatch);
 
                 try {
-                    const res = await fetch('/settings/update-password', {
+                    const res = await fetch('<%= baseUrl %>/settings/update-password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ currentPassword: current, newPassword: newP })
@@ -423,7 +423,7 @@
 
                     if (data.success) {
                         alert(translations.passwordSuccess);
-                        window.location.href = '/logout';
+                        window.location.href = '<%= baseUrl %>/logout';
                     } else {
                         alert(translations.passwordError + ': ' + data.message);
                     }

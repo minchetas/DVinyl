@@ -2,7 +2,7 @@
 
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0">
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
-        <a href="/album/<%= vinyl._id %>" class="hover:opacity-100 transition-opacity flex items-center py-2">
+        <a href="<%= baseUrl %>/album/<%= vinyl._id %>" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.cancel_back') %>
         </a>
     </nav>
@@ -24,7 +24,7 @@
                     <i class="fa-solid fa-pen-to-square text-primary-theme"></i> <%= t('edit_vinyl.title') %>
                 </h1>
 
-                <form action="/save-vinyl" method="POST" class="space-y-6">
+                <form action="<%= baseUrl %>/save-vinyl" method="POST" class="space-y-6">
                     <div class="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/30 p-4 rounded-lg transition-colors">
                         <label class="block mb-2 text-sm font-bold text-yellow-700 dark:text-yellow-500"><%= t('edit_vinyl.discogs_id_label') %></label>
                         <div class="text-xs text-yellow-800/80 dark:text-yellow-200/60 mb-2"><%= t('edit_vinyl.discogs_id_hint') %></div>
@@ -282,7 +282,9 @@
         resultsDiv.innerHTML = translations.loadingHtml;
 
         try {
-            const endpoint = (type === 'disc') ? `/admin/api/search-discogs-gallery?q=${encodeURIComponent(query)}` : `/admin/api/search-image-universal?q=${encodeURIComponent(query)}&type=music`;
+            const endpoint = (type === 'disc')
+                ? `<%= baseUrl %>/admin/api/search-discogs-gallery?q=${encodeURIComponent(query)}`
+                : `<%= baseUrl %>/admin/api/search-image-universal?q=${encodeURIComponent(query)}&type=music`;
             const res = await fetch(endpoint);
             const urls = await res.json();
 

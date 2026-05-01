@@ -13,18 +13,13 @@ async function getAdminId() {
 
 const formatTMDBItem = (item) => {
     const isTv = item.media_type === 'tv';
-    let cover = '/ressources/no_file.png';
-
-    if (item.poster_path) {
-        cover = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-    }
 
     return {
         tmdb_id: item.id,
         media_type: item.media_type || 'movie',
         title: isTv ? item.name : item.title,
         year: isTv ? (item.first_air_date ? item.first_air_date.substring(0, 4) : '') : (item.release_date ? item.release_date.substring(0, 4) : ''),
-        cover_image: cover,
+        cover_image: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
         description: item.overview || ''
     };
 };
@@ -113,7 +108,7 @@ router.get('/confirm-dvd/:media_type/:tmdb_id', requireAuth, requireAdmin, async
             studio: studio,
             year: mediaType === 'tv' ? (data.first_air_date || '').substring(0, 4) : (data.release_date || '').substring(0, 4),
             duration: mediaType === 'tv' ? `${data.number_of_seasons} Saison(s)` : `${data.runtime || '?'} min`,
-            cover_image: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '/ressources/no-pp.jpg',
+            cover_image: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
             description: data.overview || '',
             genres: data.genres ? data.genres.map(g => g.name) : []
         };

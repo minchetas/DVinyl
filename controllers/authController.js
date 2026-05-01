@@ -7,7 +7,6 @@
  */
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const LoginLog = require("../models/LoginLog");
 const geoip = require('geoip-lite');
 const requestIp = require('request-ip');

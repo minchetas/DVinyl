@@ -1,5 +1,6 @@
 const Settings = require('../models/Settings');
 const themesConfig = require('../config/themes');
+const { BASE_URL } = require('../config/constants');
 
 module.exports = async (req, res, next) => {
     try {
@@ -54,7 +55,7 @@ module.exports = async (req, res, next) => {
 
         res.locals.currentType = activeType;
 
-        const isAllowedAction = req.method === 'DELETE' || path.startsWith('/api/') ||
+        const isAllowedAction = req.method === 'DELETE' || path.startsWith(BASE_URL + '/api/') ||
             path.includes('/book/') || path.includes('/dvd/') || path.includes('/album/') ||
             path.includes('/save-');
 

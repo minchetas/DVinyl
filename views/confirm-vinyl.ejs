@@ -2,7 +2,7 @@
 
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0">
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
-        <a href="/add-vinyl" class="hover:opacity-100 transition-opacity flex items-center py-2">
+        <a href="<%= baseUrl %>/add-vinyl" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.back_to_search') %>
         </a>
     </nav>
@@ -64,7 +64,7 @@
                     <i class="fa-solid fa-pen-to-square text-primary-theme"></i> <%= t('confirm_vinyl.config_title') %>
                 </h1>
 
-                <form action="/save-vinyl" method="POST" class="space-y-6">
+                <form action="<%= baseUrl %>/save-vinyl" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_title') %></label>
@@ -359,7 +359,9 @@
 
         try {
             let urls = [];
-            const endpoint = (type === 'disc') ? `/admin/api/search-discogs-gallery?q=${encodeURIComponent(q)}` : `/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=music`;
+            const endpoint = (type === 'disc')
+                ? `<%= baseUrl %>/admin/api/search-discogs-gallery?q=${encodeURIComponent(q)}`
+                : `<%= baseUrl %>/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=music`;
 
             const res = await fetch(endpoint);
             urls = await res.json();

@@ -3,7 +3,7 @@
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0">
     
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
-        <a href="/add-book" class="hover:opacity-100 transition-opacity flex items-center py-2">
+        <a href="<%= baseUrl %>/add-book" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.back_to_search') %>
         </a>
     </nav>
@@ -59,7 +59,7 @@
                     <i class="fa-solid fa-pen-to-square text-primary-theme"></i> <%= t('confirm_book.config_title') %>
                 </h1>
 
-                <form action="/save-book" method="POST" class="space-y-6">
+                <form action="<%= baseUrl %>/save-book" method="POST" class="space-y-6">
                     <input type="hidden" name="hardcover_id" value="<%= book.hardcover_id %>">
                     <input type="hidden" name="hardcover_slug" value="<%= book.hardcover_slug %>">
 
@@ -322,7 +322,7 @@
 
         try {
             const type = window.location.pathname.includes('book') ? 'book' : 'music';
-            const res = await fetch(`/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=${type}`);
+            const res = await fetch(`<%= baseUrl %>/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=${type}`);
             const urls = await res.json();
             
             resultsDiv.innerHTML = '';

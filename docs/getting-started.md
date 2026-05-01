@@ -38,7 +38,7 @@ cp .env.example .env
 ### 4. Launch the Application
 
 ```bash
-npm start app.js
+npm start
 ```
 
 You can also run the app with **pm2**:

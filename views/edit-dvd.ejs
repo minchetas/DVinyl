@@ -3,7 +3,7 @@
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0 pt-6">
     
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
-        <a href="/dvd/<%= dvd._id %>" class="hover:opacity-100 transition-opacity flex items-center py-2">
+        <a href="<%= baseUrl %>/dvd/<%= dvd._id %>" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.cancel') %>
         </a>
     </nav>
@@ -34,7 +34,7 @@
                     <i class="fa-solid fa-pen-to-square text-primary-theme"></i> <%= t('edit_dvd.title') %>
                 </h1>
 
-                <form action="/save-dvd" method="POST" class="space-y-6">
+                <form action="<%= baseUrl %>/save-dvd" method="POST" class="space-y-6">
                     <input type="hidden" name="mongo_id" value="<%= dvd._id %>">
                     <input type="hidden" name="tmdb_id" value="<%= dvd.tmdb_id || '' %>">
                     <input type="hidden" name="media_type" value="<%= dvd.media_type || 'movie' %>">
@@ -268,7 +268,7 @@
         const resultsDiv = document.getElementById('resultsCover');
         resultsDiv.innerHTML = '<div class="col-span-full py-4 text-center opacity-50"><i class="fa-solid fa-spinner fa-spin"></i></div>';
         try {
-            const res = await fetch(`/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=movie`);
+            const res = await fetch(`<%= baseUrl %>/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=movie`);
             const urls = await res.json();
             
             resultsDiv.innerHTML = '';

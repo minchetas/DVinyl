@@ -15,7 +15,7 @@
                 <%= t('index.hero_subtitle') %>
             </p>
 
-            <form action="/collection" method="GET" class="w-full max-w-xl mx-auto mt-8">
+            <form action="<%= baseUrl %>/collection" method="GET" class="w-full max-w-xl mx-auto mt-8">
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
                         <i class="fa-solid fa-search opacity-50 group-focus-within:text-primary-theme transition-colors"></i>
@@ -38,7 +38,7 @@
                         const fastAddUrl = settings.fastAdd ? fastAddRoutes[settings.fastAdd] : null;
                     %>
                     <% if (fastAddUrl) { %>
-                        <a href="<%= fastAddUrl %>" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
+                        <a href="<%= baseUrl + fastAddUrl %>" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
                             <i class="fa-solid fa-bolt"></i>
                             <span class="hidden sm:inline"><%= t('index.nav_add_full') %></span>
                         </a>
@@ -50,7 +50,7 @@
                     <% } %>
                     <span class="opacity-30">|</span>
                 <% } %>
-                <a href="/collection" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
+                <a href="<%= baseUrl %>/collection" class="inline-flex items-center gap-2 hover:text-primary-theme transition-colors">
                     <i class="fa-solid fa-list"></i> <%= t('index.nav_view_all') %>
                 </a>
             </div>
@@ -63,7 +63,7 @@
                 <span class="w-2 h-6 md:h-8 bg-primary-theme rounded-full inline-block"></span>
                 <h2 class="text-xl md:text-2xl font-bold"><%= t('index.section_latest') %></h2>
             </div>
-            <a href="/collection" class="text-sm font-bold text-primary-theme opacity-90 hover:opacity-100 transition-colors flex items-center gap-1 group whitespace-nowrap">
+            <a href="<%= baseUrl %>/collection" class="text-sm font-bold text-primary-theme opacity-90 hover:opacity-100 transition-colors flex items-center gap-1 group whitespace-nowrap">
                 <%= t('index.view_everything') %> <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </a>
         </div>
@@ -99,7 +99,7 @@
                         };
                         let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
                     %>
-                    <a href="<%= detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all hover:shadow-lg hover:-translate-y-1">
+                    <a href="<%= baseUrl + detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all hover:shadow-lg hover:-translate-y-1">
                         
                         <div class="<%= aspectClass %> relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             
@@ -135,7 +135,7 @@
                 <span class="w-2 h-6 md:h-8 bg-pink-500 rounded-full inline-block"></span>
                 <h2 class="text-xl md:text-2xl font-bold"><%= t('index.section_wishlist') %></h2>
             </div>
-            <a href="/wishlist" class="text-sm font-bold text-pink-500 hover:text-pink-400 transition-colors flex items-center gap-1 group whitespace-nowrap">
+            <a href="<%= baseUrl %>/wishlist" class="text-sm font-bold text-pink-500 hover:text-pink-400 transition-colors flex items-center gap-1 group whitespace-nowrap">
                 <%= t('index.view_everything') %> <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </a>
         </div>
@@ -160,7 +160,7 @@
                         };
                         let badgeColor = (badgeColors[formatKey] || 'bg-gray-600/90') + ' text-white';
                     %>
-                    <a href="<%= detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-pink-500 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <a href="<%= baseUrl + detailUrl %>" class="group relative card-theme rounded-xl overflow-hidden hover:border-pink-500 transition-all hover:shadow-lg hover:-translate-y-1">
                         
                         <div class="aspect-square relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             
@@ -293,7 +293,7 @@
         <div class="grid grid-cols-1 <%= gridCols %> gap-4">
             
             <% if (settings.modules.music) { %>
-                <a href="/add-vinyl" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white transition-all duration-300">
+                <a href="<%= baseUrl %>/add-vinyl" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white transition-all duration-300">
                     <div class="w-16 h-16 rounded-full bg-primary-theme/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
                         <i class="fa-solid fa-compact-disc text-3xl"></i>
                     </div>
@@ -302,7 +302,7 @@
             <% } %>
 
             <% if (settings.modules.books) { %>
-                <a href="/add-book" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-amber-500 hover:text-white transition-all duration-300">
+                <a href="<%= baseUrl %>/add-book" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-amber-500 hover:text-white transition-all duration-300">
                     <div class="w-16 h-16 rounded-full bg-amber-500/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
                         <i class="fa-solid fa-book text-3xl"></i>
                     </div>
@@ -311,7 +311,7 @@
             <% } %>
 
             <% if (settings.modules.dvd) { %>
-                <a href="/add-dvd" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-red-500 hover:text-white transition-all duration-300">
+                <a href="<%= baseUrl %>/add-dvd" class="group flex flex-col items-center justify-center p-8 rounded-[2rem] bg-black/5 dark:bg-white/5 hover:bg-red-500 hover:text-white transition-all duration-300">
                     <div class="w-16 h-16 rounded-full bg-red-500/10 group-hover:bg-white/20 flex items-center justify-center mb-4">
                         <i class="fa-solid fa-film text-3xl"></i>
                     </div>

@@ -45,7 +45,7 @@
         
         <div class="text-center mb-8 relative">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-500/20 rounded-full blur-2xl -z-10"></div>
-            <img src="/ressources/logo.png" alt="Logo" class="mx-auto h-24 w-24 drop-shadow-2xl hover:scale-105 transition-transform duration-500">
+            <img src="<%= baseUrl %>/ressources/logo.png" alt="Logo" class="mx-auto h-24 w-24 drop-shadow-2xl hover:scale-105 transition-transform duration-500">
             <h2 class="text-4xl font-black text-white mt-6 tracking-tight">
                 <%= t('setup.welcome_to') %> <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">DVinyl</span>
             </h2>
@@ -76,7 +76,7 @@
                 <span id="js-error-text"></span>
             </div>
 
-            <form action="/setup" method="POST" class="space-y-5 relative z-10" id="setupForm">
+            <form action="<%= baseUrl %>/setup" method="POST" class="space-y-5 relative z-10" id="setupForm">
                 
                 <div class="group/field">
                     <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2 ml-1"><%= t('setup.username_label') %></label>
@@ -171,7 +171,7 @@
             <div class="max-w-screen-xl mx-auto px-4">
                 <div class="flex flex-col items-center justify-center space-y-4">
                     <div class="flex items-center gap-2 text-white font-bold text-lg tracking-tight">
-                        <img src="/ressources/logo.png" alt="vinyl" class="w-4 h-4 brightness-90">
+                        <img src="<%= baseUrl %>/ressources/logo.png" alt="vinyl" class="w-4 h-4 brightness-90">
                         <span>Vinyl</span>
                     </div>
                     <div class="text-center">
@@ -244,14 +244,14 @@
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Restauration...';
 
-                    const response = await fetch('/backup/import', {
+                    const response = await fetch('<%= baseUrl %>/backup/import', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(backupData)
                     });
 
                     if (response.ok) {
-                        window.location.href = '/login';
+                        window.location.href = '<%= baseUrl %>/login';
                     } else {
                         throw new Error('Import failed');
                     }

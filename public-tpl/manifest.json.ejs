@@ -1,19 +1,19 @@
 {
   "name": "DVinyl",
   "short_name": "DVinyl",
-  "start_url": "/",
+  "start_url": "<%= baseUrl || '/' %>",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "icons": [
     {
-      "src": "ressources/icone-512.png",
+      "src": "<%= baseUrl %>/ressources/icone-512.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "ressources/icone-512.png",
+      "src": "<%= baseUrl %>/ressources/icone-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

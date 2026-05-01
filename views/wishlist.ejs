@@ -35,7 +35,7 @@
                 <p class="opacity-60 px-4">
                     <%= t('wishlist.empty_msg') %>
                 </p>
-                <a href="/add-vinyl"
+                <a href="<%= baseUrl %>/add-vinyl"
                     class="text-primary-theme hover:underline mt-2 inline-block font-medium transition-colors">
                     <%= t('wishlist.search_link') %>
                 </a>
@@ -57,7 +57,7 @@
 
                             <div
                                 class="group relative card-theme rounded-xl hover:border-primary-theme transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col justify-between overflow-hidden">
-                                <a href="<%= detailUrl %>" class="block flex-grow">
+                                <a href="<%= baseUrl + detailUrl %>" class="block flex-grow">
                                     <div
                                         class="aspect-square w-full relative overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center">
 
@@ -113,7 +113,7 @@
                 <% } %>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="<%= baseUrl %>/socket.io/socket.io.js"></script>
     <script>
         const wishlistTranslations = {
             confirmMove: "<%= t('wishlist.confirm_move') %>",
@@ -123,7 +123,7 @@
         async function moveToCollection(id) {
             if (confirm(wishlistTranslations.confirmMove)) {
                 try {
-                    const res = await fetch(`/api/album/${id}/move-to-collection`, { method: 'POST' });
+                    const res = await fetch(`<%= baseUrl %>/api/album/${id}/move-to-collection`, { method: 'POST' });
                     const data = await res.json();
                     if (data.success) {
                         window.location.reload();
@@ -135,53 +135,55 @@
         }
 
     <% if (user.isAdmin) { %>
-        const socket = io();
+        const socket = io({
+            path: '<%= baseUrl %>/socket.io',
+        });
 
-            async function refreshCollection() {
-                const btn = document.getElementById('refreshBtn');
-                const icon = btn.querySelector('i');
+        async function refreshCollection() {
+            const btn = document.getElementById('refreshBtn');
+            const icon = btn.querySelector('i');
 
-                icon.classList.add('fa-spin');
-                btn.disabled = true;
+            icon.classList.add('fa-spin');
+            btn.disabled = true;
 
-                socket.once('import_finished', (data) => {
-                    window.location.reload();
+            socket.once('import_finished', (data) => {
+                window.location.reload();
+            });
+
+            socket.once('import_error', (data) => {
+                alert("import error: " + data.message);
+                icon.classList.remove('fa-spin');
+                btn.disabled = false;
+            });
+            try {
+                const pseudo = "<%= user.discogsUsername %>";
+                let fakeUrl = `https://www.discogs.com/user/${pseudo}`;
+
+                const isWishlistPage = window.location.pathname.includes('wishlist');
+                const type = isWishlistPage ? 'wishlist' : 'collection';
+
+                const res = await fetch('<%= baseUrl %>/import/discogs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        discogsUrl: fakeUrl,
+                        full: false,
+                        type: type
+                    })
                 });
 
-                socket.once('import_error', (data) => {
-                    alert("import error: " + data.message);
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
-                });
-                try {
-                    const pseudo = "<%= user.discogsUsername %>";
-                    let fakeUrl = `https://www.discogs.com/user/${pseudo}`;
-
-                    const isWishlistPage = window.location.pathname.includes('wishlist');
-                    const type = isWishlistPage ? 'wishlist' : 'collection';
-
-                    const res = await fetch('/import/discogs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            discogsUrl: fakeUrl,
-                            full: false,
-                            type: type
-                        })
-                    });
-
-                    if (!res.ok) {
-                        socket.off('import_finished');
-                        socket.off('import_error');
-                        icon.classList.remove('fa-spin');
-                        btn.disabled = false;
-                    }
-                } catch (e) {
-                    console.error(e);
+                if (!res.ok) {
+                    socket.off('import_finished');
+                    socket.off('import_error');
                     icon.classList.remove('fa-spin');
                     btn.disabled = false;
                 }
+            } catch (e) {
+                console.error(e);
+                icon.classList.remove('fa-spin');
+                btn.disabled = false;
             }
+        }
     <% } %>
     </script>
 

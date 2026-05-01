@@ -2,8 +2,9 @@
   "name": "dvinyl",
   "version": "2.4.3",
   "description": "",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:css": "npx tailwindcss -i ./website/src/input.css -o ./website/public/styles/tailwind.css --watch"
   },

@@ -1,11 +1,11 @@
 const CACHE_NAME = 'dvinyl-v2.3';
 
 const STATIC_ASSETS = [
-  '/',
-  '/styles/tailwind.css',
-  '/manifest.json',
-  '/ressources/icone-192.png',
-  '/ressources/icone-512.png'
+  '<%= baseUrl %>/',
+  '<%= baseUrl %>/styles/tailwind.css',
+  '<%= baseUrl %>/manifest.json',
+  '<%= baseUrl %>/ressources/icone-192.png',
+  '<%= baseUrl %>/ressources/icone-512.png'
 ];
 
 
@@ -44,26 +44,26 @@ self.addEventListener('fetch', event => {
 
   const dynamicRoutes = [
     // Auth
-    '/login', '/logout', '/setup',
+    '<%= baseUrl %>/login', '<%= baseUrl %>/logout', '<%= baseUrl %>/setup',
     // Collections
-    '/collection', '/wishlist',
-    '/album/', '/book/', '/dvd/',
+    '<%= baseUrl %>/collection', '<%= baseUrl %>/wishlist',
+    '<%= baseUrl %>/album/', '<%= baseUrl %>/book/', '<%= baseUrl %>/dvd/',
     // Add / confirmation
-    '/add-vinyl', '/add-book', '/add-dvd',
-    '/confirm-vinyl/', '/confirm-dvd/', '/confirm-book/',
-    '/save-vinyl', '/save-book', '/save-dvd',
+    '<%= baseUrl %>/add-vinyl', '<%= baseUrl %>/add-book', '<%= baseUrl %>/add-dvd',
+    '<%= baseUrl %>/confirm-vinyl/', '<%= baseUrl %>/confirm-dvd/', '<%= baseUrl %>/confirm-book/',
+    '<%= baseUrl %>/save-vinyl', '<%= baseUrl %>/save-book', '<%= baseUrl %>/save-dvd',
     // Edition
-    '/album/edit/', '/book/edit/', '/dvd/edit/',
+    '<%= baseUrl %>/album/edit/', '<%= baseUrl %>/book/edit/', '<%= baseUrl %>/dvd/edit/',
     // search
-    '/search-discogs', '/search-books', '/search-dvds',
+    '<%= baseUrl %>/search-discogs', '<%= baseUrl %>/search-books', '<%= baseUrl %>/search-dvds',
     // internals API
-    '/api/',
+    '<%= baseUrl %>/api/',
     // Import
-    '/import/',
+    '<%= baseUrl %>/import/',
     // Admin
-    '/admin', '/settings',
+    '<%= baseUrl %>/admin', '<%= baseUrl %>/settings',
     // Backup
-    '/export', '/import'
+    '<%= baseUrl %>/export', '<%= baseUrl %>/import'
   ];
 
   const isDynamic = dynamicRoutes.some(route => url.pathname.startsWith(route));
