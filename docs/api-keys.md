@@ -1,6 +1,6 @@
 # 🔑 API Configuration
 
-DVinyl relies on external APIs to fetch album data and visuals. Follow these steps to get your Discogs & Hardcover & TMDB API keys.
+DVinyl relies on external APIs to fetch metadata and visuals. Follow these steps to get your API keys.
 > You can have every key for **free**. 
 
 ## 🎵 Discogs API (Required)
@@ -24,6 +24,17 @@ DVinyl relies on external APIs to fetch album data and visuals. Follow these ste
 1. Go to [The Movie DataBase website](https://www.themoviedb.org/) and **create an account**.
 2. Then, you can find your API key (not 'token') in [this page](https://www.themoviedb.org/settings/api)
 3. Paste it into `.env` as `TMDB_API_KEY`
+
+## 🎮 IGDB API *(Optional if you don't want to add Games to your collection)*
+
+*Used for fetching video game metadata and covers.*
+
+1. Go to the [Twitch Developer Console](https://dev.twitch.tv/console/apps) and log in (requires 2FA).
+2. Click **Register Your Application**.
+3. Name it "DVinyl", set OAuth Redirect URL to `https://localhost`, and Category to `Application Integration`.
+4. Once created, copy the **Client ID**.
+5. Click **New Secret** to generate a **Client Secret**.
+6. Paste them into `.env` as `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`.
 
 ---
 

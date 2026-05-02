@@ -2,7 +2,7 @@
 
 --- 
 
-**DVinyl** is a modern, self-hostable collection manager designed for physical media enthusiasts. From Vinyls and CDs to Books and Movies, catalog, value, and organize your entire physical library through a single, customizable interface.
+**DVinyl** is a modern, self-hostable collection manager designed for physical media enthusiasts. From Vinyls and CDs to Books, Movies and Games, catalog, value, and organize your entire physical library through a single, customizable interface.
 
 Built in JavaScript.
 
@@ -14,13 +14,13 @@ Built in JavaScript.
 
 ## Overview
 
-DVinyl allows you to keep track of your physical music, books or even DVD collection. It uses the Discogs API, Hardcover API & TMDB API to retrieve important metadata and, for music, market valuations for your collection. This provides you with a convenient and full customizable dashboard for your home server.
+DVinyl allows you to keep track of your physical music, books or even DVD collection. It uses the Discogs API, Hardcover API, IGDB API & TMDB API to retrieve important metadata and, for music, market valuations for your collection. This provides you with a convenient and full customizable dashboard for your home server.
 
 ## ✨ Key Features
 
 ### 📚 Universal Collection Management
 
-   * **Multi-Format Support:** Manage your Music (Vinyls, CDs, Cassettes), Books (Manga, Comics, Hardcover), and Movies (Blu-ray, 4K, VHS, LaserDisc) in one unified library.
+   * **Multi-Format Support:** Manage your Music (Vinyls, CDs, Cassettes), Books (Manga, Comics, Hardcover), and Movies (Blu-ray, 4K, VHS, LaserDisc) and video games in one unified library.
    * **Smart Import:** Add items instantly using Discogs Release IDs or import your entire existing Discogs collection in one click.
    * **Physical Scanner:*** Scan your physical media to bridge the gap between your shelf and your digital database.
    * **Advanced Organization:** Easily track the physical location of every item in your home.
@@ -67,14 +67,14 @@ Access the application at `http://localhost:3099`.
 
 # Tech stack
 
-| **Component**    | **Technology**                 |
-| :--------------- | :----------------------------- |
-| **Backend**      | Node.js / Express              |
-| **Database**     | MongoDB                        |
-| **Frontend**     | EJS Templates                  |
-| **Styling**      | Tailwind CSS                   |
-| **Localization** | i18next                        |
-| **API**          | Discogs / Hardcover / TMDB     |
+| **Component**    | **Technology**                    |
+| :--------------- | :-------------------------------- |
+| **Backend**      | Node.js / Express                 |
+| **Database**     | MongoDB                           |
+| **Frontend**     | EJS Templates                     |
+| **Styling**      | Tailwind CSS                      |
+| **Localization** | i18next                           |
+| **API**          | Discogs / Hardcover / TMDB / IGDB |
 
 # Screenshots <small>with Ocean theme</small>
 
