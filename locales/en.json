@@ -620,7 +620,8 @@
     "scan_init": "Initializing...",
     "scan_stop": "Stop scanning",
     "scan_found": "Barcode found!",
-    "scan_error": "Camera error"
+    "scan_error": "Camera error",
+    "barcode_warning": "Scanning may not work correctly at the moment."
   },
   "confirm_game": {
     "config_title": "Verify and complete",

@@ -620,7 +620,8 @@
     "scan_init": "Inizializzazione...",
     "scan_stop": "Interrompi scansione",
     "scan_found": "Codice trovato!",
-    "scan_error": "Errore fotocamera"
+    "scan_error": "Errore fotocamera",
+    "barcode_warning": "La scansione potrebbe non funzionare correttamente al momento."
   },
   "confirm_game": {
     "config_title": "Verifica e completa",
