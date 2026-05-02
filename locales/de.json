@@ -197,7 +197,13 @@
     "refresh": "Aktualisieren",
     "refresh_metadata_btn": "Informationen aktualisieren",
     "refresh_tooltip": "Von Discogs aktualisieren",
-    "title": "Meine Sammlung"
+    "title": "Meine Sammlung",
+    "artist_filter": "Künstler",
+    "sort_added": "Datum hinzugefügt",
+    "sort_artist": "Künstler",
+    "sort_label": "Sortieren nach",
+    "sort_title": "Titel",
+    "sort_year": "Jahr"
   },
   "common": {
     "all": "Alle",
@@ -225,7 +231,8 @@
     "show": "Zeigen",
     "unknown": "Unbekannt",
     "update": "Aktualisieren",
-    "validate": "Bestätigen"
+    "validate": "Bestätigen",
+    "filters": "Filter"
   },
   "confirm_book": {
     "btn_collection": "Zur Bibliothek hinzufügen",

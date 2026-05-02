@@ -197,7 +197,13 @@
     "refresh": "Refrescar",
     "refresh_metadata_btn": "Actualizar información",
     "refresh_tooltip": "Actualizar desde Discogs",
-    "title": "Mi colección"
+    "title": "Mi colección",
+    "artist_filter": "Artista",
+    "sort_added": "Fecha agregada",
+    "sort_artist": "Artista",
+    "sort_label": "Ordenar por",
+    "sort_title": "Título",
+    "sort_year": "Año"
   },
   "common": {
     "all": "Todo",
@@ -225,7 +231,8 @@
     "show": "Espectáculo",
     "unknown": "Desconocido",
     "update": "Actualizar",
-    "validate": "Validar"
+    "validate": "Validar",
+    "filters": "Filtros"
   },
   "confirm_book": {
     "btn_collection": "Agregar a la biblioteca",

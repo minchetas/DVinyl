@@ -25,7 +25,8 @@
     "cancel": "Annuler",
     "confirm_delete": "Êtes-vous sûr ?",
     "show": "Afficher",
-    "apply": "Appliquer"
+    "apply": "Appliquer",
+    "filters": "Filtres"
   },
   "settings": {
     "page_title": "Paramètres du compte",
@@ -289,8 +290,8 @@
       "refresh_books_subtitle": "Relancer la récupération des données (Hardcover/OpenLibrary) pour les livres.",
       "refresh_dvds_title": "Actualiser toutes les métadonnées (DVDs)",
       "refresh_dvds_subtitle": "Relancer la récupération des données (TMDB) pour les DVDs et Blu-Rays.",
-    "refresh_games_title": "Actualiser toutes les métadonnées (Jeux Vidéo)",
-    "refresh_games_subtitle": "Relancer la récupération des données (IGDB) pour les jeux vidéo."
+      "refresh_games_title": "Actualiser toutes les métadonnées (Jeux Vidéo)",
+      "refresh_games_subtitle": "Relancer la récupération des données (IGDB) pour les jeux vidéo."
     },
     "errors": {
       "at_least_one_module": "Au moins un module doit être actif.",
@@ -330,7 +331,13 @@
     "refresh_tooltip": "Rafraîchir depuis Discogs",
     "refresh": "Rafraîchir",
     "refresh_metadata_btn": "Actualiser les infos",
-    "add": "Ajouter"
+    "add": "Ajouter",
+    "artist_filter": "Artiste",
+    "sort_added": "Date d'ajout",
+    "sort_artist": "Artiste",
+    "sort_label": "Trier par",
+    "sort_title": "Titre",
+    "sort_year": "Année"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",

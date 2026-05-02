@@ -125,7 +125,7 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const { search, type, format, location, genre, formatTerms} = req.query;
+        const { search, type, format, location, genre, sort, artist} = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 25;
 
@@ -165,6 +165,18 @@ router.get('/collection', requireAuth, async (req, res) => {
             query.location = new RegExp(location, 'i');
         }
 
+        if (artist) {
+            const artistRegex = new RegExp(artist, 'i');
+            conditions.push({
+                $or: [
+                    { artist: artistRegex },
+                    { author: artistRegex },
+                    { director: artistRegex },
+                    { developer: artistRegex }
+                ]
+            });
+        }
+
         if (genre) {
             const genreArr = genre.split(',').map(g => g.trim()).filter(Boolean);
             if (genreArr.length > 0) {
@@ -179,11 +191,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             }
         }
 
-        if (formatTerms && formatTerms.length > 0) {
-            conditions = [...conditions, ...formatTerms.split(',').map(term => ({
-                format_type: { $regex: term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' }
-            }))];
-        }
+
 
         
         if (conditions.length > 0) {
@@ -192,9 +200,31 @@ router.get('/collection', requireAuth, async (req, res) => {
 
         const totalItems = await Item.countDocuments(query);
         
-        
+        // Build dynamic sort object
+        const buildSortObj = () => {
+            const sortMap = {
+                'added_desc': { added_at: -1 },
+                'added_asc': { added_at: 1 },
+                'title_asc': { title: 1 },
+                'title_desc': { title: -1 },
+                'year_desc': { year: -1 },
+                'year_asc': { year: 1 },
+            };
+
+            if (sort && sort.startsWith('artist')) {
+                const dir = sort === 'artist_asc' ? 1 : -1;
+                // In 'all' mode, fall back to title sort
+                if (!type || type === 'all') return { title: dir };
+                const artistFieldMap = { music: 'artist', books: 'author', dvd: 'director', games: 'developer' };
+                const field = artistFieldMap[type] || 'title';
+                return { [field]: dir };
+            }
+
+            return sortMap[sort] || { added_at: -1 };
+        };
+
         const albums = await Item.find(query)
-            .sort({ added_at: -1 })
+            .sort(buildSortObj())
             .skip((page - 1) * limit)
             .limit(limit)
             .lean(); 
@@ -224,6 +254,27 @@ router.get('/collection', requireAuth, async (req, res) => {
             ]
         };
 
+        // Build artist list for autocomplete
+        const artistList = await (async () => {
+            const baseQuery = { owner: adminId, in_wishlist: false };
+            if (!type || type === 'all') {
+                const [artists, authors, directors, developers] = await Promise.all([
+                    Item.distinct('artist', { ...baseQuery, artist: { $nin: ['', null] } }),
+                    Item.distinct('author', { ...baseQuery, author: { $nin: ['', null] } }),
+                    Item.distinct('director', { ...baseQuery, director: { $nin: ['', null] } }),
+                    Item.distinct('developer', { ...baseQuery, developer: { $nin: ['', null] } })
+                ]);
+                return [...new Set([...artists, ...authors, ...directors, ...developers])].filter(Boolean).sort();
+            }
+            const fieldMap = { music: 'artist', books: 'author', dvd: 'director', games: 'developer' };
+            const field = fieldMap[type];
+            if (!field) return [];
+            const typeQuery = type === 'music'
+                ? { ...baseQuery, $or: [{ kind: 'Music' }, { kind: { $exists: false } }] }
+                : { ...baseQuery, kind: { music: 'Music', books: 'Book', dvd: 'Dvd', games: 'Game' }[type] };
+            return (await Item.distinct(field, { ...typeQuery, [field]: { $nin: ['', null] } })).sort();
+        })();
+
         res.render('collection', {
             albums: albums.map(formatForView),
             totalItems,
@@ -235,8 +286,11 @@ router.get('/collection', requireAuth, async (req, res) => {
             querySearch: search || '',
             queryLocation: location || '',
             queryGenre: genre || '',
-            currentFormatTerms: formatTerms || '',
+            queryArtist: artist || '',
+            currentSort: sort || 'added_desc',
+
             activeFilters: filterMap[type] || [],
+            artistList,
             locations: await Item.distinct('location', { owner: adminId }),
             genres: await (async () => {
                 if (!type || type === 'all') return [];

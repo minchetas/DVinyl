@@ -25,7 +25,8 @@
     "cancel": "Cancel",
     "confirm_delete": "Are you sure?",
     "show": "Show",
-    "apply": "Apply"
+    "apply": "Apply",
+    "filters": "Filters"
   },
   "settings": {
     "page_title": "Account Settings",
@@ -330,7 +331,13 @@
     "refresh_tooltip": "Refresh from Discogs",
     "refresh": "Refresh",
     "refresh_metadata_btn": "Refresh info",
-    "add": "Add"
+    "add": "Add",
+    "sort_label": "Sort by",
+    "sort_added": "Date added",
+    "sort_title": "Title",
+    "sort_artist": "Artist",
+    "sort_year": "Year",
+    "artist_filter": "Artist"
   },
   "confirm_vinyl": {
     "cover_preview": "Cover Preview",
