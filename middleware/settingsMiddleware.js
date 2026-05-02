@@ -1,5 +1,6 @@
 const Settings = require('../models/Settings');
 const themesConfig = require('../config/themes');
+const { BASE_URL } = require('../config/constants');
 
 module.exports = async (req, res, next) => {
     try {
@@ -36,12 +37,17 @@ module.exports = async (req, res, next) => {
         res.locals.currentLng = res.locals.user?.language || req.language || 'fr';
         res.locals.isDark = res.locals.user ? (res.locals.user.theme === 'dark') : true;
 
-        const path = req.path.toLowerCase();
+        const fullPath = req.path.toLowerCase();
+        // Strip BASE_URL from path to avoid false positives if BASE_URL contains keywords like "vinyl"
+        const path = fullPath.startsWith(BASE_URL.toLowerCase()) 
+            ? fullPath.slice(BASE_URL.length) 
+            : fullPath;
+
         const queryType = req.query.type; // ex: ?type=books
 
         let detectedType = 'home';
 
-        if (path.includes('vinyl') || path.includes('search-discogs') || path.includes('cd') || path.includes('cassette') || path.includes('cd') || path.includes('album') || path.includes('music')) {
+        if (path.includes('vinyl') || path.includes('search-discogs') || path.includes('cd') || path.includes('cassette') || path.includes('album') || path.includes('music')) {
             detectedType = 'music';
         } else if (path.includes('book') || path.includes('books')) {
             detectedType = 'books';
@@ -56,7 +62,7 @@ module.exports = async (req, res, next) => {
 
         res.locals.currentType = activeType;
 
-        const isAllowedAction = req.method === 'DELETE' || path.startsWith('/api/') ||
+        const isAllowedAction = req.method === 'DELETE' || path.startsWith(BASE_URL + '/api/') ||
             path.includes('/book/') || path.includes('/dvd/') || path.includes('/game/') || path.includes('/album/') ||
             path.includes('/save-');
 

@@ -12,5 +12,5 @@ const MONGODB_URL = process.env.MONGODB_URL;
 
 module.exports = async () => {
   await mongoose.connect(MONGODB_URL);
-  console.log('MongoDB connected');
+  console.log('✅ MongoDB connected');
 };

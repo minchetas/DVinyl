@@ -51,6 +51,7 @@ services:
     environment:
       - MONGODB_URL=mongodb://mongodb:27017/dvinyl
       - VINYL_PORT=80
+      - BASE_URL=
       - PROD=false
       - PASSJWT=<something>
       - SESSION_SECRET=<something>
@@ -67,13 +68,6 @@ services:
     restart: unless-stopped
     volumes:
       - /mnt/<mongo_dataset>:/data/db
-
-x-portals:
-  - host: 0.0.0.0
-    name: Web UI
-    path: /
-    port: <external_port>
-    scheme: http
 ```
 
 > Note: If you're using a **Raspberry Pi** and MongoDB keeps restarting, try a different version of MongoDB, such as:

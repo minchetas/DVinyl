@@ -9,13 +9,13 @@
 
         <nav class="flex py-6 text-sm opacity-60 transition-colors">
             <% if (album.in_wishlist) { %>
-                <a href="/wishlist"
+                <a href="<%= baseUrl %>/wishlist"
                     class="hover:opacity-100 hover:text-primary-theme transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i>
                     <%= t('detail.back_to_wishlist') %>
                 </a>
                 <% } else { %>
-                    <a href="/collection?type=music"
+                    <a href="<%= baseUrl %>/collection?type=music"
                         class="hover:opacity-100 hover:text-primary-theme transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <%= t('detail.back_to_collection') %>
@@ -41,7 +41,7 @@
 
                 <div class="flex gap-4 mt-6 overflow-x-auto pb-2 w-full max-w-lg justify-center">
                     <% if (album.user_image) { %>
-                        <button onclick="switchImage('<%= album.user_image %>', '<%= t('detail.additional_image') %>')"
+                        <button onclick="switchImage('<%= album.user_image %>', translations.additional_image)"
                             class="thumb-btn w-20 h-20 rounded-lg border-2 border-primary-theme overflow-hidden relative transition-all hover:opacity-100 focus:outline-none shadow-md">
                             <img src="<%= album.user_image %>" class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-black/10 dark:bg-black/20"></div>
@@ -49,7 +49,7 @@
                         <% } %>
 
                             <button
-                                onclick="switchImage('<%= album.cover_image %>', '<%= t('detail.official_cover') %>')"
+                                onclick="switchImage('<%= album.cover_image %>', translations.official_cover)"
                                 class="thumb-btn w-20 h-20 rounded-lg border-2 border-transparent hover:border-black/20 dark:hover:border-white/20 overflow-hidden relative transition-all opacity-70 hover:opacity-100 focus:outline-none shadow-sm">
                                 <img src="<%= album.cover_image %>" class="w-full h-full object-cover">
                             </button>
@@ -66,12 +66,13 @@
                     </h2>
 
                     <div class="flex flex-wrap gap-2">
-                        <% let badgeColor='bg-green-600 text-white' ; let badgeText=t('media.vinyl'); if
-                            (album.media_type==='cd' ) { badgeColor='bg-blue-600 text-white' ; badgeText=t('media.cd');
-                            } else if (album.media_type==='cassette' ) { badgeColor='bg-orange-600 text-white' ;
-                            badgeText=t('media.cassette'); } %>
+                        <% 
+                            let badgeText = t('media.vinyl');
+                            if (album.media_type === 'cd') { badgeText = t('media.cd'); } 
+                            else if (album.media_type === 'cassette') { badgeText = t('media.cassette'); } 
+                        %>
                             <span
-                                class="px-3 py-1 rounded-full text-xs font-bold tracking-wider <%= badgeColor %> shadow-sm">
+                                class="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-primary-theme text-white shadow-sm">
                                 <%= badgeText %>
                             </span>
 
@@ -329,7 +330,7 @@
                                         </button>
                                     <% } %>
                                 </div>
-                                <a href="/album/edit/<%= album._id %>"
+                                <a href="<%= baseUrl %>/album/edit/<%= album._id %>"
                                     class="opacity-70 hover:opacity-100 hover:text-primary-theme px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
                                     <i class="fa-solid fa-pen-to-square mr-2"></i>
                                     <%= t('common.edit') %>
@@ -387,7 +388,7 @@
         async function confirmDelete(id) {
             if (confirm(translations.confirm_delete)) {
                 try {
-                    const response = await fetch(`/api/album/${id}`, {
+                    const response = await fetch(`<%= baseUrl %>/api/album/${id}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' }
                     });
@@ -395,7 +396,7 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        window.location.href = data.redirectUrl;
+                        window.location.href = '<%= baseUrl %>' + data.redirectUrl;
                     } else {
                         alert(`${translations.error_server}: ${data.error}`);
                     }
@@ -415,7 +416,7 @@
             loader.classList.remove('hidden');
 
             try {
-                const res = await fetch(`/api/estimate/${id}`);
+                const res = await fetch(`<%= baseUrl %>/api/estimate/${id}`);
                 const data = await res.json();
 
                 if (data.success && data.price) {
@@ -492,7 +493,7 @@
             btnText.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <%= t('detail.importing') %>`;
 
             try {
-                const response = await fetch(`/api/album/${albumId}/import-tracklist`, {
+                const response = await fetch(`<%= baseUrl %>/api/album/${albumId}/import-tracklist`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ discogsId })
@@ -522,7 +523,7 @@
             icon.classList.add('fa-spin');
 
             try {
-                const response = await fetch(`/api/album/${albumId}/refresh-info`, {
+                const response = await fetch(`<%= baseUrl %>/api/album/${albumId}/refresh-info`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ discogsId })

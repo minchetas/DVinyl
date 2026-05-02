@@ -17,7 +17,7 @@
                     <div class="flex gap-2">
 
                         <% if (addRoute) { %>
-                            <a href="<%= addRoute %>"
+                            <a href="<%= baseUrl + addRoute %>"
                                 class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group"
                                 title="<%= t('collection.add') %>">
                                 <i class="fa-solid fa-plus group-hover:scale-110 transition-transform"></i>
@@ -212,7 +212,7 @@
                     <div class="album-card group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                         data-location="<%= album.location || '' %>"
                         data-format="<%= isDvd ? album.format : (album.media_type || album.format || '') %>">
-                        <a href="<%= detailUrl %>" class="block">
+                        <a href="<%= baseUrl + detailUrl %>" class="block">
                             <div
                                 class="<%= aspectClass %> w-full relative overflow-hidden bg-black/5 flex items-center justify-center">
 
@@ -364,7 +364,7 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="<%= baseUrl %>/socket.io/socket.io.js"></script>
     <script>
         let currentType = '<%= currentType %>';
         let currentFormat = '<%= currentFormat %>';
@@ -503,36 +503,39 @@
     
 
     <% if (user.isAdmin) { %>
-        const socket = io();
-            async function refreshCollection() {
-                const btn = document.getElementById('refreshBtn');
-                const icon = btn.querySelector('i');
-                icon.classList.add('fa-spin');
-                btn.disabled = true;
+        const socket = io({
+            path: '<%= baseUrl %>/socket.io',
+        });
 
-                socket.once('import_finished', () => window.location.reload());
-                socket.once('import_error', (data) => {
-                    alert("Erreur : " + data.message);
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
+        async function refreshCollection() {
+            const btn = document.getElementById('refreshBtn');
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            btn.disabled = true;
+
+            socket.once('import_finished', () => window.location.reload());
+            socket.once('import_error', (data) => {
+                alert("Erreur : " + data.message);
+                icon.classList.remove('fa-spin');
+                btn.disabled = false;
+            });
+
+            try {
+                const isWishlist = window.location.pathname.includes('wishlist');
+                await fetch('<%= baseUrl %>/import/discogs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        discogsUrl: `https://www.discogs.com/user/<%= user.discogsUsername %>`,
+                        full: false,
+                        type: isWishlist ? 'wishlist' : 'collection'
+                    })
                 });
-
-                try {
-                    const isWishlist = window.location.pathname.includes('wishlist');
-                    await fetch('/import/discogs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            discogsUrl: `https://www.discogs.com/user/<%= user.discogsUsername %>`,
-                            full: false,
-                            type: isWishlist ? 'wishlist' : 'collection'
-                        })
-                    });
-                } catch (e) {
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
-                }
+            } catch (e) {
+                icon.classList.remove('fa-spin');
+                btn.disabled = false;
             }
+        }
     <% } %>
 
     const modal = document.getElementById('estimateModal');
@@ -562,7 +565,7 @@
         async function startEstimation() {
             startBtn.classList.add('hidden');
             try {
-                const res = await fetch('/api/collection/ids?type=music');
+                const res = await fetch('<%= baseUrl %>/api/collection/ids?type=music');
                 const data = await res.json();
 
                 if (!data.success) throw new Error("Server Error");
@@ -597,7 +600,7 @@
 
         async function estimateOneAlbum(id, quantity) {
             try {
-                const res = await fetch(`/api/estimate/${id}`);
+                const res = await fetch(`<%= baseUrl %>/api/estimate/${id}`);
                 const data = await res.json();
                 if (data.success && data.price) {
                     const val = data.price.value * quantity;

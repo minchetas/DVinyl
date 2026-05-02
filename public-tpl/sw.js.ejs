@@ -1,11 +1,11 @@
 const CACHE_NAME = 'dvinyl-v2.5';
 
 const STATIC_ASSETS = [
-  '/',
-  '/styles/tailwind.css',
-  '/manifest.json',
-  '/ressources/icone-192.png',
-  '/ressources/icone-512.png'
+  '<%= baseUrl %>/',
+  '<%= baseUrl %>/styles/tailwind.css',
+  '<%= baseUrl %>/manifest.json',
+  '<%= baseUrl %>/ressources/icone-192.png',
+  '<%= baseUrl %>/ressources/icone-512.png'
 ];
 
 
@@ -44,26 +44,26 @@ self.addEventListener('fetch', event => {
 
   const dynamicRoutes = [
     // Auth
-    '/login', '/logout', '/setup',
+    '<%= baseUrl %>/login', '<%= baseUrl %>/logout', '<%= baseUrl %>/setup',
     // Collections
-    '/collection', '/wishlist',
-    '/album/', '/book/', '/dvd/', '/game/',
+    '<%= baseUrl %>/collection', '<%= baseUrl %>/wishlist',
+    '<%= baseUrl %>/album/', '<%= baseUrl %>/book/', '<%= baseUrl %>/dvd/', '<%= baseUrl %>/game/',
     // Add / confirmation
-    '/add-vinyl', '/add-book', '/add-dvd', '/add-game',
-    '/confirm-vinyl/', '/confirm-dvd/', '/confirm-book/', '/confirm-game/',
-    '/save-vinyl', '/save-book', '/save-dvd', '/save-game',
+    '<%= baseUrl %>/add-vinyl', '<%= baseUrl %>/add-book', '<%= baseUrl %>/add-dvd', '<%= baseUrl %>/add-game',
+    '<%= baseUrl %>/confirm-vinyl/', '<%= baseUrl %>/confirm-dvd/', '<%= baseUrl %>/confirm-book/', '<%= baseUrl %>/confirm-game/',
+    '<%= baseUrl %>/save-vinyl', '<%= baseUrl %>/save-book', '<%= baseUrl %>/save-dvd', '<%= baseUrl %>/save-game',
     // Edition
-    '/album/edit/', '/book/edit/', '/dvd/edit/', '/game/edit/',
+    '<%= baseUrl %>/album/edit/', '<%= baseUrl %>/book/edit/', '<%= baseUrl %>/dvd/edit/', '<%= baseUrl %>/game/edit/',
     // search
-    '/search-discogs', '/search-books', '/search-dvds', '/search-games',
+    '<%= baseUrl %>/search-discogs', '<%= baseUrl %>/search-books', '<%= baseUrl %>/search-dvds', '<%= baseUrl %>/search-games',
     // internals API
-    '/api/',
+    '<%= baseUrl %>/api/',
     // Import
-    '/import/',
+    '<%= baseUrl %>/import/',
     // Admin
-    '/admin', '/settings',
+    '<%= baseUrl %>/admin', '<%= baseUrl %>/settings',
     // Backup
-    '/export', '/import'
+    '<%= baseUrl %>/export', '<%= baseUrl %>/import'
   ];
 
   const isDynamic = dynamicRoutes.some(route => url.pathname.startsWith(route));

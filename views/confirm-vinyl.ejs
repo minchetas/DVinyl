@@ -2,7 +2,7 @@
 
 <div class="max-w-screen-xl mx-auto pb-20 px-4 md:px-0">
     <nav class="flex mb-6 text-sm opacity-60 transition-colors">
-        <a href="/add-vinyl" class="hover:opacity-100 transition-opacity flex items-center py-2">
+        <a href="<%= baseUrl %>/add-vinyl" class="hover:opacity-100 transition-opacity flex items-center py-2">
             <i class="fa-solid fa-arrow-left mr-2"></i> <%= t('common.back_to_search') %>
         </a>
     </nav>
@@ -64,7 +64,7 @@
                     <i class="fa-solid fa-pen-to-square text-primary-theme"></i> <%= t('confirm_vinyl.config_title') %>
                 </h1>
 
-                <form action="/save-vinyl" method="POST" class="space-y-6">
+                <form action="<%= baseUrl %>/save-vinyl" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_title') %></label>
@@ -204,7 +204,7 @@
                         <div class="grid grid-cols-3 gap-3">
                             <label class="cursor-pointer">
                                 <input type="radio" name="media_type" value="vinyl" class="peer sr-only" <%= (vinyl.media_type === 'vinyl') ? 'checked' : '' %>>
-                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-green-600 peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
+                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-primary-theme peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
                                     <i class="fa-solid fa-record-vinyl block mb-1"></i>
                                     <span class="text-xs font-bold"><%= t('media.vinyl') %></span>
                                 </div>
@@ -212,7 +212,7 @@
                             
                             <label class="cursor-pointer">
                                 <input type="radio" name="media_type" value="cd" class="peer sr-only" <%= (vinyl.media_type === 'cd') ? 'checked' : '' %>>
-                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-blue-600 peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
+                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-primary-theme peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
                                     <i class="fa-solid fa-compact-disc block mb-1"></i>
                                     <span class="text-xs font-bold"><%= t('media.cd') %></span>
                                 </div>
@@ -220,7 +220,7 @@
 
                             <label class="cursor-pointer">
                                 <input type="radio" name="media_type" value="cassette" class="peer sr-only" <%= (vinyl.media_type === 'cassette') ? 'checked' : '' %>>
-                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-orange-600 peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
+                                <div class="p-3 rounded-xl border border-transparent bg-black/5 dark:bg-white/5 text-center transition-all peer-checked:bg-primary-theme peer-checked:text-white hover:bg-black/10 dark:hover:bg-white/10 opacity-70 peer-checked:opacity-100">
                                     <i class="fa-solid fa-tape block mb-1"></i>
                                     <span class="text-xs font-bold"><%= t('media.cassette') %></span>
                                 </div>
@@ -360,7 +360,9 @@
 
         try {
             let urls = [];
-            const endpoint = (type === 'disc') ? `/admin/api/search-discogs-gallery?q=${encodeURIComponent(q)}` : `/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=music`;
+            const endpoint = (type === 'disc')
+                ? `<%= baseUrl %>/admin/api/search-discogs-gallery?q=${encodeURIComponent(q)}`
+                : `<%= baseUrl %>/admin/api/search-image-universal?q=${encodeURIComponent(q)}&type=music`;
 
             const res = await fetch(endpoint);
             urls = await res.json();

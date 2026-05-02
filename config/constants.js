@@ -9,5 +9,8 @@ module.exports = {
     'Children', 'Biography', 'Autobiography', 'Memoir', 'Poetry', 'Essay',
     'Self Help', 'Yuri', 'Slice of life', 'Adventure', 'Action', 'Drama', 'Crime',
     'LGBTQ', 'LGBTQIA', 'LGBTQIA+'
-  ]
-}
+  ],
+  BASE_URL: process.env.BASE_URL
+    ? (process.env.BASE_URL.startsWith('/') ? process.env.BASE_URL : `/${process.env.BASE_URL}`)
+    : '',
+};

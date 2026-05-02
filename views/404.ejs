@@ -16,7 +16,7 @@
             <%= t('errors.404_desc') %>
         </p>
         
-        <a href="/" class="inline-flex items-center justify-center gap-2 w-full py-4 bg-theme-highlight text-white font-bold rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-theme-highlight/20">
+        <a href="<%= baseUrl || '/' %>" class="inline-flex items-center justify-center gap-2 w-full py-4 bg-theme-highlight text-white font-bold rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-theme-highlight/20">
             <i class="fa-solid fa-house"></i>
             <%= t('common.back_home') %>
         </a>

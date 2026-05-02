@@ -9,13 +9,13 @@
 
         <nav class="flex py-6 text-sm opacity-60 transition-colors">
             <% if (book.in_wishlist) { %>
-                <a href="/wishlist"
+                <a href="<%= baseUrl %>/wishlist"
                     class="hover:opacity-100 hover:text-primary-theme transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i>
                     <%= t('detail.back_to_wishlist') %>
                 </a>
                 <% } else { %>
-                    <a href="/collection?type=books"
+                    <a href="<%= baseUrl %>/collection?type=books"
                         class="hover:opacity-100 hover:text-primary-theme transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <%= t('detail.back_to_collection') %>
@@ -261,7 +261,7 @@
                                         </button>
                                     <% } %>
                                 </div>
-                                <a href="/book/edit/<%= book._id %>"
+                                <a href="<%= baseUrl %>/book/edit/<%= book._id %>"
                                     class="opacity-70 hover:opacity-100 hover:text-primary-theme px-4 py-2 text-sm transition-colors border border-black/10 dark:border-white/10 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
                                     <i class="fa-solid fa-pen-to-square mr-2"></i>
                                     <%= t('common.edit') %>
@@ -289,14 +289,14 @@
         async function confirmDelete(id) {
             if (confirm(translations.confirm_delete)) {
                 try {
-                    const response = await fetch(`/api/book/${id}`, {
+                    const response = await fetch(`<%= baseUrl %>/api/book/${id}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' }
                     });
 
                     const data = await response.json();
                     if (data.success) {
-                        window.location.href = data.redirectUrl;
+                        window.location.href = '<%= baseUrl %>' + data.redirectUrl;
                     } else {
                         alert(`${translations.error_server}: ${data.error}`);
                     }
@@ -315,7 +315,7 @@
             icon.classList.add('fa-spin');
 
             try {
-                const response = await fetch(`/api/book/${bookId}/refresh-info`, {
+                const response = await fetch(`<%= baseUrl %>/api/book/${bookId}/refresh-info`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
