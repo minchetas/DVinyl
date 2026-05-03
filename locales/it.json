@@ -173,7 +173,21 @@
       "unblock": "Sbloccare"
     },
     "users_count": "Utenti ({{count}})",
-    "users_title": "Utenti"
+    "users_title": "Utenti",
+    "visibility": {
+      "apply_to_admin": "Applica queste regole anche all'amministratore",
+      "apply_to_admin_desc": "Se abilitati, gli elementi nascosti non saranno visibili anche quando hai effettuato l'accesso come amministratore.",
+      "hidden_genres": "Generi nascosti",
+      "hidden_items": "Oggetti nascosti",
+      "hidden_types": "Tipi nascosti",
+      "no_hidden_items": "Nessun singolo elemento nascosto.",
+      "save_btn": "Salva visibilità",
+      "search_item": "Cerca un oggetto da nascondere",
+      "search_placeholder": "Titolo, Artista...",
+      "subtitle": "Nascondi elementi specifici della tua collezione agli ospiti (o a te stesso).",
+      "success_msg": "Impostazioni di visibilità aggiornate.",
+      "title": "Impostazioni di visibilità"
+    }
   },
   "auth": {
     "email_invalid": "Inserisci un'e-mail valida",
@@ -465,7 +479,8 @@
     "physical": "Fisico",
     "collector": "Collector",
     "limited": "Edizione Limitata",
-    "steelbook": "Steelbook"
+    "steelbook": "Steelbook",
+    "book": "Libro"
   },
   "messages": {
     "avatar_success": "Immagine del profilo aggiornata!",

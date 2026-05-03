@@ -127,7 +127,8 @@
     "physical": "Physique",
     "collector": "Collector",
     "limited": "Édition Limitée",
-    "steelbook": "Steelbook"
+    "steelbook": "Steelbook",
+    "book": "Livre"
   },
   "index": {
     "welcome": "Salut",
@@ -323,6 +324,20 @@
       "warning_body": "Comptez ~1-2 min pour 200 livres, ~10 min pour 2000. L'import tourne en arrière-plan, vous pouvez naviguer librement.",
       "default_language": "Langue par défaut",
       "default_language_hint": "Utilisée si Open Library ne trouve pas la langue. Ex: fr, en, ja, es..."
+    },
+    "visibility": {
+      "apply_to_admin": "Appliquez également ces règles à l'administrateur",
+      "apply_to_admin_desc": "S'ils sont activés, les éléments masqués ne seront pas visibles même lorsque vous êtes connecté en tant qu'administrateur.",
+      "hidden_genres": "Genres cachés",
+      "hidden_items": "Objets cachés",
+      "hidden_types": "Types cachés",
+      "no_hidden_items": "Aucun élément individuel n'est masqué.",
+      "save_btn": "Enregistrer la visibilité",
+      "search_item": "Rechercher un élément à masquer",
+      "search_placeholder": "Titre, Artiste...",
+      "subtitle": "Cachez des éléments spécifiques de votre collection aux invités (ou à vous-même).",
+      "success_msg": "Paramètres de visibilité mis à jour.",
+      "title": "Paramètres de visibilité"
     }
   },
   "collection": {

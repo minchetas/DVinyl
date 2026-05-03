@@ -97,6 +97,7 @@
     "cds": "CDs",
     "sacd": "SACD",
     "cdr": "CDr",
+    "book": "Book",
     "cassette": "Cassette",
     "cassettes": "Cassettes",
     "hardcover": "Hardcover",
@@ -196,6 +197,20 @@
   },
   "admin": {
     "title": "Administration",
+    "visibility": {
+      "title": "Visibility Settings",
+      "subtitle": "Hide specific elements of your collection from guests (or yourself).",
+      "apply_to_admin": "Apply these rules to Admin as well",
+      "apply_to_admin_desc": "If enabled, hidden items will not be visible even when you are logged in as admin.",
+      "hidden_types": "Hidden Types",
+      "hidden_genres": "Hidden Genres",
+      "search_item": "Search an item to hide",
+      "search_placeholder": "Title, Artist...",
+      "hidden_items": "Hidden Items",
+      "no_hidden_items": "No individual items hidden.",
+      "save_btn": "Save Visibility",
+      "success_msg": "Visibility settings updated."
+    },
     "add_user_btn": "Add User",
     "modules": "Modules",
     "temp_password_hint": "Here is the temporary password (copy it, it won't be shown again):",

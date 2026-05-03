@@ -173,7 +173,21 @@
       "unblock": "Entsperren"
     },
     "users_count": "Benutzer ({{count}})",
-    "users_title": "Benutzer"
+    "users_title": "Benutzer",
+    "visibility": {
+      "apply_to_admin": "Wenden Sie diese Regeln auch auf Admin an",
+      "apply_to_admin_desc": "Wenn diese Option aktiviert ist, sind ausgeblendete Elemente auch dann nicht sichtbar, wenn Sie als Administrator angemeldet sind.",
+      "hidden_genres": "Versteckte Genres",
+      "hidden_items": "Versteckte Gegenstände",
+      "hidden_types": "Versteckte Typen",
+      "no_hidden_items": "Keine einzelnen Elemente ausgeblendet.",
+      "save_btn": "Sichtbarkeit speichern",
+      "search_item": "Suchen Sie nach einem Element, das Sie ausblenden möchten",
+      "search_placeholder": "Titel, Künstler...",
+      "subtitle": "Verstecken Sie bestimmte Elemente Ihrer Sammlung vor Gästen (oder sich selbst).",
+      "success_msg": "Sichtbarkeitseinstellungen aktualisiert.",
+      "title": "Sichtbarkeitseinstellungen"
+    }
   },
   "auth": {
     "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
@@ -465,7 +479,8 @@
     "physical": "Physisch",
     "collector": "Collector",
     "limited": "Limited Edition",
-    "steelbook": "Steelbook"
+    "steelbook": "Steelbook",
+    "book": "Buch"
   },
   "messages": {
     "avatar_success": "Profilbild aktualisiert!",

@@ -9,6 +9,7 @@ const Vinyl = require('../models/Vinyl');
 const { requireAuth, requireAdmin } = require('../middleware/authMiddleware'); // Protect routes
 const User = require('../models/User');
 const { STANDARD_FORMAT_TERMS } = require('../config/constants');
+const { applyVisibilityFilter } = require('../utils/visibilityHelper');
 
 async function getAdminId() {
     const admin = await User.findOne({ isAdmin: true }).select('_id');
@@ -42,7 +43,9 @@ router.get('/', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
         const settings = res.locals.settings;
-        const allItems = await Item.find({ owner: adminId, in_wishlist: false }).lean();
+        let queryAll = { owner: adminId, in_wishlist: false };
+        applyVisibilityFilter(queryAll, res.locals.isAdmin, settings);
+        const allItems = await Item.find(queryAll).lean();
         
         const countByFormat = (items, format) => {
             return items
@@ -110,9 +113,15 @@ router.get('/', requireAuth, async (req, res) => {
         stats.game_developer = getTop(allItems.filter(i => i.kind === 'Game'), 'developer');
         stats.game_publisher = getTop(allItems.filter(i => i.kind === 'Game'), 'publisher');
 
+        let latestQuery = { owner: adminId, in_wishlist: false };
+        applyVisibilityFilter(latestQuery, res.locals.isAdmin, settings);
+        
+        let wishlistQuery = { owner: adminId, in_wishlist: true };
+        applyVisibilityFilter(wishlistQuery, res.locals.isAdmin, settings);
+
         res.render('index', { 
-            latestCollection: (await Item.find({ owner: adminId, in_wishlist: false }).sort({ added_at: -1 }).limit(4)).map(formatForView),
-            latestWishlist: (await Item.find({ owner: adminId, in_wishlist: true }).sort({ added_at: -1 }).limit(4)).map(formatForView),
+            latestCollection: (await Item.find(latestQuery).sort({ added_at: -1 }).limit(4)).map(formatForView),
+            latestWishlist: (await Item.find(wishlistQuery).sort({ added_at: -1 }).limit(4)).map(formatForView),
             stats,
             settings 
         });
@@ -197,6 +206,8 @@ router.get('/collection', requireAuth, async (req, res) => {
         if (conditions.length > 0) {
             query.$and = conditions;
         }
+
+        applyVisibilityFilter(query, res.locals.isAdmin, res.locals.settings);
 
         const totalItems = await Item.countDocuments(query);
         
@@ -687,10 +698,13 @@ router.get('/api/collection/ids', requireAuth, async (req, res) => {
 router.get('/wishlist', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const items = await Item.find({ 
+        let query = { 
             owner: adminId,
             in_wishlist: true 
-        }).sort({ added_at: -1 });
+        };
+        applyVisibilityFilter(query, res.locals.isAdmin, res.locals.settings);
+
+        const items = await Item.find(query).sort({ added_at: -1 });
 
         res.render('wishlist', { 
             albums: items.map(formatForView), 

@@ -45,7 +45,46 @@ async function loadAdminData() {
     const users = await User.find().sort({ lastChange: -1 });
     const blockedIps = await BlockedIP.find().sort({ createdAt: -1 });
     const logs = await LoginLog.find().sort({ timestamp: -1 }).limit(20);
-    return { users, blockedIps, logs };
+
+    // Get distinct genres grouped by kind
+    const admin = await User.findOne({ isAdmin: true }).select('_id');
+    const adminId = admin ? admin._id : null;
+
+    const pipeline = [
+        { $match: { owner: adminId } },
+        {
+            $project: {
+                kind: 1,
+                allGenres: {
+                    $concatArrays: [
+                        { $cond: [{ $in: ["$genre", ["", null]] }, [], ["$genre"]] },
+                        { $ifNull: ["$genres", []] },
+                        { $ifNull: ["$styles", []] }
+                    ]
+                }
+            }
+        },
+        { $unwind: "$allGenres" },
+        {
+            $group: {
+                _id: "$kind",
+                genres: { $addToSet: "$allGenres" }
+            }
+        }
+    ];
+
+    const genreGroupsRaw = await Item.aggregate(pipeline);
+
+    const allGenres = {};
+    genreGroupsRaw.forEach(group => {
+        if (group._id && group.genres && group.genres.length > 0) {
+            allGenres[group._id] = group.genres.filter(Boolean).sort();
+        }
+    });
+
+    const visibilitySettings = await Settings.findOne().populate('visibility.hiddenItems').lean() || {};
+
+    return { users, blockedIps, logs, allGenres, visibilitySettings };
 }
 
 // DASHBOARD (GET)
@@ -235,6 +274,57 @@ router.post('/modules/save', requireAuth, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error("[ERR] modules save", err);
         res.status(500).send("[ERR] modules save failed.");
+    }
+});
+
+router.post('/visibility/save', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { applyToAdmin, hiddenItems, hiddenGenres, hiddenTypes } = req.body;
+
+        let parsedItems = [];
+        if (hiddenItems) {
+            try {
+                parsedItems = JSON.parse(hiddenItems);
+            } catch (e) {
+                parsedItems = [];
+            }
+        }
+
+        const applyToAdminVal = applyToAdmin === 'on' || applyToAdmin === 'true' || applyToAdmin === true;
+        const update = {
+            'visibility.applyToAdmin': applyToAdminVal,
+            'visibility.hiddenItems': parsedItems,
+            'visibility.hiddenGenres': Array.isArray(hiddenGenres) ? hiddenGenres : (hiddenGenres ? [hiddenGenres] : []),
+            'visibility.hiddenTypes': Array.isArray(hiddenTypes) ? hiddenTypes : (hiddenTypes ? [hiddenTypes] : [])
+        };
+
+        await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });
+
+        res.redirect('/admin?msg=saved');
+    } catch (err) {
+        console.error("[ERR] visibility save", err);
+        res.status(500).send("[ERR] visibility save failed.");
+    }
+});
+
+router.get('/api/search-collection', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json([]);
+
+        const admin = await User.findOne({ isAdmin: true }).select('_id');
+        const adminId = admin ? admin._id : null;
+
+        const regex = new RegExp(q, 'i');
+        const items = await Item.find({
+            owner: adminId,
+            $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }]
+        }).limit(10).select('_id title artist author director kind cover_image').lean();
+
+        res.json(items);
+    } catch (err) {
+        console.error("[ERR] search collection", err);
+        res.status(500).json({ error: "Search failed" });
     }
 });
 

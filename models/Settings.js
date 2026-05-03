@@ -28,7 +28,13 @@ const settingsSchema = new mongoose.Schema({
         type: [String], 
         default: ['total', 'vinyl', 'cd', 'cassette', 'artist'] 
     },
-    fastAdd: { type: String, default: '' }
+    fastAdd: { type: String, default: '' },
+    visibility: {
+        applyToAdmin: { type: Boolean, default: false },
+        hiddenItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }],
+        hiddenGenres: [{ type: String }],
+        hiddenTypes: [{ type: String }]
+    }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

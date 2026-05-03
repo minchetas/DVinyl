@@ -61,7 +61,7 @@ const checkUser = (req, res, next) => {
         let user = await User.findById(decodedToken.id);
         res.locals.user = user;
 
-        if (user && user._id.toString() === process.env.ADMIN_ID) {
+        if (user && user.isAdmin === true) {
             res.locals.isAdmin = true;
         }
 
