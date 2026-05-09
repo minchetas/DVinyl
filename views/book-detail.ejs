@@ -191,8 +191,11 @@
                     </div>
                     <div>
                         <span class="block text-xs opacity-50 uppercase font-bold mb-1">ISBN</span>
-                        <span class="font-mono text-sm bg-black/5 dark:bg-white/5 px-2 py-1 rounded transition-colors">
-                            <%= book.isbn || 'N/A' %>
+                        <span class="inline-flex items-center gap-1.5 font-mono text-sm bg-black/5 dark:bg-white/5 px-2 py-1 rounded transition-colors">
+                            <%= book.barcode || book.isbn || 'N/A' %>
+                            <% if (book.barcode_locked) { %>
+                                <i class="fa-solid fa-lock text-[10px] text-primary-theme opacity-70" title="<%= t('confirm_vinyl.barcode_locked') %>"></i>
+                            <% } %>
                         </span>
                     </div>
                     <div>

@@ -88,7 +88,8 @@
     "password_reset_success": "Password reset for {{name}}.",
     "password_mismatch": "Passwords do not match.",
     "avatar_success": "Profile picture updated!",
-    "estimate_error": "Error during estimation"
+    "estimate_error": "Error during estimation",
+    "batch_barcode_success": "{{count}} barcodes updated!"
   },
   "media": {
     "vinyl": "Vinyl",
@@ -266,7 +267,14 @@
       "import_fast": "Fast Import",
       "import_full": "Complete Import",
       "import_warning": "The complete import retrieves tracks but takes longer (API limits).",
-      "import_started": "Import started..."
+      "import_started": "Import started...",
+      "batch_barcode": {
+        "title": "Batch Barcode Import",
+        "subtitle": "Update barcodes in batch. Format: ID_DISCOGS:BARCODE (one per line). Items will be automatically locked.",
+        "placeholder": "123456:9990001\n789012:9990002",
+        "btn": "Update Barcodes",
+        "success": "{{count}} barcodes updated!"
+      }
     },
     "backup": {
       "export_btn": "Export Database",
@@ -352,7 +360,8 @@
     "sort_title": "Title",
     "sort_artist": "Artist",
     "sort_year": "Year",
-    "artist_filter": "Artist"
+    "artist_filter": "Artist",
+    "decade_filter": "Decade"
   },
   "confirm_vinyl": {
     "cover_preview": "Cover Preview",
@@ -386,7 +395,9 @@
     "network_error": "Network error.",
     "country": "Country",
     "field_genres": "Genres",
-    "field_styles": "Styles"
+    "field_styles": "Styles",
+    "barcode_label": "Barcode",
+    "barcode_locked": "Lock barcode"
   },
   "edit_vinyl": {
     "title": "Edit Album",

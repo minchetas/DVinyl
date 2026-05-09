@@ -10,7 +10,6 @@ const gameSchema = new mongoose.Schema({
   },
   igdb_id: Number,
   region: { type: String, default: '' }, // JAP, PAL, NTSC-U, etc. (manual)
-  barcode: String,
 
   format: { 
       type: String, 

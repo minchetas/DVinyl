@@ -120,13 +120,17 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60">
-                                    <%= t('confirm_game.field_barcode') %>
+                        <div>
+                            <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60 flex items-center gap-2">
+                                <%= t('confirm_game.field_barcode') %>
+                                <label class="cursor-pointer flex items-center ml-auto" title="<%= t('confirm_vinyl.barcode_locked') %>">
+                                    <input type="checkbox" name="barcode_locked" class="hidden peer" <%= game.barcode_locked ? 'checked' : '' %>>
+                                    <i class="fa-solid fa-unlock opacity-30 peer-checked:hidden"></i>
+                                    <i class="fa-solid fa-lock text-primary-theme hidden peer-checked:block"></i>
                                 </label>
-                                <input type="text" name="barcode" value="<%= game.barcode || '' %>"
-                                    class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 transition-colors outline-none">
-                            </div>
+                            </label>
+                            <input type="text" name="barcode" value="<%= game.barcode || '' %>" class="bg-black/5 dark:bg-white/5 border border-transparent rounded-lg text-sm focus:ring-primary-theme block w-full p-3 transition-colors outline-none font-mono" placeholder="Code-barres...">
+                        </div>
                             <div>
                                 <label class="block mb-2 text-sm font-bold uppercase tracking-widest opacity-60">
                                     <%= t('confirm_game.field_quantity') %>

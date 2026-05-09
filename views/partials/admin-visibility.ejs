@@ -93,7 +93,11 @@
                                     </div>
                                     <div class="overflow-hidden">
                                         <div class="text-xs font-bold truncate"><%= item.title %></div>
-                                        <div class="text-[10px] opacity-50 truncate"><%= item.artist || item.author || item.director %></div>
+                                        <div class="text-[10px] opacity-50 truncate">
+                                            <%= item.artist || item.author || item.director %>
+                                            <% let fmt = item.format || item.media_type || item.platform || item.format_type; %>
+                                            <% if (fmt) { %> • <%= t('media.' + fmt.toLowerCase()) || fmt %><% } %>
+                                        </div>
                                     </div>
                                 </div>
                                 <button type="button" class="text-red-500 opacity-50 hover:opacity-100 p-2 rounded-lg" onclick="removeHiddenItem('<%= item._id %>')">
@@ -119,6 +123,22 @@
 
 <script>
     let hiddenItemsArr = JSON.parse(document.getElementById('hiddenItemsInput').value || '[]');
+    
+    const getFormatLabel = (item) => {
+        const fmt = item.format || item.media_type || item.platform || item.format_type || '';
+        if (!fmt) return '';
+        const map = {
+            'vinyl': 'Vinyle',
+            'cd': 'CD',
+            'cassette': 'Cassette',
+            'dvd': 'DVD',
+            'bluray': 'Blu-ray',
+            '4k': '4K',
+            'paperback': 'Broché',
+            'hardcover': 'Relié'
+        };
+        return ' • ' + (map[fmt.toLowerCase()] || fmt.charAt(0).toUpperCase() + fmt.slice(1));
+    };
 
     document.getElementById('itemSearch').addEventListener('input', async function(e) {
         const q = e.target.value.trim();
@@ -146,7 +166,7 @@
                             <img src="${item.cover_image || '/ressources/logo.png'}" class="w-8 h-8 rounded-md object-cover bg-black/10 dark:bg-white/10">
                             <div class="overflow-hidden">
                                 <div class="text-xs font-bold truncate">${item.title}</div>
-                                <div class="text-[10px] opacity-60 truncate">${item.artist || item.author || item.director || ''}</div>
+                                <div class="text-[10px] opacity-60 truncate">${item.artist || item.author || item.director || ''}${getFormatLabel(item)}</div>
                             </div>
                         </div>
                         ${isAlreadyHidden ? '<i class="fa-solid fa-check text-green-500"></i>' : '<i class="fa-solid fa-plus text-primary-theme"></i>'}
@@ -195,7 +215,7 @@
                 </div>
                 <div class="overflow-hidden">
                     <div class="text-xs font-bold truncate">${item.title}</div>
-                    <div class="text-[10px] opacity-50 truncate">${item.artist || item.author || item.director || ''}</div>
+                    <div class="text-[10px] opacity-50 truncate">${item.artist || item.author || item.director || ''}${getFormatLabel(item)}</div>
                 </div>
             </div>
             <button type="button" class="text-red-500 opacity-50 hover:opacity-100 p-2 rounded-lg" onclick="removeHiddenItem('${item._id}')">

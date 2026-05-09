@@ -227,7 +227,7 @@ router.get('/confirm-book/:id', requireAuth, async (req, res) => {
 router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { 
-            mongo_id, title, author, publisher, year, isbn, pages, language, 
+            mongo_id, title, author, publisher, year, isbn, barcode, barcode_locked, pages, language, 
             format, series, volume, cover_image, hardcover_id, hardcover_slug,
             in_wishlist, comments, location, genre, genres, styles, readingStatus, rating, quantity
         } = req.body;
@@ -249,7 +249,9 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
             book.author = author;
             book.publisher = publisher;
             book.year = year;
-            book.isbn = isbn;
+            book.isbn = barcode || isbn;
+            book.barcode = barcode || isbn;
+            book.barcode_locked = barcode_locked === 'on';
             book.pages = pages;
             book.language = language;
             book.format = format;
@@ -269,7 +271,9 @@ router.post('/save-book', requireAuth, requireAdmin, async (req, res) => {
             await book.save();
         } else {
             await Book.create({
-                title, author, publisher, year, isbn, pages, language,
+                title, author, publisher, year, isbn: barcode || isbn, barcode: barcode || isbn, 
+                barcode_locked: barcode_locked === 'on',
+                pages, language,
                 format, series, volume, cover_image,
                 kind: 'Book',
                 media_type: 'book',
@@ -568,7 +572,8 @@ router.post('/api/book/:id/refresh-info', requireAuth, requireAdmin, async (req,
                     genre: formatted.genres[0] || '',
                     pages: formatted.pages,
                     language: formatted.language,
-                    isbn: formatted.isbn,
+                    isbn: book.barcode_locked ? book.isbn : formatted.isbn,
+                    barcode: book.barcode_locked ? book.barcode : formatted.isbn,
                     publisher: formatted.publisher
                 }
             }

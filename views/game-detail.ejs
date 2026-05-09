@@ -193,8 +193,11 @@
                         <span class="block text-xs opacity-50 uppercase font-bold mb-1">
                             <%= t('game_detail.barcode_label') %>
                         </span>
-                        <span class="font-mono text-sm bg-black/5 dark:bg-white/5 px-2 py-1 rounded transition-colors">
+                        <span class="inline-flex items-center gap-1.5 font-mono text-sm bg-black/5 dark:bg-white/5 px-2 py-1 rounded transition-colors">
                             <%= game.barcode || 'N/A' %>
+                            <% if (game.barcode_locked) { %>
+                                <i class="fa-solid fa-lock text-[10px] text-primary-theme opacity-70" title="<%= t('confirm_vinyl.barcode_locked') %>"></i>
+                            <% } %>
                         </span>
                     </div>
                     <div>

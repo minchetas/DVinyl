@@ -81,14 +81,13 @@
                                             <i class="fa-solid fa-arrow-left mr-2"></i>
                                             <%= t('common.all') %>
                                         </button>
-
                                         <% activeFilters.forEach(filter=> { %>
                                             <button onclick="currentFormat = '<%= filter.id %>'; reloadPage();"
-                                                class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 <%= currentFormat === filter.id ? 'bg-primary-theme text-white shadow-lg' : 'bg-black/5 dark:bg-white/10 opacity-60' %>">
+                                                class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 <%= (currentFormat === filter.id) ? 'bg-primary-theme text-white shadow-lg' : 'bg-black/5 dark:bg-white/10 opacity-60' %>">
                                                 <%= filter.label %>
                                             </button>
                                             <% }) %>
-                                                <% } %>
+                                        <% } %>
                 </div>
 
                 <button onclick="toggleMobileFilters()"
@@ -119,6 +118,32 @@
                     </datalist>
                 </div>
 
+                <div class="w-full lg:w-32 relative">
+                    <button onclick="toggleDecadeMenu(event)" id="decadeSelectorBtn"
+                        class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
+                        <span class="truncate transition-opacity <%= locals.queryDecade ? '' : 'opacity-50 group-hover:opacity-100' %>">
+                            <%= locals.queryDecade ? locals.queryDecade + 's' : t('collection.decade_filter') %>
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-[10px] opacity-20 group-hover:opacity-60 transition-all"></i>
+                    </button>
+                    <div id="decade-menu" class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-2 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div class="max-h-[40vh] overflow-y-auto custom-scrollbar space-y-1">
+                            <button onclick="handleDecade('')" class="w-full flex items-center p-2 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all opacity-70">
+                                <%= t('collection.decade_filter') %>
+                            </button>
+                            <% const currentYear = new Date().getFullYear(); 
+                               for (let y = Math.floor(currentYear/10)*10; y >= 1950; y -= 10) { 
+                                   const isActive = locals.queryDecade == y;
+                            %>
+                                <button onclick="handleDecade('<%= y %>')" class="w-full flex items-center justify-between p-2 text-sm rounded-lg transition-all cursor-pointer <%= isActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                    <span><%= y %>s</span>
+                                    <% if (isActive) { %><i class="fa-solid fa-check text-[11px]"></i><% } %>
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
                 <% if (currentType !=='all' ) { %>
                     <div class="w-full lg:w-48 relative">
                         <button onclick="toggleGenreMenu(event)" id="genreSelectorBtn"
@@ -138,7 +163,7 @@
                                     <label
                                         class="flex items-center gap-3 p-2 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors group">
                                         <input type="checkbox"
-                                            class="accent-primary-theme w-4 h-4 rounded border-gray-300 transition-all cursor-pointer"
+                                            class="genre-checkbox accent-primary-theme w-4 h-4 rounded border-gray-300 transition-all cursor-pointer"
                                             value="<%= gen %>" <%=currentGenreArr.includes(gen) ? 'checked' : '' %>>
                                         <span class="group-hover:translate-x-0.5 transition-transform">
                                             <%= gen %>
@@ -414,9 +439,8 @@
         const filterInput = document.getElementById('filterInput');
         const locationInput = document.getElementById('locationInput');
         const artistInput = document.getElementById('artistInput');
-        const genreInput = document.getElementById('genreInput');
-        const formatTermsInput = document.getElementById('format-multi-select');
         let currentLimit = <%= locals.queryLimit %>;
+        let currentDecade = '<%= locals.queryDecade || "" %>';
 
         function toggleMobileFilters() {
             const container = document.getElementById('filterContainer');
@@ -442,6 +466,24 @@
             window.location.href = url.toString();
         }
 
+            validateAndSetUrlSearchParamString('type', currentType);
+            validateAndSetUrlSearchParamString('format', currentFormat);
+            validateAndSetUrlSearchParamString('search', filterInput?.value);
+            validateAndSetUrlSearchParamString('location', locationInput?.value);
+
+            if (currentType !== 'all') {
+                const genreMenu = document.getElementById('genre-multi-select');
+                if (genreMenu) {
+                    const checkedGenres = [...genreMenu.querySelectorAll('.genre-checkbox:checked')].map(cb => cb.value);
+                    const isExclude = document.getElementById('excludeGenreMode').checked;
+                    if (checkedGenres.length) {
+                        url.searchParams.set(isExclude ? 'exclude_genre' : 'genre', checkedGenres.join(','));
+                    }
+                }
+            }
+
+
+
         function reloadPage() {
             const url = new URL(window.location.origin + window.location.pathname);
 
@@ -453,16 +495,16 @@
             if (currentType !== 'all') {
                 const genreMenu = document.getElementById('genre-multi-select');
                 if (genreMenu) {
-                    const checkedGenres = [...genreMenu.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value);
+                    const checkedGenres = [...genreMenu.querySelectorAll('.genre-checkbox:checked')].map(cb => cb.value);
                     if (checkedGenres.length) url.searchParams.set('genre', checkedGenres.join(','));
                 }
             }
 
-
-
             validateAndSetUrlSearchParamString('limit', currentLimit);
             validateAndSetUrlSearchParamString('sort', currentSort);
+            validateAndSetUrlSearchParamString('decade', currentDecade);
             validateAndSetUrlSearchParamString('artist', artistInput?.value);
+
             url.searchParams.set('page', 1);
             window.location.href = url.toString();
 
@@ -485,6 +527,7 @@
                 reloadPage();
             });
         });
+
 
 
 
@@ -549,6 +592,7 @@
             const menuConfigs = [
                 { menuId: 'genre-multi-select', btnId: 'genreSelectorBtn' },
                 { menuId: 'sort-menu', btnId: 'sortSelectorBtn' },
+                { menuId: 'decade-menu', btnId: 'decadeSelectorBtn' },
             ];
             menuConfigs.forEach(({ menuId, btnId }) => {
                 const menu = document.getElementById(menuId);
@@ -569,7 +613,7 @@
         });
 
         // Prevent closing when clicking inside menu
-        ['genre-multi-select', 'sort-menu'].forEach(id => {
+        ['genre-multi-select', 'sort-menu', 'decade-menu'].forEach(id => {
             const menu = document.getElementById(id);
             if (menu) {
                 menu.addEventListener('click', (e) => {
@@ -743,6 +787,39 @@
             document.getElementById('progressContainer').classList.add('hidden');
             resultDiv.classList.remove('hidden');
         }
-    </script>
+        function toggleDecadeMenu(e) {
+            e.stopPropagation();
+            const menuConfigs = [
+                { menuId: 'genre-multi-select', btnId: 'genreSelectorBtn' },
+                { menuId: 'sort-menu', btnId: 'sortSelectorBtn' },
+                { menuId: 'decade-menu', btnId: 'decadeSelectorBtn' },
+            ];
+            
+            const thisMenu = document.getElementById('decade-menu');
+            const thisBtn = document.getElementById('decadeSelectorBtn');
+            const isHidden = thisMenu.classList.contains('hidden');
+            
+            menuConfigs.forEach(({ menuId, btnId }) => {
+                const menu = document.getElementById(menuId);
+                const btn = document.getElementById(btnId);
+                if (menu && !menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    if (btn) btn.classList.remove('ring-1', 'ring-primary-theme', 'border-primary-theme');
+                }
+            });
+            
+            if (isHidden) {
+                thisMenu.classList.remove('hidden');
+                if (thisBtn) thisBtn.classList.add('ring-1', 'ring-primary-theme', 'border-primary-theme');
+            }
+        }
 
+        function handleDecade(y) {
+            currentDecade = y;
+            reloadPage();
+        }
+
+    </script>
     <%- include('partials/footer') %>
+</body>
+</html>

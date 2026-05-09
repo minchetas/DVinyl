@@ -144,7 +144,7 @@ router.post('/save-game', requireAuth, requireAdmin, async (req, res) => {
     try {
         const {
             mongo_id, title, developer, publisher, platform, year,
-            igdb_id, format, region, barcode,
+            igdb_id, format, region, barcode, barcode_locked,
             cover_image, in_wishlist, comments, location, genre, genres, styles, 
             playStatus, user_rating, quantity
         } = req.body;
@@ -169,6 +169,7 @@ router.post('/save-game', requireAuth, requireAdmin, async (req, res) => {
             game.format = format;
             game.region = region || '';
             game.barcode = barcode;
+            game.barcode_locked = barcode_locked === 'on';
             game.cover_image = cover_image;
             game.in_wishlist = isWishlist;
             game.comments = comments || '';
@@ -185,6 +186,7 @@ router.post('/save-game', requireAuth, requireAdmin, async (req, res) => {
             await Game.create({
                 title, developer, publisher, platform, year,
                 igdb_id, format, region: region || '', barcode,
+                barcode_locked: barcode_locked === 'on',
                 cover_image,
                 kind: 'Game',
                 in_wishlist: isWishlist,

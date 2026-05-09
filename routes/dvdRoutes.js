@@ -136,7 +136,7 @@ router.post('/save-dvd', requireAuth, requireAdmin, async (req, res) => {
     try {
         const {
             mongo_id, title, director, studio, year, duration,
-            tmdb_id, media_type, format, zone, barcode, is_boxset,
+            tmdb_id, media_type, format, zone, barcode, barcode_locked, is_boxset,
             cover_image, in_wishlist, comments, location, genre, genres, styles, watchStatus, user_rating, quantity
         } = req.body;
 
@@ -161,6 +161,7 @@ router.post('/save-dvd', requireAuth, requireAdmin, async (req, res) => {
             dvd.format = format;
             dvd.zone = zone;
             dvd.barcode = barcode;
+            dvd.barcode_locked = barcode_locked === 'on';
             dvd.is_boxset = is_boxset === 'true';
             dvd.cover_image = cover_image;
             dvd.in_wishlist = isWishlist;
@@ -178,6 +179,7 @@ router.post('/save-dvd', requireAuth, requireAdmin, async (req, res) => {
             await Dvd.create({
                 title, director, studio, year, duration,
                 tmdb_id, media_type, format, zone, barcode,
+                barcode_locked: barcode_locked === 'on',
                 is_boxset: is_boxset === 'true',
                 cover_image,
                 kind: 'Dvd',

@@ -88,7 +88,8 @@
     "password_reset_success": "Mot de passe réinitialisé pour {{name}}.",
     "password_mismatch": "Les mots de passe ne correspondent pas.",
     "avatar_success": "Photo de profil mise à jour !",
-    "estimate_error": "Erreur lors de l'estimation"
+    "estimate_error": "Erreur lors de l'estimation",
+    "batch_barcode_success": "{{count}} codes-barres mis à jour !"
   },
   "media": {
     "vinyl": "Vinyle",
@@ -252,7 +253,14 @@
       "import_fast": "Importation Rapide",
       "import_full": "Importation Complète",
       "import_warning": "L'import complet récupère les pistes mais prend plus de temps (limites API).",
-      "import_started": "Démarrage..."
+      "import_started": "Démarrage...",
+      "batch_barcode": {
+        "title": "Importation de codes-barres",
+        "subtitle": "Mettez à jour les codes-barres en lot. Format : ID_DISCOGS:CODE_BARRES (un par ligne). Les items seront automatiquement verrouillés.",
+        "placeholder": "123456:9990001\n789012:9990002",
+        "btn": "Mettre à jour les codes-barres",
+        "success": "{{count}} codes-barres mis à jour !"
+      }
     },
     "backup": {
       "export_btn": "Exporter la base de données",
@@ -352,7 +360,8 @@
     "sort_artist": "Artiste",
     "sort_label": "Trier par",
     "sort_title": "Titre",
-    "sort_year": "Année"
+    "sort_year": "Année",
+    "decade_filter": "Décennie"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",
@@ -386,7 +395,9 @@
     "network_error": "Erreur réseau.",
     "country": "Pays",
     "field_genres": "Genres",
-    "field_styles": "Styles"
+    "field_styles": "Styles",
+    "barcode_label": "Code-barres",
+    "barcode_locked": "Verrouiller le code-barres"
   },
   "edit_vinyl": {
     "title": "Modifier l'album",

@@ -177,6 +177,19 @@
                             <%= album.catalog_number || 'N/A' %>
                         </span>
                     </div>
+                    <% if(album.barcode) { %>
+                    <div>
+                        <span class="block text-xs opacity-50 uppercase font-bold mb-1">
+                            <%= t('confirm_vinyl.barcode_label') %>
+                        </span>
+                        <span class="font-mono text-sm bg-black/5 dark:bg-white/5 px-2 py-1 rounded transition-colors inline-flex items-center gap-2">
+                            <%= album.barcode %>
+                            <% if(album.barcode_locked) { %>
+                                <i class="fa-solid fa-lock text-[10px] text-primary-theme opacity-50"></i>
+                            <% } %>
+                        </span>
+                    </div>
+                    <% } %>
                     <div>
                         <span class="block text-xs opacity-50 uppercase font-bold mb-1">
                             <%= t('confirm_vinyl.year_label') %>

@@ -148,7 +148,14 @@
       "import_warning": "Der vollständige Import ruft Tracks ab, dauert jedoch länger (API-Grenzwerte).",
       "submit": "Passwort erstellen und generieren",
       "title": "Neuer Benutzer",
-      "username": "Benutzername"
+      "username": "Benutzername",
+      "batch_barcode": {
+        "btn": "Barcodes aktualisieren",
+        "placeholder": "123456:9990001\n\n789012:9990002",
+        "subtitle": "Aktualisieren Sie Barcodes im Stapel. \nFormat: ID_DISCOGS:BARCODE (einer pro Zeile). \nGegenstände werden automatisch gesperrt.",
+        "success": "{{count}} Barcodes aktualisiert!",
+        "title": "Batch-Barcode-Import"
+      }
     },
     "modules": "Module",
     "modules_description": "Aktivieren oder deaktivieren Sie die Module von DVinyl",
@@ -217,7 +224,8 @@
     "sort_artist": "Künstler",
     "sort_label": "Sortieren nach",
     "sort_title": "Titel",
-    "sort_year": "Jahr"
+    "sort_year": "Jahr",
+    "decade_filter": "Jahrzehnt"
   },
   "common": {
     "all": "Alle",
@@ -330,7 +338,9 @@
     "source_search": "Suchen",
     "source_url": "URL",
     "tracks_title": "Spuren",
-    "year_label": "Jahr"
+    "year_label": "Jahr",
+    "barcode_label": "Barcode",
+    "barcode_locked": "Barcode sperren"
   },
   "detail": {
     "added_at": "Hinzugefügt bei",
@@ -499,7 +509,8 @@
     "user_created_success": "Benutzer {{name}} wurde erstellt!",
     "user_deleted": "Benutzer gelöscht.",
     "username_available": "Benutzername verfügbar!",
-    "username_current": "Dies ist Ihr aktueller Benutzername."
+    "username_current": "Dies ist Ihr aktueller Benutzername.",
+    "batch_barcode_success": "{{count}} Barcodes aktualisiert!"
   },
   "modal": {
     "add_hub_subtitle": "Wählen Sie den Medientyp aus, den Sie Ihrer Sammlung hinzufügen möchten",

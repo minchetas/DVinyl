@@ -134,7 +134,7 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const { search, type, format, location, genre, sort, artist} = req.query;
+        const { search, type, format, location, genre, sort, artist, decade } = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 25;
 
@@ -170,6 +170,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             });
         }
 
+
         if (location) {
             query.location = new RegExp(location, 'i');
         }
@@ -186,6 +187,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             });
         }
 
+
         if (genre) {
             const genreArr = genre.split(',').map(g => g.trim()).filter(Boolean);
             if (genreArr.length > 0) {
@@ -197,6 +199,19 @@ router.get('/collection', requireAuth, async (req, res) => {
                         { styles: { $in: genreArr.map(g => new RegExp(g, 'i')) } }
                     ]
                 });
+            }
+        }
+
+
+        if (decade) {
+            // decade is expected as "1980", "1990", etc.
+            const startYear = parseInt(decade);
+            if (!isNaN(startYear)) {
+                const years = [];
+                for (let y = startYear; y < startYear + 10; y++) {
+                    years.push(new RegExp(`^${y}$`));
+                }
+                conditions.push({ year: { $in: years } });
             }
         }
 
@@ -298,6 +313,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             queryLocation: location || '',
             queryGenre: genre || '',
             queryArtist: artist || '',
+            queryDecade: decade || '',
             currentSort: sort || 'added_desc',
 
             activeFilters: filterMap[type] || [],
@@ -541,6 +557,14 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
             $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
         });
 
+        let barcode = '';
+        if (data.identifiers && data.identifiers.length > 0) {
+            const barcodeObj = data.identifiers.find(id => id.type === 'Barcode');
+            if (barcodeObj) {
+                barcode = barcodeObj.value.replace(/\s/g, '');
+            }
+        }
+
         const vinyl = {
             title: data.title,
             artist: data.artists ? data.artists.map(a => a.name).join(', ') : 'Unknown',
@@ -555,6 +579,7 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
             country: data.country || '',
             genres: data.genres || [],
             styles: data.styles || [],
+            barcode: barcode,
             media_type: finalMediaType // Pass it to the view
         };
 
@@ -573,7 +598,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
             mongo_id, title, artist, year, label, catalog_number, country,
             format_type, variant_color, cover_image, user_image, discogs_id, tracklist_json,
             media_type, in_wishlist, comments, location, genre, quantity,
-            genres, styles
+            genres, styles, barcode, barcode_locked, added_at
         } = req.body;
         
         const parsedGenres = Array.isArray(genres) ? genres : (genres ? genres.split(',').map(g => g.trim()).filter(Boolean) : []);
@@ -581,6 +606,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
 
         const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
+        const isBarcodeLocked = barcode_locked === 'on' || barcode_locked === 'true' || barcode_locked === true;
         
         let album;
 
@@ -621,6 +647,9 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 styles: parsedStyles,
                 quantity: parseInt(quantity) || 1,
                 country: country || '',
+                barcode: barcode || '',
+                barcode_locked: isBarcodeLocked,
+                added_at: added_at ? new Date(added_at) : (album.added_at || new Date()),
                 kind: 'Music'
             };
             
@@ -651,6 +680,9 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 styles: parsedStyles,
                 quantity: parseInt(quantity) || 1,
                 country: country || '',
+                barcode: barcode || '',
+                barcode_locked: isBarcodeLocked,
+                added_at: added_at ? new Date(added_at) : new Date()
             });
         }
 
@@ -1008,8 +1040,21 @@ router.post('/api/album/:id/refresh-info', requireAuth, requireAdmin, async (req
             tracklist: data.tracklist || []
         };
 
-        // For backward compatibility: update the single genre field if it's currently empty
         const currentAlbum = await Item.findById(albumId);
+        
+        // Only update barcode if not locked
+        if (currentAlbum && !currentAlbum.barcode_locked) {
+            let barcode = '';
+            if (data.identifiers && data.identifiers.length > 0) {
+                const barcodeObj = data.identifiers.find(id => id.type === 'Barcode');
+                if (barcodeObj) {
+                    barcode = barcodeObj.value.replace(/\s/g, '');
+                }
+            }
+            if (barcode) updateData.barcode = barcode;
+        }
+
+        // For backward compatibility: update the single genre field if it's currently empty
         if (currentAlbum && (!currentAlbum.genre || currentAlbum.genre === '') && data.genres && data.genres.length > 0) {
             updateData.genre = data.genres[0];
         }

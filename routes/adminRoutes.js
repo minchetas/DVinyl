@@ -307,6 +307,32 @@ router.post('/visibility/save', requireAuth, requireAdmin, async (req, res) => {
     }
 });
 
+router.post('/batch-update-barcodes', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const { barcodeList } = req.body;
+        if (!barcodeList) return res.redirect('/admin?msg=error');
+
+        const lines = barcodeList.split('\n').map(l => l.trim()).filter(l => l.includes(':'));
+        let count = 0;
+
+        for (const line of lines) {
+            const [discogsId, barcode] = line.split(':').map(s => s.trim());
+            if (discogsId && barcode) {
+                const result = await Item.updateMany(
+                    { discogs_id: parseInt(discogsId), kind: 'Music' },
+                    { $set: { barcode: barcode, barcode_locked: true } }
+                );
+                count += result.modifiedCount;
+            }
+        }
+
+        res.redirect(`/admin?msg=batch_barcode_success&count=${count}`);
+    } catch (err) {
+        console.error("[ERR] batch-update-barcodes", err);
+        res.redirect('/admin?msg=error');
+    }
+});
+
 router.get('/api/search-collection', requireAuth, requireAdmin, async (req, res) => {
     try {
         const { q } = req.query;
@@ -319,7 +345,7 @@ router.get('/api/search-collection', requireAuth, requireAdmin, async (req, res)
         const items = await Item.find({
             owner: adminId,
             $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }]
-        }).limit(10).select('_id title artist author director kind cover_image').lean();
+        }).limit(10).select('_id title artist author director kind cover_image format format_type platform media_type').lean();
 
         res.json(items);
     } catch (err) {
@@ -517,7 +543,7 @@ router.post('/refresh-all-music-metadata', requireAuth, requireAdmin, async (req
 
         query.$and = conditions;
 
-        const albums = await Item.find(query).select('_id discogs_id title artist genre genres styles tracklist');
+        const albums = await Item.find(query).select('_id discogs_id title artist genre genres styles tracklist barcode_locked');
         if (albums.length === 0) return res.json({ success: true, count: 0 });
 
         res.status(202).json({ success: true, total: albums.length });
@@ -543,12 +569,20 @@ router.post('/refresh-all-music-metadata', requireAuth, requireAdmin, async (req
                             headers: { 'User-Agent': 'DVinylApp/2.0', 'Authorization': `Discogs token=${token}` }
                         });
 
-                        const { genres = [], styles = [], tracklist = [] } = response.data;
+                        const { genres = [], styles = [], tracklist = [], identifiers = [] } = response.data;
 
                         const updateObj = {};
                         if (mode === 'all' || !album.genres || album.genres.length === 0) updateObj.genres = genres;
                         if (mode === 'all' || !album.styles || album.styles.length === 0) updateObj.styles = styles;
                         if (mode === 'all' || !album.tracklist || album.tracklist.length === 0) updateObj.tracklist = tracklist;
+                        
+                        if (!album.barcode_locked) {
+                            const barcodeObj = identifiers.find(id => id.type === 'Barcode');
+                            if (barcodeObj) {
+                                updateObj.barcode = barcodeObj.value.replace(/\s/g, '');
+                            }
+                        }
+
                         if (!album.genre || album.genre.trim() === '') {
                             updateObj.genre = genres[0] || '';
                         }
