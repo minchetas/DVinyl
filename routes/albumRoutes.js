@@ -172,7 +172,7 @@ router.get('/collection', requireAuth, async (req, res) => {
 
 
         if (location) {
-            query.location = new RegExp(location, 'i');
+            conditions.push({ location: new RegExp(location, 'i') });
         }
 
         if (artist) {
@@ -180,9 +180,11 @@ router.get('/collection', requireAuth, async (req, res) => {
             conditions.push({
                 $or: [
                     { artist: artistRegex },
+                    { artists: artistRegex },
                     { author: artistRegex },
                     { director: artistRegex },
-                    { developer: artistRegex }
+                    { developer: artistRegex },
+                    { label: artistRegex }
                 ]
             });
         }
@@ -204,21 +206,25 @@ router.get('/collection', requireAuth, async (req, res) => {
 
 
         if (decade) {
-            // decade is expected as "1980", "1990", etc.
-            const startYear = parseInt(decade);
-            if (!isNaN(startYear)) {
+            // decade is expected as a comma-separated string like "1980,1990"
+            const decadeArr = decade.split(',').map(d => parseInt(d)).filter(d => !isNaN(d));
+            if (decadeArr.length > 0) {
                 const years = [];
-                for (let y = startYear; y < startYear + 10; y++) {
-                    years.push(new RegExp(`^${y}$`));
-                }
+                decadeArr.forEach(startYear => {
+                    for (let y = startYear; y < startYear + 10; y++) {
+                        years.push(new RegExp(`^${y}$`));
+                    }
+                });
                 conditions.push({ year: { $in: years } });
             }
         }
 
 
-
-        
-        if (conditions.length > 0) {
+        // Wrap conditions if filterMode is 'hide'
+        const filterMode = req.query.filterMode || 'show';
+        if (filterMode === 'hide' && conditions.length > 0) {
+            query.$and = [{ $nor: [{ $and: conditions }] }];
+        } else if (conditions.length > 0) {
             query.$and = conditions;
         }
 
@@ -314,6 +320,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             queryGenre: genre || '',
             queryArtist: artist || '',
             queryDecade: decade || '',
+            queryFilterMode: filterMode,
             currentSort: sort || 'added_desc',
 
             activeFilters: filterMap[type] || [],

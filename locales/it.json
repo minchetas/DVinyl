@@ -225,7 +225,9 @@
     "sort_label": "Ordina per",
     "sort_title": "Titolo",
     "sort_year": "Anno",
-    "decade_filter": "Decennio"
+    "decade_filter": "Decennio",
+    "filter_mode_hide": "Nascondere",
+    "filter_mode_show": "Spettacolo"
   },
   "common": {
     "all": "Tutto",

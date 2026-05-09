@@ -225,7 +225,9 @@
     "sort_label": "Sortieren nach",
     "sort_title": "Titel",
     "sort_year": "Jahr",
-    "decade_filter": "Jahrzehnt"
+    "decade_filter": "Jahrzehnt",
+    "filter_mode_hide": "Verstecken",
+    "filter_mode_show": "Zeigen"
   },
   "common": {
     "all": "Alle",

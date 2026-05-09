@@ -118,28 +118,32 @@
                     </datalist>
                 </div>
 
-                <div class="w-full lg:w-32 relative">
+                <div class="w-full lg:w-36 relative">
                     <button onclick="toggleDecadeMenu(event)" id="decadeSelectorBtn"
                         class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
                         <span class="truncate transition-opacity <%= locals.queryDecade ? '' : 'opacity-50 group-hover:opacity-100' %>">
-                            <%= locals.queryDecade ? locals.queryDecade + 's' : t('collection.decade_filter') %>
+                            <% const currentDecadeArr = locals.queryDecade ? locals.queryDecade.split(',') : []; %>
+                            <%= currentDecadeArr.length > 0 ? (currentDecadeArr.length === 1 ? currentDecadeArr[0] + 's' : currentDecadeArr.length + ' ' + t('collection.decade_filter')) : t('collection.decade_filter') %>
                         </span>
                         <i class="fa-solid fa-chevron-down text-[10px] opacity-20 group-hover:opacity-60 transition-all"></i>
                     </button>
-                    <div id="decade-menu" class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-2 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div id="decade-menu" class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-3 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div class="max-h-[40vh] overflow-y-auto custom-scrollbar space-y-1">
-                            <button onclick="handleDecade('')" class="w-full flex items-center p-2 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all opacity-70">
-                                <%= t('collection.decade_filter') %>
-                            </button>
                             <% const currentYear = new Date().getFullYear(); 
                                for (let y = Math.floor(currentYear/10)*10; y >= 1950; y -= 10) { 
-                                   const isActive = locals.queryDecade == y;
+                                   const isActive = currentDecadeArr.includes(y.toString());
                             %>
-                                <button onclick="handleDecade('<%= y %>')" class="w-full flex items-center justify-between p-2 text-sm rounded-lg transition-all cursor-pointer <%= isActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                    <span><%= y %>s</span>
-                                    <% if (isActive) { %><i class="fa-solid fa-check text-[11px]"></i><% } %>
-                                </button>
+                                <label class="flex items-center gap-3 p-2 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors group">
+                                    <input type="checkbox" class="decade-checkbox accent-primary-theme w-4 h-4 rounded border-gray-300 transition-all cursor-pointer" 
+                                           value="<%= y %>" <%= isActive ? 'checked' : '' %>>
+                                    <span class="group-hover:translate-x-0.5 transition-transform"><%= y %>s</span>
+                                </label>
                             <% } %>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
+                            <button onclick="reloadPage()" class="w-full py-2 bg-primary-theme text-white text-xs font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all">
+                                <%= t('common.apply') %>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -181,76 +185,90 @@
                     </div>
                     <% } %>
 
-
-
-                        <div class="w-full lg:w-44 relative">
-                            <div class="relative">
-                                <input type="text" id="artistInput" placeholder="<%= t('collection.artist_filter') %>"
-                                    value="<%= locals.queryArtist || '' %>" autocomplete="off"
-                                    class="filter-input-textbox block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none placeholder-opacity-50">
-                                <div id="artistAutocomplete"
-                                    class="hidden absolute left-0 right-0 top-full z-50 mt-1 card-theme rounded-xl shadow-2xl border border-black/5 dark:border-white/10 max-h-[40vh] overflow-y-auto custom-scrollbar">
-                                </div>
-                            </div>
+                <div class="w-full lg:w-44 relative">
+                    <div class="relative">
+                        <input type="text" id="artistInput" placeholder="<%= t('collection.artist_filter') %>"
+                            value="<%= locals.queryArtist || '' %>" autocomplete="off"
+                            class="filter-input-textbox block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none placeholder-opacity-50">
+                        <div id="artistAutocomplete"
+                            class="hidden absolute left-0 right-0 top-full z-50 mt-1 card-theme rounded-xl shadow-2xl border border-black/5 dark:border-white/10 max-h-[40vh] overflow-y-auto custom-scrollbar">
                         </div>
+                    </div>
+                </div>
 
-                        <div class="w-full lg:w-48 relative">
-                            <button onclick="toggleSortMenu(event)" id="sortSelectorBtn"
-                                class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
-                                <span class="truncate opacity-50 group-hover:opacity-100 transition-opacity"
-                                    id="sortLabel">
-                                    <%= t('collection.sort_label') %>
-                                </span>
-                                <i
-                                    class="fa-solid fa-arrow-down-short-wide text-[12px] opacity-20 group-hover:opacity-60 transition-all"></i>
-                            </button>
-                            <div id="sort-menu"
-                                class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-2 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
-                                <% const sortOptions=[ { key: 'added' , label: t('collection.sort_added'), descFirst:
-                                    true }, { key: 'title' , label: t('collection.sort_title'), descFirst: false }, {
-                                    key: 'year' , label: t('collection.sort_year'), descFirst: true }, ]; %>
-                                    <% sortOptions.forEach(opt=> {
-                                        const isActive = currentSort.startsWith(opt.key);
-                                        const currentDir = isActive ? (currentSort.endsWith('_asc') ? 'asc' :
-                                        'desc') : (opt.descFirst ? 'desc' : 'asc');
-                                        %>
-                                        <button
-                                            onclick="handleSort('<%= opt.key %>', '<%= currentDir %>', <%= opt.descFirst %>)"
-                                            class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
-                                                    <%= isActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                            <span>
-                                                <%= opt.label %>
-                                            </span>
-                                            <% if (isActive) { %>
-                                                <i
-                                                    class="fa-solid fa-arrow-<%= currentDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
-                                                <% } %>
-                                        </button>
-                                        <% }); %>
-                                            <% if (currentType !=='all' ) { %>
-                                                <% const artistActive=currentSort.startsWith('artist'); const
-                                                    artistDir=artistActive ? (currentSort.endsWith('_asc') ? 'asc'
-                                                    : 'desc' ) : 'asc' ; %>
-                                                    <button onclick="handleSort('artist', '<%= artistDir %>', false)"
-                                                        class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
-                                                    <%= artistActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                                        <span>
-                                                            <%= t('collection.sort_artist') %>
-                                                        </span>
-                                                        <% if (artistActive) { %>
-                                                            <i
-                                                                class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
-                                                            <% } %>
-                                                    </button>
+                <div class="w-full lg:w-48 relative">
+                    <button onclick="toggleSortMenu(event)" id="sortSelectorBtn"
+                        class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
+                        <span class="truncate opacity-50 group-hover:opacity-100 transition-opacity"
+                            id="sortLabel">
+                            <%= t('collection.sort_label') %>
+                        </span>
+                        <i
+                            class="fa-solid fa-arrow-down-short-wide text-[12px] opacity-20 group-hover:opacity-60 transition-all"></i>
+                    </button>
+                    <div id="sort-menu"
+                        class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-2 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <% const sortOptions=[ { key: 'added' , label: t('collection.sort_added'), descFirst:
+                            true }, { key: 'title' , label: t('collection.sort_title'), descFirst: false }, {
+                            key: 'year' , label: t('collection.sort_year'), descFirst: true }, ]; %>
+                            <% sortOptions.forEach(opt=> {
+                                const isActive = currentSort.startsWith(opt.key);
+                                const currentDir = isActive ? (currentSort.endsWith('_asc') ? 'asc' :
+                                'desc') : (opt.descFirst ? 'desc' : 'asc');
+                                %>
+                                <button
+                                    onclick="handleSort('<%= opt.key %>', '<%= currentDir %>', <%= opt.descFirst %>)"
+                                    class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
+                                            <%= isActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                    <span>
+                                        <%= opt.label %>
+                                    </span>
+                                    <% if (isActive) { %>
+                                        <i
+                                            class="fa-solid fa-arrow-<%= currentDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                        <% } %>
+                                </button>
+                                <% }); %>
+                                    <% if (currentType !=='all' ) { %>
+                                        <% const artistActive=currentSort.startsWith('artist'); const
+                                            artistDir=artistActive ? (currentSort.endsWith('_asc') ? 'asc'
+                                            : 'desc' ) : 'asc' ; %>
+                                            <button onclick="handleSort('artist', '<%= artistDir %>', false)"
+                                                class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
+                                            <%= artistActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                                <span>
+                                                    <%= t('collection.sort_artist') %>
+                                                </span>
+                                                <% if (artistActive) { %>
+                                                    <i
+                                                        class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
                                                     <% } %>
-                            </div>
-                        </div>
-                        <div class="w-full lg:w-12">
-                            <button onclick="reloadPage()"
-                                class="block w-full p-2.5 text-sm rounded-lg border hover:text-primary-theme hover:border-primary-theme card-theme transition-all bg-primary-theme/5">
-                                <i class="fa-solid fa-magnifying-glass opacity-60"></i>
-                            </button>
-                        </div>
+                                            </button>
+                                            <% } %>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 w-full lg:w-auto">
+                    <div class="flex bg-black/5 dark:bg-white/5 p-1 rounded-lg h-10 items-center">
+                        <button onclick="setFilterMode('show')" 
+                            title="<%= t('collection.filter_mode_show') %>"
+                            class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode !== 'hide') ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                        <button onclick="setFilterMode('hide')" 
+                            title="<%= t('collection.filter_mode_hide') %>"
+                            class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode === 'hide') ? 'bg-red-500 text-white shadow-sm' : 'opacity-40 hover:opacity-100' %>">
+                            <i class="fa-solid fa-eye-slash text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="w-12">
+                        <button onclick="reloadPage()"
+                            class="block w-full h-10 flex items-center justify-center rounded-lg border hover:text-primary-theme hover:border-primary-theme card-theme transition-all bg-primary-theme/5">
+                            <i class="fa-solid fa-magnifying-glass opacity-60"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -441,6 +459,12 @@
         const artistInput = document.getElementById('artistInput');
         let currentLimit = <%= locals.queryLimit %>;
         let currentDecade = '<%= locals.queryDecade || "" %>';
+        let currentFilterMode = '<%= locals.queryFilterMode || "show" %>';
+
+        function setFilterMode(mode) {
+            currentFilterMode = mode;
+            reloadPage();
+        }
 
         function toggleMobileFilters() {
             const container = document.getElementById('filterContainer');
@@ -466,24 +490,6 @@
             window.location.href = url.toString();
         }
 
-            validateAndSetUrlSearchParamString('type', currentType);
-            validateAndSetUrlSearchParamString('format', currentFormat);
-            validateAndSetUrlSearchParamString('search', filterInput?.value);
-            validateAndSetUrlSearchParamString('location', locationInput?.value);
-
-            if (currentType !== 'all') {
-                const genreMenu = document.getElementById('genre-multi-select');
-                if (genreMenu) {
-                    const checkedGenres = [...genreMenu.querySelectorAll('.genre-checkbox:checked')].map(cb => cb.value);
-                    const isExclude = document.getElementById('excludeGenreMode').checked;
-                    if (checkedGenres.length) {
-                        url.searchParams.set(isExclude ? 'exclude_genre' : 'genre', checkedGenres.join(','));
-                    }
-                }
-            }
-
-
-
         function reloadPage() {
             const url = new URL(window.location.origin + window.location.pathname);
 
@@ -500,10 +506,16 @@
                 }
             }
 
+            const decadeMenu = document.getElementById('decade-menu');
+            if (decadeMenu) {
+                const checkedDecades = [...decadeMenu.querySelectorAll('.decade-checkbox:checked')].map(cb => cb.value);
+                if (checkedDecades.length) url.searchParams.set('decade', checkedDecades.join(','));
+            }
+
             validateAndSetUrlSearchParamString('limit', currentLimit);
             validateAndSetUrlSearchParamString('sort', currentSort);
-            validateAndSetUrlSearchParamString('decade', currentDecade);
             validateAndSetUrlSearchParamString('artist', artistInput?.value);
+            validateAndSetUrlSearchParamString('filterMode', currentFilterMode);
 
             url.searchParams.set('page', 1);
             window.location.href = url.toString();
@@ -814,10 +826,6 @@
             }
         }
 
-        function handleDecade(y) {
-            currentDecade = y;
-            reloadPage();
-        }
 
     </script>
     <%- include('partials/footer') %>

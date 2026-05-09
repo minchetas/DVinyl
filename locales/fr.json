@@ -361,7 +361,9 @@
     "sort_label": "Trier par",
     "sort_title": "Titre",
     "sort_year": "Année",
-    "decade_filter": "Décennie"
+    "decade_filter": "Décennie",
+    "filter_mode_show": "Afficher",
+    "filter_mode_hide": "Masquer"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",
