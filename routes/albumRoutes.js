@@ -134,7 +134,13 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const { search, type, format, location, genre, sort, artist, decade } = req.query;
+        const { search, type, format, location, genre, artist, decade } = req.query;
+        let sort = req.query.sort;
+        if (sort) {
+            res.cookie('sortPref', sort, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+        } else {
+            sort = req.cookies.sortPref || 'added_desc';
+        }
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 25;
 
@@ -321,7 +327,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             queryArtist: artist || '',
             queryDecade: decade || '',
             queryFilterMode: filterMode,
-            currentSort: sort || 'added_desc',
+            currentSort: sort,
 
             activeFilters: filterMap[type] || [],
             artistList,
