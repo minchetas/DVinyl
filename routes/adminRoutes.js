@@ -14,9 +14,8 @@ const Vinyl = require("../models/Vinyl");
 const Book = require("../models/Book");
 const Dvd = require("../models/Dvd");
 const Game = require("../models/Game");
-const { BOOK_GENRES_WHITELIST } = require("../config/constants");
+const { BOOK_GENRES_WHITELIST, TMDB_LANG_MAP } = require("../config/constants");
 const { igdbRequest } = require("../utils/igdbHelper");
-const lang = process.env.LANG;
 
 /**
  * routes/adminRoutes.js
@@ -476,7 +475,8 @@ router.get(
           // TMDB fallback
           const tmdbApiKey = process.env.TMDB_API_KEY;
           if (tmdbApiKey) {
-            const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=${lang}`;
+            const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
+            const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=${tmdbLang}`;
             const tmdbRes = await axios.get(tmdbUrl, axiosConfig);
             const tmdbUrls = (tmdbRes.data.results || [])
               .filter((item) => item.poster_path)
@@ -510,7 +510,8 @@ router.get(
           return res.status(500).json({ error: "Missing TMDB API Key" });
         }
 
-        const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=${lang}`;
+        const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
+        const tmdbUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(q)}&language=${tmdbLang}`;
         const response = await axios.get(tmdbUrl, axiosConfig);
 
         const results = (response.data.results || [])
@@ -934,8 +935,9 @@ router.post(
             }
 
             const type = dvd.media_type === "tv" ? "tv" : "movie";
+            const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
             const response = await axios.get(
-              `https://api.themoviedb.org/3/${type}/${dvd.tmdb_id}?api_key=${tmdbKey}&language=${lang}`,
+              `https://api.themoviedb.org/3/${type}/${dvd.tmdb_id}?api_key=${tmdbKey}&language=${tmdbLang}`,
             );
 
             if (response.data) {

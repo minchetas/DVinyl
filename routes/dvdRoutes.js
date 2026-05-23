@@ -5,7 +5,7 @@ const Dvd = require("../models/Dvd");
 const Item = require("../models/Item");
 const User = require("../models/User");
 const { requireAuth, requireAdmin } = require("../middleware/authMiddleware");
-const lang = process.env.LANG;
+const { TMDB_LANG_MAP } = require("../config/constants");
 
 async function getAdminId() {
   const admin = await User.findOne({ isAdmin: true }).select("_id");
@@ -49,6 +49,7 @@ router.post("/search-dvds", requireAuth, requireAdmin, async (req, res) => {
   try {
     const tmdbApiKey = process.env.TMDB_API_KEY;
     if (!tmdbApiKey) throw new Error("TMDB_API_KEY missing");
+    const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
 
     const isBarcode = /^\d{12,13}$/.test(query.replace(/[- ]/g, ""));
 
@@ -71,10 +72,10 @@ router.post("/search-dvds", requireAuth, requireAdmin, async (req, res) => {
 
     const [page1, page2] = await Promise.all([
       axios.get(
-        `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=${lang}&page=1`,
+        `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=${tmdbLang}&page=1`,
       ),
       axios.get(
-        `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=${lang}&page=2`,
+        `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(searchQuery)}&language=${tmdbLang}&page=2`,
       ),
     ]);
 
@@ -116,7 +117,8 @@ router.get(
 
     try {
       const tmdbApiKey = process.env.TMDB_API_KEY;
-      const url = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${tmdbApiKey}&language=${lang}&append_to_response=credits`;
+      const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
+      const url = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${tmdbApiKey}&language=${tmdbLang}&append_to_response=credits`;
 
       const response = await axios.get(url);
       const data = response.data;
@@ -390,8 +392,9 @@ router.post(
 
       const tmdbApiKey = process.env.TMDB_API_KEY;
       const type = dvd.media_type === "tv" ? "tv" : "movie";
+      const tmdbLang = TMDB_LANG_MAP[req.language] || "en-US";
       const response = await axios.get(
-        `https://api.themoviedb.org/3/${type}/${dvd.tmdb_id}?api_key=${tmdbApiKey}&language=${lang}`,
+        `https://api.themoviedb.org/3/${type}/${dvd.tmdb_id}?api_key=${tmdbApiKey}&language=${tmdbLang}`,
       );
 
       if (!response.data) {
