@@ -150,7 +150,7 @@ router.get('/collection', requireAuth, async (req, res) => {
         if (search) {
             const regex = new RegExp(search, 'i');
             conditions.push({ 
-                $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }] 
+                $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }] 
             });
         }
 

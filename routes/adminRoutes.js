@@ -344,7 +344,7 @@ router.get('/api/search-collection', requireAuth, requireAdmin, async (req, res)
         const regex = new RegExp(q, 'i');
         const items = await Item.find({
             owner: adminId,
-            $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }]
+            $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }]
         }).limit(10).select('_id title artist author director kind cover_image format format_type platform media_type').lean();
 
         res.json(items);
