@@ -401,29 +401,19 @@ router.get(
   requireAdmin,
   async (req, res) => {
     try {
-      const { q } = req.query;
-      if (!q) return res.json([]);
+        const { q } = req.query;
+        if (!q) return res.json([]);
 
-      const admin = await User.findOne({ isAdmin: true }).select("_id");
-      const adminId = admin ? admin._id : null;
+        const admin = await User.findOne({ isAdmin: true }).select('_id');
+        const adminId = admin ? admin._id : null;
 
-      const regex = new RegExp(q, "i");
-      const items = await Item.find({
-        owner: adminId,
-        $or: [
-          { title: regex },
-          { artist: regex },
-          { author: regex },
-          { director: regex },
-        ],
-      })
-        .limit(10)
-        .select(
-          "_id title artist author director kind cover_image format format_type platform media_type",
-        )
-        .lean();
+        const regex = new RegExp(q, 'i');
+        const items = await Item.find({
+            owner: adminId,
+            $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }]
+        }).limit(10).select('_id title artist author director kind cover_image format format_type platform media_type').lean();
 
-      res.json(items);
+        res.json(items);
     } catch (err) {
       console.error("[ERR] search collection", err);
       res.status(500).json({ error: "Search failed" });

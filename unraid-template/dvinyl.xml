@@ -1,0 +1,40 @@
+<Container version="2">
+  <Name>DVinyl</Name>
+  <Repository>kyonew/dvinyl:latest</Repository>
+  <Registry>https://hub.docker.com/r/kyonew/dvinyl</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Kyonew/DVinyl/issues</Support>
+  <Project>https://github.com/Kyonew/DVinyl</Project>
+  <Overview>A self-hosted media collection manager for your Vinyls, CDs, Books, Games, and DVDs.</Overview>
+  <Description>DVinyl is a self-hosted media collection manager for your Vinyls, CDs, Books, Games, and DVDs. Keep track of your collection easily. Note: Requires a separate MongoDB instance.</Description>
+  <Category>MediaApp:Books MediaApp:Video MediaApp:Other</Category>
+  <WebUI>http://[IP]:[PORT:3099]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/Kyonew/DVinyl/main/unraid-template/dvinyl.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/Kyonew/DVinyl/main/public/images/logo.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled></DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>MongoDB database. You must install a MongoDB container first and link it via the MONGODB_URL variable.</Requires>
+  
+  <Config Name="WebUI Port" Target="3099" Default="3099" Mode="tcp" Description="The port DVinyl will be accessible on." Type="Port" Display="always" Required="true" Mask="false">3099</Config>
+  
+  <Config Name="Uploads Volume" Target="/app/public/uploads" Default="/mnt/user/appdata/dvinyl/uploads" Mode="rw" Description="Directory to store uploaded files like covers." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/dvinyl/uploads</Config>
+  
+  <Config Name="MongoDB URL" Target="MONGODB_URL" Default="mongodb://[IP_OF_MONGODB]:27017/dvinyl" Mode="" Description="Connection string for your MongoDB instance. Replace [IP_OF_MONGODB] with your MongoDB container IP or Unraid IP if hosted on the same custom network." Type="Variable" Display="always" Required="true" Mask="false">mongodb://[IP_OF_MONGODB]:27017/dvinyl</Config>
+  <Config Name="JWT Password" Target="PASSJWT" Default="ChangeThisToAComplexPassword" Mode="" Description="Password used for JWT token encryption." Type="Variable" Display="always" Required="true" Mask="true">ChangeThisToAComplexPassword</Config>
+  <Config Name="Session Secret" Target="SESSION_SECRET" Default="ChangeThisToAComplexSecret" Mode="" Description="Secret used for sessions." Type="Variable" Display="always" Required="true" Mask="true">ChangeThisToAComplexSecret</Config>
+  
+  <Config Name="HTTPS Production Mode" Target="PROD" Default="false" Mode="" Description="Change to true ONLY if you use HTTPS via a reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Base URL" Target="BASE_URL" Default="" Mode="" Description="Base URL for serving on a sub-path, leave empty to serve from root." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Discogs API Token" Target="DISCOGS_TOKEN" Default="" Mode="" Description="Your Discogs API Token for Vinyls/CDs." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Hardcover API Key" Target="HARDCOVER_API_KEY" Default="" Mode="" Description="Your Hardcover API Key for Books." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="TMDB API Key" Target="TMDB_API_KEY" Default="" Mode="" Description="Your TMDB API Key for DVDs." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Twitch Client ID" Target="TWITCH_CLIENT_ID" Default="" Mode="" Description="Your Twitch Client ID for Games." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Twitch Client Secret" Target="TWITCH_CLIENT_SECRET" Default="" Mode="" Description="Your Twitch Client Secret for Games." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+</Container>
