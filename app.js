@@ -212,8 +212,9 @@ const migrateDatabase = require('./utils/migrate.js');
 connectDB()
   .then(async () => {
     await migrateDatabase();
-    server.listen(process.env.VINYL_PORT, () => {
-        console.log(`🚀 Server started on port ${process.env.VINYL_PORT}`);
+    const port = process.env.VINYL_PORT || 3099;
+    server.listen(port, () => {
+        console.log(`🚀 Server started on port ${port}`);
     });
   })
   .catch((err) => console.log('❌DB Error:', err));

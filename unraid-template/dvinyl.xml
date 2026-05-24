@@ -13,7 +13,7 @@
   <Category>MediaApp:Books MediaApp:Video MediaApp:Other</Category>
   <WebUI>http://[IP]:[PORT:3099]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/Kyonew/DVinyl/main/unraid-template/dvinyl.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/Kyonew/DVinyl/main/public/images/logo.png</Icon>
+  <Icon>https://raw.githubusercontent.com/Kyonew/DVinyl/main/public/ressources/logo.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
@@ -31,6 +31,7 @@
   <Config Name="Session Secret" Target="SESSION_SECRET" Default="ChangeThisToAComplexSecret" Mode="" Description="Secret used for sessions." Type="Variable" Display="always" Required="true" Mask="true">ChangeThisToAComplexSecret</Config>
   
   <Config Name="HTTPS Production Mode" Target="PROD" Default="false" Mode="" Description="Change to true ONLY if you use HTTPS via a reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Vinyl Port Variable" Target="VINYL_PORT" Default="3099" Mode="" Description="Internal port variable required by the app." Type="Variable" Display="always" Required="true" Mask="false">3099</Config>
   <Config Name="Base URL" Target="BASE_URL" Default="" Mode="" Description="Base URL for serving on a sub-path, leave empty to serve from root." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="Discogs API Token" Target="DISCOGS_TOKEN" Default="" Mode="" Description="Your Discogs API Token for Vinyls/CDs." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
   <Config Name="Hardcover API Key" Target="HARDCOVER_API_KEY" Default="" Mode="" Description="Your Hardcover API Key for Books." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
