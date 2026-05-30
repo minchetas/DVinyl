@@ -995,8 +995,27 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
 
                 let formatType = [info.formats?.[0]?.name].filter(Boolean);
                 let variantColor = [];
-                if (info.formats?.[0]?.descriptions) {
-                    info.formats[0].descriptions.forEach(d => STANDARD_FORMAT_TERMS.includes(d) ? formatType.push(d) : variantColor.push(d));
+                const firstFormat = info.formats?.[0];
+                if (firstFormat) {
+                    if (firstFormat.text) {
+                        const parts = firstFormat.text.split(',').map(p => p.trim());
+                        parts.forEach(part => {
+                            if (STANDARD_FORMAT_TERMS.includes(part)) {
+                                if (!formatType.includes(part)) formatType.push(part);
+                            } else {
+                                if (!variantColor.includes(part)) variantColor.push(part);
+                            }
+                        });
+                    }
+                    if (firstFormat.descriptions) {
+                        firstFormat.descriptions.forEach(d => {
+                            if (STANDARD_FORMAT_TERMS.includes(d)) {
+                                if (!formatType.includes(d)) formatType.push(d);
+                            } else {
+                                if (!variantColor.includes(d)) variantColor.push(d);
+                            }
+                        });
+                    }
                 }
                 const rawFormat = info.formats?.[0]?.name.toLowerCase() || 'vinyl';
                 let mediaType = rawFormat.includes('cd') ? 'cd' : (rawFormat.includes('cassette') ? 'cassette' : 'vinyl');
