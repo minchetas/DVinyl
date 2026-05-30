@@ -378,7 +378,12 @@
     "artist_filter": "Artist",
     "decade_filter": "Decade",
     "filter_mode_show": "Show",
-    "filter_mode_hide": "Hide"
+    "filter_mode_hide": "Hide",
+    "styles_filter": "Styles",
+    "clear_all": "Clear all filters",
+    "search_genre_placeholder": "Search genres...",
+    "search_style_placeholder": "Search styles...",
+    "active_filters": "Active filters:"
   },
   "confirm_vinyl": {
     "cover_preview": "Cover Preview",

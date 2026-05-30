@@ -378,7 +378,12 @@
     "sort_year": "Année",
     "decade_filter": "Décennie",
     "filter_mode_show": "Afficher",
-    "filter_mode_hide": "Masquer"
+    "filter_mode_hide": "Masquer",
+    "styles_filter": "Styles",
+    "clear_all": "Effacer tous les filtres",
+    "search_genre_placeholder": "Rechercher des genres...",
+    "search_style_placeholder": "Rechercher des styles...",
+    "active_filters": "Filtres actifs :"
   },
   "confirm_vinyl": {
     "cover_preview": "Aperçu Pochette",

@@ -242,7 +242,12 @@
     "sort_year": "Jahr",
     "decade_filter": "Jahrzehnt",
     "filter_mode_hide": "Verstecken",
-    "filter_mode_show": "Zeigen"
+    "filter_mode_show": "Zeigen",
+    "styles_filter": "Styles",
+    "clear_all": "Alle Filter löschen",
+    "search_genre_placeholder": "Genres suchen...",
+    "search_style_placeholder": "Styles suchen...",
+    "active_filters": "Aktive Filter:"
   },
   "common": {
     "all": "Alle",

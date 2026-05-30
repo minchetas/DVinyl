@@ -135,7 +135,7 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/collection', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const { search, type, format, location, genre, artist, decade } = req.query;
+        const { search, type, format, location, genre, style, artist, decade } = req.query;
         let sort = req.query.sort;
         if (sort) {
             res.cookie('sortPref', sort, { maxAge: 365 * 24 * 60 * 60 * 1000 });
@@ -200,13 +200,20 @@ router.get('/collection', requireAuth, async (req, res) => {
         if (genre) {
             const genreArr = genre.split(',').map(g => g.trim()).filter(Boolean);
             if (genreArr.length > 0) {
-                // Return items that match ANY of the selected genres/styles
                 conditions.push({
                     $or: [
                         { genre: { $in: genreArr.map(g => new RegExp(g, 'i')) } },
-                        { genres: { $in: genreArr.map(g => new RegExp(g, 'i')) } },
-                        { styles: { $in: genreArr.map(g => new RegExp(g, 'i')) } }
+                        { genres: { $in: genreArr.map(g => new RegExp(g, 'i')) } }
                     ]
+                });
+            }
+        }
+
+        if (style) {
+            const styleArr = style.split(',').map(s => s.trim()).filter(Boolean);
+            if (styleArr.length > 0) {
+                conditions.push({
+                    styles: { $in: styleArr.map(s => new RegExp(s, 'i')) }
                 });
             }
         }
@@ -325,6 +332,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             querySearch: search || '',
             queryLocation: location || '',
             queryGenre: genre || '',
+            queryStyle: style || '',
             queryArtist: artist || '',
             queryDecade: decade || '',
             queryFilterMode: filterMode,
@@ -338,12 +346,19 @@ router.get('/collection', requireAuth, async (req, res) => {
                 const kind = { music: 'Music', books: 'Book', dvd: 'Dvd', games: 'Game' }[type];
                 const typeQuery = type === 'music' ? { $or: [{ kind: 'Music' }, { kind: { $exists: false } }] } : { kind };
 
-                const [gBase, gArray, sArray] = await Promise.all([
+                const [gBase, gArray] = await Promise.all([
                     Item.distinct('genre', { owner: adminId, ...typeQuery, genre: { $nin: ['', null] } }),
-                    Item.distinct('genres', { owner: adminId, ...typeQuery }),
-                    Item.distinct('styles', { owner: adminId, ...typeQuery })
+                    Item.distinct('genres', { owner: adminId, ...typeQuery })
                 ]);
-                return [...new Set([...gBase, ...gArray, ...sArray])].filter(Boolean).sort();
+                return [...new Set([...gBase, ...gArray])].filter(Boolean).sort();
+            })(),
+            styles: await (async () => {
+                if (type !== 'music') return [];
+                const sArray = await Item.distinct('styles', {
+                    owner: adminId,
+                    $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
+                });
+                return [...new Set(sArray)].filter(Boolean).sort();
             })(),
             standardFormatTerms: STANDARD_FORMAT_TERMS,
         });

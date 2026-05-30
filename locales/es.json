@@ -242,7 +242,12 @@
     "sort_year": "Año",
     "decade_filter": "Década",
     "filter_mode_hide": "Esconder",
-    "filter_mode_show": "Espectáculo"
+    "filter_mode_show": "Espectáculo",
+    "styles_filter": "Estilos",
+    "clear_all": "Borrar todos los filtros",
+    "search_genre_placeholder": "Buscar géneros...",
+    "search_style_placeholder": "Buscar estilos...",
+    "active_filters": "Filtros activos:"
   },
   "common": {
     "all": "Todo",
