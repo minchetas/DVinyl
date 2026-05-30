@@ -51,15 +51,18 @@ const checkUser = (req, res, next) => {
 
   res.locals.user = null;
   res.locals.isAdmin = false;
+  req.user = null;
 
   if (token) {
     jwt.verify(token, process.env.PASSJWT, async (err, decodedToken) => {
       if (err) {
         res.locals.user = null;
+        req.user = null;
         next();
       } else {
         let user = await User.findById(decodedToken.id);
         res.locals.user = user;
+        req.user = user;
 
         if (user && user.isAdmin === true) {
             res.locals.isAdmin = true;
@@ -70,6 +73,7 @@ const checkUser = (req, res, next) => {
     });
   } else {
     res.locals.user = null;
+    req.user = null;
     next();
   }
 };

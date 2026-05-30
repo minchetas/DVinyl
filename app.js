@@ -109,6 +109,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(checkUser);
+
 app.use(async (req, res, next) => {
   // If the user is authenticated and has a language preference, enforce it
   if (req.user && req.user.language) {
@@ -145,7 +147,6 @@ app.use(async (req, res, next) => {
 });
 
 // Check user middleware (populate res.locals.user for all views)
-app.use(checkUser);
 app.use(settingsMiddleware);
 
 // Installation gatekeeper middleware

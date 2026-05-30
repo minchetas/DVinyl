@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 // POST /setup - create initial admin user and issue a JWT
 router.post('/', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, language } = req.body;
         
         // Create the initial admin user (isAdmin: true)
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -39,6 +39,7 @@ router.post('/', async (req, res) => {
             email,
             password: password, 
             isAdmin: true,
+            language: language || req.language || 'fr',
             lastChange: new Date()
         });
 
