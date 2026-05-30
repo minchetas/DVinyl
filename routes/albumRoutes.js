@@ -497,7 +497,7 @@ router.post('/search-discogs', requireAuth, requireAdmin, async (req, res) => {
             currentType: 'add-vinyl'
         });
     } catch (err) {
-        console.error(err);
+        console.error(`❌ Discogs Search error:`, err.message);
         res.render('add-vinyl', { results: [], error: req.t('errors.api_error'), searchType: type, user: res.locals.user, currentType: 'add-vinyl' });
     }
 });
@@ -598,8 +598,14 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
 
         res.render('confirm-vinyl', { vinyl, user: res.locals.user, locations, genres, currentType: 'music' });
     } catch (err) {
-        console.error(err);
-        res.status(500).send(req.t('errors.generic_server_error'));
+        console.error(`❌ Discogs Release details error for ID ${discogsId}:`, err.message);
+        res.render('add-vinyl', { 
+            results: [], 
+            error: `${req.t('errors.api_error')} (Discogs HTTP ${err.response ? err.response.status : '500'})`, 
+            searchType: searchTypeHint || 'vinyl', 
+            user: res.locals.user, 
+            currentType: 'add-vinyl' 
+        });
     }
 });
 
