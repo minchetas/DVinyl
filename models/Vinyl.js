@@ -16,6 +16,7 @@ const vinylSchema = new mongoose.Schema({
   },
   format_type: { type: String, default: 'Vinyl' },
   variant_color: String,
+  sleeve_condition: { type: String, default: '' },
   discogs_id: Number,
   country: { type: String, default: '' },
   tracklist: [{ position: String, title: String, duration: String }],

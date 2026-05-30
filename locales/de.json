@@ -343,7 +343,10 @@
     "tracks_title": "Spuren",
     "year_label": "Jahr",
     "barcode_label": "Barcode",
-    "barcode_locked": "Barcode sperren"
+    "barcode_locked": "Barcode sperren",
+    "sleeve_condition_label": "Zustand der Hülle",
+    "sleeve_condition_placeholder": "Zustand auswählen...",
+    "sleeve_condition_generic": "Generische Hülle"
   },
   "detail": {
     "added_at": "Hinzugefügt bei",
@@ -365,8 +368,9 @@
     "personal_notes": "Persönliche Notizen",
     "refresh_info_error": "Fehler beim Aktualisieren der Metadaten.",
     "refresh_info_success": "Metadaten erfolgreich aktualisiert!",
-    "shipping_hint": "*Exkl. \nVersand",
+    "shipping_hint": "*Excl. \nVersand",
     "source": "Quelle",
+    "sleeve_condition": "Zustand der Hülle",
     "tracklist_not_found": "Tracklist nicht auf Discogs gefunden",
     "tracklist_title": "Trackliste",
     "unavailable_data": "Daten nicht verfügbar",

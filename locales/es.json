@@ -343,7 +343,10 @@
     "tracks_title": "Pistas",
     "year_label": "Año",
     "barcode_label": "Código de barras",
-    "barcode_locked": "bloquear código de barras"
+    "barcode_locked": "bloquear código de barras",
+    "sleeve_condition_label": "Estado de la funda",
+    "sleeve_condition_placeholder": "Seleccionar estado...",
+    "sleeve_condition_generic": "Funda genérica"
   },
   "detail": {
     "added_at": "Agregado en",
@@ -367,6 +370,7 @@
     "refresh_info_success": "¡Metadatos actualizados exitosamente!",
     "shipping_hint": "*Excl. \nenvío",
     "source": "Fuente",
+    "sleeve_condition": "Estado de la funda",
     "tracklist_not_found": "Lista de canciones no encontrada en Discogs",
     "tracklist_title": "Lista de canciones",
     "unavailable_data": "Datos no disponibles",

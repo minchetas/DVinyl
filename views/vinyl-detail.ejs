@@ -93,6 +93,14 @@
                                             <%= album.variant_color %>
                                         </span>
                                         <% } %>
+                                    <% if(album.sleeve_condition) { %>
+                                        <span
+                                            class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs flex items-center gap-2 transition-colors"
+                                            title="<%= t('detail.sleeve_condition') %>">
+                                            <i class="fa-solid fa-folder-open"></i>
+                                            <%= album.sleeve_condition === 'Generic' ? t('confirm_vinyl.sleeve_condition_generic') : album.sleeve_condition %>
+                                        </span>
+                                        <% } %>
                                             <span
                                                 class="px-3 py-1 bg-black/5 dark:bg-white/10 border border-transparent rounded-full text-xs opacity-80 transition-colors">
                                                 <%= t('confirm_vinyl.field_quantity') %> : <%= album.quantity || 1 %>
@@ -230,7 +238,7 @@
                                 <%= t('detail.estimation_title') %>
                             </span>
                             <button id="btnEstimate"
-                                onclick="fetchEstimation('<%= album.discogs_id %>', '<%= album.quantity || 1 %>')"
+                                onclick="fetchEstimation('<%= album.discogs_id %>', '<%= album.quantity || 1 %>', '<%= album.sleeve_condition || '' %>')"
                                 class="text-xs bg-black/5 dark:bg-white/5 hover:bg-primary-theme hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1 border border-transparent">
                                 <i class="fa-solid fa-calculator"></i>
                                 <%= t('detail.calculate_btn') %>
@@ -420,7 +428,7 @@
             }
         }
 
-        async function fetchEstimation(id, quantity) {
+        async function fetchEstimation(id, quantity, condition) {
             const btn = document.getElementById('btnEstimate');
             const resultDiv = document.getElementById('priceResult');
             const loader = document.getElementById('priceLoader');
@@ -429,7 +437,7 @@
             loader.classList.remove('hidden');
 
             try {
-                const res = await fetch(`<%= baseUrl %>/api/estimate/${id}`);
+                const res = await fetch(`<%= baseUrl %>/api/estimate/${id}?condition=${encodeURIComponent(condition || '')}`);
                 const data = await res.json();
 
                 if (data.success && data.price) {

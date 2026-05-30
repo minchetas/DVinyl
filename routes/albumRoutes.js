@@ -24,12 +24,13 @@ const formatForView = (item) => {
         ...obj,
         artist: obj.artist || obj.creator || obj.author || obj.director || 'Inconnu',
         media_type: obj.media_type || obj.format || 'other',
-        cover_image: obj.cover_image || obj.coverUrl || '/ressources/logo.png',        
+        cover_image: obj.cover_image || obj.coverUrl || '/ressources/logo.png',
         tracklist: obj.tracklist || [],
         label: obj.label || obj.publisher || obj.studio || '',
         year: obj.year || '',
         format_type: obj.format_type || '',
         variant_color: obj.variant_color || '',
+        sleeve_condition: obj.sleeve_condition || '',
         location: obj.location || '',
         genre: obj.genre || '',
         quantity: obj.quantity || 1,
@@ -46,7 +47,7 @@ router.get('/', requireAuth, async (req, res) => {
         let queryAll = { owner: adminId, in_wishlist: false };
         applyVisibilityFilter(queryAll, res.locals.isAdmin, settings);
         const allItems = await Item.find(queryAll).lean();
-        
+
         const countByFormat = (items, format) => {
             return items
                 .filter(i => {
@@ -91,9 +92,9 @@ router.get('/', requireAuth, async (req, res) => {
                 const name = item[field];
                 if (name) {
                     map[name] = (map[name] || 0) + 1;
-                    if (map[name] > topCount) { 
-                        topCount = map[name]; 
-                        topName = name; 
+                    if (map[name] > topCount) {
+                        topCount = map[name];
+                        topName = name;
                     }
                 }
             });
@@ -115,15 +116,15 @@ router.get('/', requireAuth, async (req, res) => {
 
         let latestQuery = { owner: adminId, in_wishlist: false };
         applyVisibilityFilter(latestQuery, res.locals.isAdmin, settings);
-        
+
         let wishlistQuery = { owner: adminId, in_wishlist: true };
         applyVisibilityFilter(wishlistQuery, res.locals.isAdmin, settings);
 
-        res.render('index', { 
+        res.render('index', {
             latestCollection: (await Item.find(latestQuery).sort({ added_at: -1 }).limit(4)).map(formatForView),
             latestWishlist: (await Item.find(wishlistQuery).sort({ added_at: -1 }).limit(4)).map(formatForView),
             stats,
-            settings 
+            settings
         });
     } catch (err) {
         console.error("Dashboard error:", err);
@@ -145,34 +146,34 @@ router.get('/collection', requireAuth, async (req, res) => {
         const limit = parseInt(req.query.limit) || 25;
 
         let query = { owner: adminId, in_wishlist: false };
-        let conditions = []; 
+        let conditions = [];
 
         if (search) {
             const regex = new RegExp(search, 'i');
-            conditions.push({ 
-                $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }] 
+            conditions.push({
+                $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }]
             });
         }
 
-        
+
         if (type && type !== 'all') {
             const typeMap = { music: 'Music', books: 'Book', dvd: 'Dvd', games: 'Game' };
             if (type === 'music') {
-                
-                conditions.push({ 
-                    $or: [{ kind: 'Music' }, { kind: { $exists: false } }] 
+
+                conditions.push({
+                    $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
                 });
             } else {
                 query.kind = typeMap[type];
             }
         }
 
-        
+
         if (format && format !== 'all') {
-            
+
             const formatRegex = new RegExp(`^${format}$`, 'i');
-            conditions.push({ 
-                $or: [{ media_type: formatRegex }, { format: formatRegex }] 
+            conditions.push({
+                $or: [{ media_type: formatRegex }, { format: formatRegex }]
             });
         }
 
@@ -237,7 +238,7 @@ router.get('/collection', requireAuth, async (req, res) => {
         applyVisibilityFilter(query, res.locals.isAdmin, res.locals.settings);
 
         const totalItems = await Item.countDocuments(query);
-        
+
         // Build dynamic sort object
         const buildSortObj = () => {
             const sortMap = {
@@ -265,7 +266,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             .sort(buildSortObj())
             .skip((page - 1) * limit)
             .limit(limit)
-            .lean(); 
+            .lean();
 
         const filterMap = {
             music: [
@@ -336,7 +337,7 @@ router.get('/collection', requireAuth, async (req, res) => {
                 if (!type || type === 'all') return [];
                 const kind = { music: 'Music', books: 'Book', dvd: 'Dvd', games: 'Game' }[type];
                 const typeQuery = type === 'music' ? { $or: [{ kind: 'Music' }, { kind: { $exists: false } }] } : { kind };
-                
+
                 const [gBase, gArray, sArray] = await Promise.all([
                     Item.distinct('genre', { owner: adminId, ...typeQuery, genre: { $nin: ['', null] } }),
                     Item.distinct('genres', { owner: adminId, ...typeQuery }),
@@ -371,12 +372,12 @@ router.get('/album/edit/:id', requireAuth, async (req, res) => {
         const albumFormatted = formatForView(album);
         const adminId = await getAdminId();
         const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
-        const genres = await Item.distinct('genre', { 
-            owner: adminId, 
+        const genres = await Item.distinct('genre', {
+            owner: adminId,
             genre: { $ne: "" },
             $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
         });
-        
+
         res.render('edit-vinyl', { vinyl: albumFormatted, user: res.locals.user, locations, genres, currentType: 'music' });
     } catch (err) {
         console.error(err);
@@ -385,120 +386,120 @@ router.get('/album/edit/:id', requireAuth, async (req, res) => {
 });
 
 router.post('/search-discogs', requireAuth, requireAdmin, async (req, res) => {
-  const query = req.body.query || '';
-  const type = req.body.type || 'vinyl';
-  
-  // Advanced filters
-  const year = req.body.year;
-  const country = req.body.country;
-  const genre_filter = req.body.genre_filter;
-  const label_filter = req.body.label_filter;
+    const query = req.body.query || '';
+    const type = req.body.type || 'vinyl';
 
-  const token = process.env.DISCOGS_TOKEN;
+    // Advanced filters
+    const year = req.body.year;
+    const country = req.body.country;
+    const genre_filter = req.body.genre_filter;
+    const label_filter = req.body.label_filter;
 
-  try {
-    const Settings = require('../models/Settings');
-    const settings = await Settings.findOne({});
-    const enableAdvancedCD = settings && settings.modules && settings.modules.advancedCD;
+    const token = process.env.DISCOGS_TOKEN;
 
-    let searchUrls = [];
-    let isDirectRelease = false;
+    try {
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne({});
+        const enableAdvancedCD = settings && settings.modules && settings.modules.advancedCD;
 
-    const urlMatch = query.match(/discogs\.com\/(?:[a-zA-Z]{2}\/)?(release|master)\/(\d+)/);
+        let searchUrls = [];
+        let isDirectRelease = false;
 
-    if (urlMatch) {
-        const itemType = urlMatch[1];
-        const itemId = urlMatch[2];
+        const urlMatch = query.match(/discogs\.com\/(?:[a-zA-Z]{2}\/)?(release|master)\/(\d+)/);
 
-        if (itemType === 'master') {
-            searchUrls.push(`https://api.discogs.com/database/search?master_id=${itemId}&type=release&token=${token}`);
-        } else if (itemType === 'release') {
-            searchUrls.push(`https://api.discogs.com/releases/${itemId}?token=${token}`);
-            isDirectRelease = true;
-        }
-    } else {
-        let advancedParams = '';
-        if (year) advancedParams += `&year=${encodeURIComponent(year)}`;
-        if (country) advancedParams += `&country=${encodeURIComponent(country)}`;
-        if (genre_filter) advancedParams += `&genre=${encodeURIComponent(genre_filter)}`;
-        if (label_filter) advancedParams += `&label=${encodeURIComponent(label_filter)}`;
+        if (urlMatch) {
+            const itemType = urlMatch[1];
+            const itemId = urlMatch[2];
 
-        if (type === 'cd' && enableAdvancedCD) {
-            searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=CD${advancedParams}&token=${token}`);
-            searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=SACD${advancedParams}&token=${token}`);
-            searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=CDr${advancedParams}&token=${token}`);
-        } else {
-            searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=${type}${advancedParams}&token=${token}`);
-        }
-    }
-
-    const responses = await Promise.all(searchUrls.map(url => axios.get(url, { headers: { 'User-Agent': 'DVinylApp/1.0' } })));
-    
-    let allResults = [];
-    if (isDirectRelease) {
-        const r = responses[0].data;
-        const mappedResult = {
-            id: r.id,
-            title: r.artists ? r.artists.map(a => a.name).join(', ') + ' - ' + r.title : r.title,
-            year: r.year,
-            country: r.country,
-            cover_image: (r.images && r.images.length > 0) ? r.images[0].resource_url : r.thumb,
-            formats: r.formats,
-            format: r.formats && r.formats[0] ? [r.formats[0].name, ...(r.formats[0].descriptions || [])] : []
-        };
-        allResults.push(mappedResult);
-    } else {
-        responses.forEach((response, index) => {
-            let results = response.data.results || [];
-            if (!urlMatch && type === 'cd' && enableAdvancedCD) {
-                if (index === 1) results = results.map(item => ({...item, is_advanced_cd: 'sacd'}));
-                else if (index === 2) results = results.map(item => ({...item, is_advanced_cd: 'cdr'}));
+            if (itemType === 'master') {
+                searchUrls.push(`https://api.discogs.com/database/search?master_id=${itemId}&type=release&token=${token}`);
+            } else if (itemType === 'release') {
+                searchUrls.push(`https://api.discogs.com/releases/${itemId}?token=${token}`);
+                isDirectRelease = true;
             }
-            allResults = allResults.concat(results);
+        } else {
+            let advancedParams = '';
+            if (year) advancedParams += `&year=${encodeURIComponent(year)}`;
+            if (country) advancedParams += `&country=${encodeURIComponent(country)}`;
+            if (genre_filter) advancedParams += `&genre=${encodeURIComponent(genre_filter)}`;
+            if (label_filter) advancedParams += `&label=${encodeURIComponent(label_filter)}`;
+
+            if (type === 'cd' && enableAdvancedCD) {
+                searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=CD${advancedParams}&token=${token}`);
+                searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=SACD${advancedParams}&token=${token}`);
+                searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=CDr${advancedParams}&token=${token}`);
+            } else {
+                searchUrls.push(`https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&type=release&format=${type}${advancedParams}&token=${token}`);
+            }
+        }
+
+        const responses = await Promise.all(searchUrls.map(url => axios.get(url, { headers: { 'User-Agent': 'DVinylApp/1.0' } })));
+
+        let allResults = [];
+        if (isDirectRelease) {
+            const r = responses[0].data;
+            const mappedResult = {
+                id: r.id,
+                title: r.artists ? r.artists.map(a => a.name).join(', ') + ' - ' + r.title : r.title,
+                year: r.year,
+                country: r.country,
+                cover_image: (r.images && r.images.length > 0) ? r.images[0].resource_url : r.thumb,
+                formats: r.formats,
+                format: r.formats && r.formats[0] ? [r.formats[0].name, ...(r.formats[0].descriptions || [])] : []
+            };
+            allResults.push(mappedResult);
+        } else {
+            responses.forEach((response, index) => {
+                let results = response.data.results || [];
+                if (!urlMatch && type === 'cd' && enableAdvancedCD) {
+                    if (index === 1) results = results.map(item => ({ ...item, is_advanced_cd: 'sacd' }));
+                    else if (index === 2) results = results.map(item => ({ ...item, is_advanced_cd: 'cdr' }));
+                }
+                allResults = allResults.concat(results);
+            });
+        }
+
+        const technicalBlacklist = [
+            'Vinyl', 'LP', 'Album', 'Reissue', 'Repress', 'Stereo', 'Gatefold',
+            '12"', '7"', 'Limited Edition', 'Compilation', 'Deluxe Edition', 'Numbered', 'Promo'
+        ];
+
+        const uniqueIds = new Set();
+        const deduplicatedResults = [];
+        for (const item of allResults) {
+            if (!uniqueIds.has(item.id)) {
+                uniqueIds.add(item.id);
+                deduplicatedResults.push(item);
+            }
+        }
+
+        const processedResults = deduplicatedResults.slice(0, 100).map(item => {
+            let variant_info = '';
+
+            if (item.formats && item.formats[0] && item.formats[0].text) {
+                variant_info = item.formats[0].text.split(',')
+                    .map(p => p.trim())
+                    .filter(part => !technicalBlacklist.some(term => part.toLowerCase().includes(term.toLowerCase())))
+                    .join(', ');
+            }
+
+            return {
+                ...item,
+                variant_info: variant_info,
+                country: item.country || ''
+            };
         });
+
+        res.render('add-vinyl', {
+            results: processedResults,
+            searchType: type,
+            user: res.locals.user,
+            currentType: 'add-vinyl'
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('add-vinyl', { results: [], error: req.t('errors.api_error'), searchType: type, user: res.locals.user, currentType: 'add-vinyl' });
     }
-
-    const technicalBlacklist = [
-        'Vinyl', 'LP', 'Album', 'Reissue', 'Repress', 'Stereo', 'Gatefold', 
-        '12"', '7"', 'Limited Edition', 'Compilation', 'Deluxe Edition', 'Numbered', 'Promo'
-    ];
-
-    const uniqueIds = new Set();
-    const deduplicatedResults = [];
-    for (const item of allResults) {
-        if (!uniqueIds.has(item.id)) {
-            uniqueIds.add(item.id);
-            deduplicatedResults.push(item);
-        }
-    }
-
-    const processedResults = deduplicatedResults.slice(0, 100).map(item => {
-        let variant_info = '';
-        
-        if (item.formats && item.formats[0] && item.formats[0].text) {
-            variant_info = item.formats[0].text.split(',')
-                .map(p => p.trim())
-                .filter(part => !technicalBlacklist.some(term => part.toLowerCase().includes(term.toLowerCase())))
-                .join(', ');
-        }
-
-        return {
-            ...item,
-            variant_info: variant_info,
-            country: item.country || ''
-        };
-    });
-
-    res.render('add-vinyl', { 
-        results: processedResults,
-        searchType: type,
-        user: res.locals.user,
-        currentType: 'add-vinyl'
-    });
-  } catch (err) {
-    console.error(err);
-    res.render('add-vinyl', { results: [], error: req.t('errors.api_error'), searchType: type, user: res.locals.user, currentType: 'add-vinyl' });
-  }
 });
 
 // Confirmation with extended info
@@ -510,7 +511,7 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
     try {
         const url = `https://api.discogs.com/releases/${discogsId}?token=${token}`;
         const response = await axios.get(url, { headers: { 'User-Agent': 'DVinylApp/1.0' } });
-        const data = response.data;       
+        const data = response.data;
 
         let formatType = [];
         let variantColor = [];
@@ -560,11 +561,11 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
         // Overwrite finalMediaType with searchTypeHint if it exists and logic above didn't catch it
         // (Ensures consistency with what the user selected in search)
         if (searchTypeHint) finalMediaType = searchTypeHint;
-        
+
         const adminId = await User.findOne({ isAdmin: true }).select('_id').lean();
         const locations = await Item.distinct('location', { owner: adminId, location: { $ne: "" } });
-        const genres = await Item.distinct('genre', { 
-            owner: adminId, 
+        const genres = await Item.distinct('genre', {
+            owner: adminId,
             genre: { $ne: "" },
             $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
         });
@@ -584,10 +585,10 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
             label: data.labels && data.labels.length > 0 ? data.labels[0].name : '',
             catalog_number: data.labels && data.labels.length > 0 ? data.labels[0].catno : '',
             format_type: formatType.join(', '),
-            variant_color: variantColor.join(', '), 
+            variant_color: variantColor.join(', '),
             tracklist: data.tracklist || [],
             cover_image: data.images && data.images.length > 0 ? data.images[0].resource_url : '',
-            discogs_id: data.id, 
+            discogs_id: data.id,
             country: data.country || '',
             genres: data.genres || [],
             styles: data.styles || [],
@@ -599,33 +600,33 @@ router.get('/confirm-vinyl/:id', requireAuth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send(req.t('errors.generic_server_error'));
-    } 
+    }
 });
 
 // Save handler: smart create or update logic
 // Performs creation or update depending on provided IDs
 router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { 
+        const {
             mongo_id, title, artist, year, label, catalog_number, country,
             format_type, variant_color, cover_image, user_image, discogs_id, tracklist_json,
             media_type, in_wishlist, comments, location, genre, quantity,
-            genres, styles, barcode, barcode_locked, added_at
+            genres, styles, barcode, barcode_locked, added_at, sleeve_condition
         } = req.body;
-        
+
         const parsedGenres = Array.isArray(genres) ? genres : (genres ? genres.split(',').map(g => g.trim()).filter(Boolean) : []);
         const parsedStyles = Array.isArray(styles) ? styles : (styles ? styles.split(',').map(s => s.trim()).filter(Boolean) : []);
 
         const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
         const isBarcodeLocked = barcode_locked === 'on' || barcode_locked === 'true' || barcode_locked === true;
-        
+
         let album;
 
         if (mongo_id) {
             album = await Item.findById(mongo_id);
         }
-        
+
         if (!album && discogs_id) {
             album = await Item.findOne({ discogs_id: discogs_id, owner: adminId });
         }
@@ -647,6 +648,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 catalog_number: catalog_number,
                 format_type: format_type,
                 variant_color: variant_color,
+                sleeve_condition: sleeve_condition || '',
                 tracklist: tracklist,
                 cover_image: cover_image,
                 user_image: user_image,
@@ -664,23 +666,23 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 added_at: added_at ? new Date(added_at) : (album.added_at || new Date()),
                 kind: 'Music'
             };
-            
+
             if (user_image && user_image.length > 0) {
                 album.user_image = user_image;
             }
 
             await Item.updateOne(
-                { _id: album._id }, 
-                { $set: updateData }, 
+                { _id: album._id },
+                { $set: updateData },
                 { strict: false }
             );
         } else {
             await Vinyl.create({
                 title, artist, year, label, catalog_number,
-                format_type, variant_color,
+                format_type, variant_color, sleeve_condition: sleeve_condition || '',
                 tracklist,
-                cover_image, 
-                user_image, 
+                cover_image,
+                user_image,
                 discogs_id,
                 media_type: media_type || 'vinyl',
                 in_wishlist: isWishlist,
@@ -724,12 +726,12 @@ router.post('/api/album/:id/move-to-collection', requireAuth, requireAdmin, asyn
 router.get('/api/collection/ids', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        const albums = await Item.find({ 
-            owner: adminId, 
+        const albums = await Item.find({
+            owner: adminId,
             in_wishlist: false,
-            $or: [{ kind: 'Music' }, { kind: { $exists: false } }] 
+            $or: [{ kind: 'Music' }, { kind: { $exists: false } }]
         }).select('discogs_id quantity').lean();
-        
+
         console.log(`📦 Global estimate: ${albums.length} albums sent to front-end.`);
         res.json({ success: true, albums });
 
@@ -742,17 +744,17 @@ router.get('/api/collection/ids', requireAuth, async (req, res) => {
 router.get('/wishlist', requireAuth, async (req, res) => {
     try {
         const adminId = await getAdminId();
-        let query = { 
+        let query = {
             owner: adminId,
-            in_wishlist: true 
+            in_wishlist: true
         };
         applyVisibilityFilter(query, res.locals.isAdmin, res.locals.settings);
 
         const items = await Item.find(query).sort({ added_at: -1 });
 
-        res.render('wishlist', { 
-            albums: items.map(formatForView), 
-            user: res.locals.user 
+        res.render('wishlist', {
+            albums: items.map(formatForView),
+            user: res.locals.user
         });
     } catch (err) {
         console.error(err);
@@ -814,7 +816,7 @@ router.get('/api/estimate/:discogsId', requireAuth, async (req, res) => {
 
             if (statsRes.ok) {
                 const statsData = await statsRes.json();
-                
+
                 // Verify there's a non-zero lowest price
                 if (statsData.lowest_price && statsData.lowest_price.value > 0) {
                     // console.log(`💰 Plan A (market) for ID ${discogsId}: ${statsData.lowest_price.value}€`);
@@ -839,25 +841,60 @@ router.get('/api/estimate/:discogsId', requireAuth, async (req, res) => {
 
             if (suggRes.ok) {
                 const suggData = await suggRes.json();
-                
-                // Try to find "Very Good Plus" key flexibly (case/format tolerant)
                 const keys = Object.keys(suggData);
-                const vgKey = keys.find(k => k.toLowerCase().includes('very good plus'));
-                const mintKey = keys.find(k => k.toLowerCase().includes('mint (m)')); // Fallback if VG+ doesn't exist
 
-                const bestPrice = suggData[vgKey] || suggData[mintKey];
+                const condition = (req.query.condition || '').toUpperCase();
+                let targetKey;
+
+                if (condition && condition !== 'GENERIC') {
+                    if (condition === 'M') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('mint (m)'));
+                    } else if (condition === 'NM') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('near mint'));
+                    } else if (condition === 'VG+') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('very good plus'));
+                    } else if (condition === 'VG') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('very good (vg)'));
+                    } else if (condition === 'G+') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('good plus'));
+                    } else if (condition === 'G') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('good (g)'));
+                    } else if (condition === 'F') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('fair (f)'));
+                    } else if (condition === 'P') {
+                        targetKey = keys.find(k => k.toLowerCase().includes('poor (p)'));
+                    }
+                }
+
+                if (!targetKey) {
+                    const vgKey = keys.find(k => k.toLowerCase().includes('very good plus'));
+                    const mintKey = keys.find(k => k.toLowerCase().includes('mint (m)'));
+                    targetKey = vgKey || mintKey || keys[0];
+                }
+
+                const bestPrice = suggData[targetKey];
 
                 if (bestPrice && bestPrice.value > 0) {
                     // console.log(`📉 Plan B (history) for ID ${discogsId}: ${bestPrice.value}€`);
+
+                    let gradeLabel = 'VG+';
+                    if (targetKey.toLowerCase().includes('near mint')) gradeLabel = 'NM';
+                    else if (targetKey.toLowerCase().includes('mint (m)')) gradeLabel = 'M';
+                    else if (targetKey.toLowerCase().includes('very good (vg)')) gradeLabel = 'VG';
+                    else if (targetKey.toLowerCase().includes('good plus')) gradeLabel = 'G+';
+                    else if (targetKey.toLowerCase().includes('good (g)')) gradeLabel = 'G';
+                    else if (targetKey.toLowerCase().includes('fair (f)')) gradeLabel = 'F';
+                    else if (targetKey.toLowerCase().includes('poor (p)')) gradeLabel = 'P';
+
                     return res.json({
                         success: true,
                         source: 'history', // historical estimation
                         price: bestPrice,
-                        details: "Based on historical data (VG+)"
+                        details: `Based on historical data (${gradeLabel})`
                     });
                 }
             }
-            } catch (e) {
+        } catch (e) {
             // console.log(`⚠️ Plan B failed for ${discogsId}`);
         }
 
@@ -890,24 +927,24 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
         let totalImported = 0;
         let totalProcessed = 0;
         let hasMore = true;
-        
+
         const isWishlist = (type === 'wishlist');
         const apiUrl = isWishlist ? `https://api.discogs.com/users/${username}/wants` : `https://api.discogs.com/users/${username}/collection/folders/0/releases`;
         const listKey = isWishlist ? 'wants' : 'releases';
-        
+
         while (hasMore) {
             const response = await axios.get(apiUrl, {
                 params: { page, per_page: 50 },
                 headers: { 'Authorization': `Discogs token=${token}`, 'User-Agent': 'DVinylApp/1.0' }
             });
-            
+
             const listItems = response.data[listKey];
             const pagination = response.data.pagination;
 
             if (!listItems || listItems.length === 0) break;
-            
+
             const albumsToInsert = [];
-            
+
             for (const item of listItems) {
                 const info = item.basic_information;
                 const existing = await Item.findOne({ discogs_id: info.id, owner: userId });
@@ -920,7 +957,7 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                                 headers: { 'Authorization': `Discogs token=${token}`, 'User-Agent': 'DVinylApp/2.0' }
                             });
                             const fetchedTracklist = detailRes.data.tracklist || [];
-                            
+
                             if (fetchedTracklist.length > 0) {
                                 await Item.updateOne(
                                     { _id: existing._id },
@@ -929,14 +966,14 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                                 );
                             }
                             await new Promise(resolve => setTimeout(resolve, 1000));
-                        } catch (e) { 
-                            console.error(`Tracklist update error ID ${info.id}`); 
+                        } catch (e) {
+                            console.error(`Tracklist update error ID ${info.id}`);
                         }
                     }
-                    
+
                     totalProcessed++;
-                    req.io.emit('import_progress', { current: totalProcessed, total: pagination.items }); 
-                    continue; 
+                    req.io.emit('import_progress', { current: totalProcessed, total: pagination.items });
+                    continue;
                 }
 
                 let tracklist = [];
@@ -961,16 +998,16 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                 albumsToInsert.push({
                     title: info.title,
                     artist: info.artists.map(a => a.name).join(', '),
-                    year: info.year || 0, 
+                    year: info.year || 0,
                     label: info.labels?.[0]?.name || 'Unknown',
                     catalog_number: info.labels?.[0]?.catno || '',
-                    format_type: formatType.join(', '), 
+                    format_type: formatType.join(', '),
                     variant_color: variantColor.join(', '),
-                    media_type: mediaType, 
+                    media_type: mediaType,
                     cover_image: info.cover_image || info.thumb || '',
-                    tracklist, 
-                    discogs_id: info.id, 
-                    owner: userId, 
+                    tracklist,
+                    discogs_id: info.id,
+                    owner: userId,
                     added_at: new Date(),
                     location: '',
                     genre: info.genres?.[0] || '',
@@ -979,7 +1016,7 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
                     in_wishlist: isWishlist,
                     kind: 'Music'
                 });
-                
+
                 totalProcessed++;
                 req.io.emit('import_progress', { current: totalProcessed, total: pagination.items });
             }
@@ -993,7 +1030,7 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
             else page++;
         }
 
-        req.io.emit('import_finished', { count: totalImported }); 
+        req.io.emit('import_finished', { count: totalImported });
 
     } catch (err) {
         req.io.emit('import_error', { message: err.message });
@@ -1045,7 +1082,7 @@ router.post('/api/album/:id/refresh-info', requireAuth, requireAdmin, async (req
             headers: { 'Authorization': `Discogs token=${token}`, 'User-Agent': 'DVinylApp/2.0' }
         });
         const data = response.data;
-        
+
         const updateData = {
             genres: data.genres || [],
             styles: data.styles || [],
@@ -1053,7 +1090,7 @@ router.post('/api/album/:id/refresh-info', requireAuth, requireAdmin, async (req
         };
 
         const currentAlbum = await Item.findById(albumId);
-        
+
         // Only update barcode if not locked
         if (currentAlbum && !currentAlbum.barcode_locked) {
             let barcode = '';
@@ -1072,7 +1109,7 @@ router.post('/api/album/:id/refresh-info', requireAuth, requireAdmin, async (req
         }
 
         await Item.findByIdAndUpdate(albumId, { $set: updateData }, { strict: false });
-        
+
         res.json({ success: true, genres: updateData.genres, styles: updateData.styles });
     } catch (err) {
         console.error("Refresh info error:", err);

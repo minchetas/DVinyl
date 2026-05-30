@@ -400,7 +400,10 @@
     "field_genres": "Genres",
     "field_styles": "Styles",
     "barcode_label": "Barcode",
-    "barcode_locked": "Lock barcode"
+    "barcode_locked": "Lock barcode",
+    "sleeve_condition_label": "Sleeve Condition",
+    "sleeve_condition_placeholder": "Select sleeve condition...",
+    "sleeve_condition_generic": "Generic Sleeve"
   },
   "edit_vinyl": {
     "title": "Edit Album",
@@ -416,6 +419,7 @@
     "additional_image": "Additional image",
     "added_at": "Added at",
     "source": "Source",
+    "sleeve_condition": "Sleeve Condition",
     "estimation_title": "Estimation (Discogs)",
     "calculate_btn": "Calculate",
     "personal_notes": "Personal notes",

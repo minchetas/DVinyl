@@ -180,6 +180,23 @@
                                 <% locations.forEach(loc => { %> <option value="<%= loc %>"> <% }) %>
                             </datalist>
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider opacity-60 mb-2">
+                                <i class="fa-solid fa-folder-open mr-1"></i> <%= t('confirm_vinyl.sleeve_condition_label') %>
+                            </label>
+                            <select name="sleeve_condition" class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary-theme outline-none transition-all cursor-pointer">
+                                <option value="" class="bg-white dark:bg-[#1a1a1a]" <%= (!vinyl.sleeve_condition) ? 'selected' : '' %>><%= t('confirm_vinyl.sleeve_condition_placeholder') %></option>
+                                <option value="M" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'M') ? 'selected' : '' %>>Mint (M)</option>
+                                <option value="NM" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'NM') ? 'selected' : '' %>>Near Mint (NM)</option>
+                                <option value="VG+" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'VG+') ? 'selected' : '' %>>Very Good Plus (VG+)</option>
+                                <option value="VG" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'VG') ? 'selected' : '' %>>Very Good (VG)</option>
+                                <option value="G+" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'G+') ? 'selected' : '' %>>Good Plus (G+)</option>
+                                <option value="G" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'G') ? 'selected' : '' %>>Good (G)</option>
+                                <option value="F" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'F') ? 'selected' : '' %>>Fair (F)</option>
+                                <option value="P" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'P') ? 'selected' : '' %>>Poor (P)</option>
+                                <option value="Generic" class="bg-white dark:bg-[#1a1a1a]" <%= (vinyl.sleeve_condition === 'Generic') ? 'selected' : '' %>><%= t('confirm_vinyl.sleeve_condition_generic') %></option>
+                            </select>
+                        </div>
                     </div>
                     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>

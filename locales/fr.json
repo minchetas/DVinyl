@@ -400,7 +400,10 @@
     "field_genres": "Genres",
     "field_styles": "Styles",
     "barcode_label": "Code-barres",
-    "barcode_locked": "Verrouiller le code-barres"
+    "barcode_locked": "Verrouiller le code-barres",
+    "sleeve_condition_label": "État de la pochette",
+    "sleeve_condition_placeholder": "Sélectionner l'état...",
+    "sleeve_condition_generic": "Pochette générique"
   },
   "edit_vinyl": {
     "title": "Modifier l'album",
@@ -416,6 +419,7 @@
     "additional_image": "Image supplémentaire",
     "added_at": "Date d'ajout",
     "source": "Source",
+    "sleeve_condition": "État de la pochette",
     "estimation_title": "Estimation (Discogs)",
     "calculate_btn": "Calculer",
     "personal_notes": "Notes personnelles",

@@ -343,7 +343,10 @@
     "tracks_title": "Tracce",
     "year_label": "Anno",
     "barcode_label": "Codice a barre",
-    "barcode_locked": "Blocca il codice a barre"
+    "barcode_locked": "Blocca il codice a barre",
+    "sleeve_condition_label": "Condizione della copertina",
+    "sleeve_condition_placeholder": "Seleziona condizione...",
+    "sleeve_condition_generic": "Copertina generica"
   },
   "detail": {
     "added_at": "Aggiunto a",
@@ -367,6 +370,7 @@
     "refresh_info_success": "Metadati aggiornati correttamente!",
     "shipping_hint": "*Escl. \nspedizione",
     "source": "Fonte",
+    "sleeve_condition": "Condizione della copertina",
     "tracklist_not_found": "Tracklist non trovata su Discogs",
     "tracklist_title": "Elenco delle tracce",
     "unavailable_data": "Dati non disponibili",
