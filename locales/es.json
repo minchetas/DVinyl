@@ -102,6 +102,20 @@
       "warning_body": "Espere entre 1 y 2 minutos para 200 libros, ~10 minutos para 2000. La importación se ejecuta en segundo plano, por lo que puede navegar libremente.",
       "warning_title": "Importación potencialmente larga"
     },
+    "musiksammler": {
+      "title": "Musik-Sammler",
+      "subtitle": "Importa tu colección de Musik-Sammler",
+      "btn": "Importar CSV",
+      "modal_subtitle": "Importa tu colección o lista de deseos de Musik-Sammler en formato CSV.",
+      "how_to": "¿Cómo exportar desde Musik-Sammler?",
+      "step1": "Inicie sesión en musik-sammler.de y vaya a Perfil → Exportar",
+      "step2": "Marque todas las casillas de datos y seleccione el formato CSV",
+      "step3": "Haga clic en 'Daten exportieren' para descargar su archivo",
+      "step4": "Suelte el archivo a continuación e inicie la importación",
+      "drop_hint": "Arrastre su archivo CSV aquí o haga clic para buscar",
+      "file_ready": "Archivo listo para ser importado",
+      "btn_import": "Iniciar Importación"
+    },
     "import": {
       "collection": "Importar colección",
       "subtitle": "Importa tu colección de Discogs o tu lista de deseos de Discogs",

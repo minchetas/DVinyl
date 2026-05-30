@@ -317,6 +317,33 @@
                             </div>
                             <% } %>
 
+                        <!-- Musik-Sammler Import -->
+                        <div class="card-theme rounded-3xl p-6 md:p-8 shadow-sm transition-colors">
+                            <div class="flex flex-col gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-[#004A8F]/10 flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-music text-[#004A8F] dark:text-blue-500"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">
+                                            <%= t('admin.musiksammler.title') %>
+                                        </h3>
+                                        <p class="text-xs opacity-50">
+                                            <%= t('admin.musiksammler.subtitle') %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-t border-black/5 dark:border-white/5">
+                                    <button onclick="toggleModal('importMusikSammlerModal')"
+                                        class="w-full bg-black/5 dark:bg-white/5 hover:bg-[#004A8F] dark:hover:bg-blue-700 hover:text-white px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-file-csv"></i>
+                                        <%= t('admin.musiksammler.btn') %>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
@@ -1053,6 +1080,107 @@
         </div>
     </div>
 
+    <!-- Musik-Sammler Modal -->
+    <div id="importMusikSammlerModal"
+        class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="absolute inset-0" onclick="toggleModal('importMusikSammlerModal')"></div>
+        <div
+            class="card-theme relative w-full max-w-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl transition-all animate-scale-in overflow-y-auto max-h-[90vh]">
+            <button onclick="toggleModal('importMusikSammlerModal')"
+                class="absolute top-6 right-6 opacity-40 hover:opacity-100 hover:rotate-90 transition-all">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+
+            <h3 class="text-2xl font-black mb-1 flex items-center gap-3">
+                <i class="fa-solid fa-music text-[#004A8F] dark:text-blue-500"></i>
+                <%= t('admin.musiksammler.title') %>
+            </h3>
+            <p class="text-sm opacity-60 mb-6">
+                <%= t('admin.musiksammler.modal_subtitle') %>
+            </p>
+
+            <!-- Mini tutorial -->
+            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 mb-6 space-y-3">
+                <p class="text-[10px] font-black uppercase tracking-widest opacity-50">
+                    <%= t('admin.musiksammler.how_to') %>
+                </p>
+                <div class="flex items-start gap-3 text-sm opacity-70">
+                    <span
+                        class="bg-primary-theme text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <span>
+                        <%= t('admin.musiksammler.step1') %>
+                    </span>
+                </div>
+                <div class="flex items-start gap-3 text-sm opacity-70">
+                    <span
+                        class="bg-primary-theme text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    <span>
+                        <%= t('admin.musiksammler.step2') %>
+                    </span>
+                </div>
+                <div class="flex items-start gap-3 text-sm opacity-70">
+                    <span
+                        class="bg-primary-theme text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <span>
+                        <%= t('admin.musiksammler.step3') %>
+                    </span>
+                </div>
+                <div class="flex items-start gap-3 text-sm opacity-70">
+                    <span
+                        class="bg-primary-theme text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">4</span>
+                    <span>
+                        <%= t('admin.musiksammler.step4') %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Destination Selection -->
+            <div class="mb-6">
+                <label class="block text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">
+                    Destination
+                </label>
+                <select id="musikSammlerImportType"
+                    class="bg-black/5 dark:bg-white/5 border border-transparent text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary-theme focus:border-primary-theme block w-full p-3 transition-colors outline-none cursor-pointer">
+                    <option class="bg-white dark:bg-[#1a1a1a]" value="collection" selected>
+                        <%= t('admin.import.collection') %>
+                    </option>
+                    <option class="bg-white dark:bg-[#1a1a1a]" value="wishlist">
+                        <%= t('admin.import.wantlist') %>
+                    </option>
+                </select>
+            </div>
+
+            <!-- File Upload -->
+            <div class="mb-6">
+                <label class="block text-[10px] font-black uppercase tracking-widest opacity-50 mb-2">
+                    <%= t('admin.musiksammler.drop_hint') %>
+                </label>
+                <label class="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-neutral-300 dark:border-neutral-700 rounded-2xl text-neutral-500 hover:border-primary-theme hover:text-primary-theme hover:bg-primary-theme/5 transition-all cursor-pointer">
+                    <i class="fa-solid fa-file-csv text-2xl"></i>
+                    <span id="musikSammlerFileName" class="text-xs font-bold text-center px-4">
+                        Sélectionner un fichier .csv
+                    </span>
+                    <input type="file" id="musikSammlerInput" class="hidden" accept=".csv">
+                </label>
+            </div>
+
+            <!-- Error message container -->
+            <div id="musikSammlerError"
+                class="hidden bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl mb-6 text-sm flex items-start gap-3">
+                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                <span id="musikSammlerErrorText"></span>
+            </div>
+
+            <button id="btnMusikSammlerImport" onclick="startMusikSammlerImport()" disabled
+                class="w-full bg-primary-theme text-white font-black py-4 rounded-2xl shadow-lg shadow-primary-theme/20 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100">
+                <i class="fa-solid fa-file-import"></i>
+                <span>
+                    <%= t('admin.musiksammler.btn_import') %>
+                </span>
+            </button>
+        </div>
+    </div>
+
     <%- include('partials/footer') %>
 
         <script src="<%= baseUrl %>/socket.io/socket.io.js"></script>
@@ -1132,6 +1260,60 @@
                 }
             }
 
+            // Musik-Sammler CSV upload listeners
+            const musikSammlerInput = document.getElementById('musikSammlerInput');
+            const musikSammlerFileName = document.getElementById('musikSammlerFileName');
+            const btnMusikSammlerImport = document.getElementById('btnMusikSammlerImport');
+
+            if (musikSammlerInput) {
+                musikSammlerInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        musikSammlerFileName.innerText = file.name;
+                        btnMusikSammlerImport.disabled = false;
+                    } else {
+                        musikSammlerFileName.innerText = 'Sélectionner un fichier .csv';
+                        btnMusikSammlerImport.disabled = true;
+                    }
+                });
+            }
+
+            async function startMusikSammlerImport() {
+                const fileInput = document.getElementById('musikSammlerInput');
+                const importType = document.getElementById('musikSammlerImportType')?.value || 'collection';
+                const file = fileInput?.files?.[0];
+                if (!file) return;
+
+                const errorBox = document.getElementById('musikSammlerError');
+                const errorText = document.getElementById('musikSammlerErrorText');
+                errorBox.classList.add('hidden');
+                btnMusikSammlerImport.disabled = true;
+                btnMusikSammlerImport.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> <%= t("admin.modal.import_loading") %>';
+
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const csvContent = event.target.result;
+                        const response = await fetch('<%= baseUrl %>/import/musik-sammler', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ csv: csvContent, type: importType })
+                        });
+                        if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data.error || 'Error during import initiation');
+                        }
+                        btnMusikSammlerImport.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> <%= t("admin.modal.import_started") %>';
+                    } catch (err) {
+                        errorText.innerText = err.message;
+                        errorBox.classList.remove('hidden');
+                        btnMusikSammlerImport.disabled = false;
+                        btnMusikSammlerImport.innerHTML = '<i class="fa-solid fa-file-import mr-2"></i> <%= t("admin.musiksammler.btn_import") %>';
+                    }
+                };
+                reader.readAsText(file);
+            }
+
             const socket = io({
                 path: '<%= baseUrl %>/socket.io',
             });
@@ -1151,6 +1333,11 @@
                 if (btnGoodreadsImport) {
                     btnGoodreadsImport.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${data.current} / ${data.total}`;
                 }
+
+                // Musik-Sammler
+                if (btnMusikSammlerImport && btnMusikSammlerImport.disabled) {
+                    btnMusikSammlerImport.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ${data.current} / ${data.total}`;
+                }
             });
 
             socket.on('import_finished', (data) => {
@@ -1160,9 +1347,24 @@
 
             socket.on('import_error', (data) => {
                 const grModal = document.getElementById('importGoodreadsModal');
+                const msModal = document.getElementById('importMusikSammlerModal');
                 const isGrOpen = grModal && !grModal.classList.contains('hidden');
-                const errorBoxId = isGrOpen ? 'goodreadsError' : 'importError';
-                const errorTextId = isGrOpen ? 'goodreadsErrorText' : 'importErrorText';
+                const isMsOpen = msModal && !msModal.classList.contains('hidden');
+                
+                let errorBoxId = 'importError';
+                let errorTextId = 'importErrorText';
+                if (isGrOpen) {
+                    errorBoxId = 'goodreadsError';
+                    errorTextId = 'goodreadsErrorText';
+                } else if (isMsOpen) {
+                    errorBoxId = 'musikSammlerError';
+                    errorTextId = 'musikSammlerErrorText';
+                    if (btnMusikSammlerImport) {
+                        btnMusikSammlerImport.disabled = false;
+                        btnMusikSammlerImport.innerHTML = '<i class="fa-solid fa-file-import mr-2"></i> <%= t("admin.musiksammler.btn_import") %>';
+                    }
+                }
+                
                 const errorBox = document.getElementById(errorBoxId);
                 const errorText = document.getElementById(errorTextId);
                 if (errorText) errorText.innerText = data.message;

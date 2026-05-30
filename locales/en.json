@@ -347,6 +347,20 @@
       "warning_body": "Expect ~1-2 min for 200 books, ~10 min for 2000. The import runs in the background, so you can navigate freely.",
       "default_language": "Default Language",
       "default_language_hint": "Used if Open Library doesn't detect the language. Example: fr, en, ja, es..."
+    },
+    "musiksammler": {
+      "title": "Musik-Sammler",
+      "subtitle": "Import your Musik-Sammler collection",
+      "btn": "Import CSV",
+      "modal_subtitle": "Import your Musik-Sammler collection or wishlist in CSV format.",
+      "how_to": "How to export from Musik-Sammler?",
+      "step1": "Log in to musik-sammler.de and go to Profile → Export",
+      "step2": "Check all the data boxes and select the CSV format",
+      "step3": "Click on 'Daten exportieren' to download your file",
+      "step4": "Drop the file below and start the import",
+      "drop_hint": "Drag your CSV file here or click to browse",
+      "file_ready": "File ready to be imported",
+      "btn_import": "Start Import"
     }
   },
   "collection": {

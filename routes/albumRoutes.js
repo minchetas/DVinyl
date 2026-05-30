@@ -1043,6 +1043,245 @@ router.post('/import/discogs', requireAuth, async (req, res) => {
     }
 });
 
+// Musik-Sammler CSV import route
+router.post('/import/musik-sammler', requireAuth, requireAdmin, async (req, res) => {
+    const { csv, type } = req.body;
+    const userId = req.user._id;
+
+    if (!csv) {
+        return res.status(400).json({ error: "Missing CSV data" });
+    }
+
+    res.status(202).json({ success: true, message: "Import started" });
+
+    try {
+        const rows = parseCSV(csv);
+        if (rows.length < 2) {
+            req.io.emit('import_error', { message: "CSV file is empty or invalid" });
+            return;
+        }
+
+        const cleanHeader = (h) => h.replace(/^\uFEFF/, '').trim();
+        const headers = rows[0].map(cleanHeader);
+
+        const artistIndex = headers.indexOf('Künstler/Band');
+        const countryIndex = headers.indexOf('Land');
+        const titleIndex = headers.indexOf('Albumtitel');
+        const typeIndex = headers.indexOf('Typ');
+        const barcodeIndex = headers.indexOf('EAN/UPC');
+        const labelIndex = headers.indexOf('Label');
+        const catnoIndex = headers.indexOf('Katalognummer');
+        const yearReleaseIndex = headers.indexOf('Veröffentlichungsjahr Tonträger');
+        const yearAlbumIndex = headers.indexOf('Veröffentlichungsjahr Album');
+        const mfgCountryIndex = headers.indexOf('Herstellungsland');
+        const genreIndex = headers.indexOf('Genre');
+        const subgenresIndex = headers.indexOf('Untergenres');
+        const featuresIndex = headers.indexOf('Besonderheiten');
+        const infoIndex = headers.indexOf('Zusatzinformationen');
+        const priceIndex = headers.indexOf('Kaufpreis');
+        const dateIndex = headers.indexOf('Kaufdatum');
+        const locationIndex = headers.indexOf('Kauf-Ort');
+        const commentIndex = headers.indexOf('Kommentar');
+        const linkCoverIndex = headers.indexOf('Link zum Cover');
+        const songsIndex = headers.indexOf('Songtitel');
+
+        if (titleIndex === -1 || artistIndex === -1) {
+            req.io.emit('import_error', { message: "Invalid CSV format: Künstler/Band or Albumtitel header missing." });
+            return;
+        }
+
+        let totalImported = 0;
+        let totalProcessed = 0;
+        const totalItems = rows.length - 1;
+
+        const isWishlist = (type === 'wishlist');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.length < 2 || (row.length === 1 && row[0] === '')) continue; // Skip empty rows
+
+            const title = row[titleIndex]?.trim() || '';
+            const artist = row[artistIndex]?.trim() || 'Unknown';
+
+            if (!title) {
+                totalProcessed++;
+                req.io.emit('import_progress', { current: totalProcessed, total: totalItems });
+                continue;
+            }
+
+            // Check if already exists
+            const existing = await Item.findOne({
+                title: { $regex: new RegExp('^' + escapeRegExp(title) + '$', 'i') },
+                artist: { $regex: new RegExp('^' + escapeRegExp(artist) + '$', 'i') },
+                owner: userId
+            });
+
+            if (existing) {
+                totalProcessed++;
+                req.io.emit('import_progress', { current: totalProcessed, total: totalItems });
+                continue;
+            }
+
+            let year = '';
+            if (yearReleaseIndex > -1 && row[yearReleaseIndex]) {
+                year = row[yearReleaseIndex].trim();
+            }
+            if ((!year || year === '0') && yearAlbumIndex > -1 && row[yearAlbumIndex]) {
+                year = row[yearAlbumIndex].trim();
+            }
+
+            const label = labelIndex > -1 ? row[labelIndex]?.trim() : '';
+            const catalog_number = catnoIndex > -1 ? row[catnoIndex]?.trim() : '';
+            const barcode = barcodeIndex > -1 ? row[barcodeIndex]?.trim().replace(/\s/g, '') : '';
+            const country = (countryIndex > -1 ? row[countryIndex]?.trim() : '') || (mfgCountryIndex > -1 ? row[mfgCountryIndex]?.trim() : '');
+
+            const rawType = typeIndex > -1 ? row[typeIndex]?.toLowerCase() || '' : '';
+            let media_type = 'vinyl';
+            if (rawType.includes('cd') || rawType.includes('sacd')) {
+                media_type = 'cd';
+            } else if (rawType.includes('cassette') || rawType.includes('mc') || rawType.includes('kassette')) {
+                media_type = 'cassette';
+            }
+            const format_type = typeIndex > -1 ? row[typeIndex]?.trim() : 'Vinyl';
+
+            const variant_color = featuresIndex > -1 ? row[featuresIndex]?.trim() : '';
+
+            // Comments compilation
+            let commentsParts = [];
+            const customComment = commentIndex > -1 ? row[commentIndex]?.trim() : '';
+            if (customComment) {
+                commentsParts.push(customComment);
+            }
+            const addInfo = infoIndex > -1 ? row[infoIndex]?.trim() : '';
+            if (addInfo) {
+                commentsParts.push(`Zusatzinfo: ${addInfo}`);
+            }
+            const price = priceIndex > -1 ? row[priceIndex]?.trim() : '';
+            const date = dateIndex > -1 ? row[dateIndex]?.trim() : '';
+            const buyPlace = locationIndex > -1 ? row[locationIndex]?.trim() : '';
+
+            let purchaseInfo = [];
+            if (price && price !== '0.00' && price !== '0') purchaseInfo.push(`${price} €`);
+            if (date) purchaseInfo.push(date);
+            if (buyPlace) purchaseInfo.push(buyPlace);
+
+            if (purchaseInfo.length > 0) {
+                commentsParts.push(`Achat: ${purchaseInfo.join(' - ')}`);
+            }
+            const comments = commentsParts.join('\n\n');
+
+            const cover_image = linkCoverIndex > -1 ? row[linkCoverIndex]?.trim() : '';
+
+            const mainGenre = genreIndex > -1 ? row[genreIndex]?.trim() : '';
+            const subGenresRaw = subgenresIndex > -1 ? row[subgenresIndex]?.trim() : '';
+            const parsedSubgenres = subGenresRaw ? subGenresRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+            const genres = [mainGenre].filter(Boolean);
+            const styles = parsedSubgenres;
+            const genre = mainGenre || '';
+
+            // Tracklist parsing
+            const tracklist = [];
+            if (songsIndex > -1 && songsIndex < row.length) {
+                let trackNum = 1;
+                for (let s = songsIndex; s < row.length; s++) {
+                    const rawSong = row[s]?.trim();
+                    if (!rawSong) continue;
+
+                    // Skip numeric count
+                    if (s === songsIndex && /^\d+$/.test(rawSong)) {
+                        continue;
+                    }
+
+                    const match = rawSong.match(/^(.*?)\s*\((\d{2}:\d{2}:\d{2}|\d{2}:\d{2})\)$/);
+                    let sTitle = rawSong;
+                    let sDuration = '';
+                    if (match) {
+                        sTitle = match[1].trim();
+                        sDuration = match[2].trim();
+                    }
+
+                    tracklist.push({
+                        position: trackNum.toString(),
+                        title: sTitle,
+                        duration: sDuration
+                    });
+                    trackNum++;
+                }
+            }
+
+            await Vinyl.create({
+                title,
+                artist,
+                year,
+                label,
+                catalog_number,
+                format_type,
+                variant_color,
+                cover_image,
+                tracklist,
+                media_type,
+                in_wishlist: isWishlist,
+                owner: userId,
+                comments,
+                location: '',
+                genre,
+                genres,
+                styles,
+                barcode,
+                added_at: new Date()
+            });
+
+            totalImported++;
+            totalProcessed++;
+            req.io.emit('import_progress', { current: totalProcessed, total: totalItems });
+        }
+
+        req.io.emit('import_finished', { count: totalImported });
+
+    } catch (err) {
+        console.error("Musik-Sammler import error:", err);
+        req.io.emit('import_error', { message: err.message });
+    }
+});
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function parseCSV(text) {
+    const lines = [];
+    let row = [""];
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i+1];
+        if (c === '"') {
+            if (inQuotes && next === '"') {
+                row[row.length - 1] += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (c === ',' && !inQuotes) {
+            row.push('');
+        } else if ((c === '\r' || c === '\n') && !inQuotes) {
+            if (c === '\r' && next === '\n') {
+                i++;
+            }
+            lines.push(row);
+            row = [''];
+        } else {
+            row[row.length - 1] += c;
+        }
+    }
+    if (row.length > 1 || row[0] !== '') {
+        lines.push(row);
+    }
+    return lines;
+}
+
 // API route to import tracklist from Discogs
 router.post('/api/album/:id/import-tracklist', requireAuth, requireAdmin, async (req, res) => {
     const { discogsId } = req.body;

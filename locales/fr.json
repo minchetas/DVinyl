@@ -333,6 +333,20 @@
       "default_language": "Langue par défaut",
       "default_language_hint": "Utilisée si Open Library ne trouve pas la langue. Ex: fr, en, ja, es..."
     },
+    "musiksammler": {
+      "title": "Musik-Sammler",
+      "subtitle": "Importer votre collection Musik-Sammler",
+      "btn": "Importer un CSV",
+      "modal_subtitle": "Importez votre collection ou wishlist Musik-Sammler au format CSV.",
+      "how_to": "Comment exporter depuis Musik-Sammler ?",
+      "step1": "Connectez-vous sur musik-sammler.de et allez dans Profil → Export",
+      "step2": "Cochez toutes les cases de données et sélectionnez le format CSV",
+      "step3": "Cliquez sur 'Daten exportieren' pour télécharger votre fichier",
+      "step4": "Déposez le fichier ci-dessous et lancez l'importation",
+      "drop_hint": "Glissez votre fichier CSV ici ou cliquez pour parcourir",
+      "file_ready": "Fichier prêt à être importé",
+      "btn_import": "Lancer l'importation"
+    },
     "visibility": {
       "apply_to_admin": "Appliquez également ces règles à l'administrateur",
       "apply_to_admin_desc": "S'ils sont activés, les éléments masqués ne seront pas visibles même lorsque vous êtes connecté en tant qu'administrateur.",
