@@ -39,6 +39,13 @@ const createPassword = (length = 12) => {
 };
 
 /**
+ * Helper to escape regular expression special characters.
+ * @param {string} string
+ * @returns {string}
+ */
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
  * Helper to load the common admin data used by the dashboard view.
  * Centralizing this avoids duplicating queries across handlers.
  */
@@ -406,7 +413,7 @@ router.get(
         const admin = await User.findOne({ isAdmin: true }).select('_id');
         const adminId = admin ? admin._id : null;
 
-        const regex = new RegExp(q, 'i');
+        const regex = new RegExp(escapeRegExp(q), 'i');
         const items = await Item.find({
             owner: adminId,
             $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }]

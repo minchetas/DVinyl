@@ -149,7 +149,7 @@ router.get('/collection', requireAuth, async (req, res) => {
         let conditions = [];
 
         if (search) {
-            const regex = new RegExp(search, 'i');
+            const regex = new RegExp(escapeRegExp(search), 'i');
             conditions.push({
                 $or: [{ title: regex }, { artist: regex }, { author: regex }, { director: regex }, { barcode: regex }]
             });
@@ -171,7 +171,7 @@ router.get('/collection', requireAuth, async (req, res) => {
 
         if (format && format !== 'all') {
 
-            const formatRegex = new RegExp(`^${format}$`, 'i');
+            const formatRegex = new RegExp(`^${escapeRegExp(format)}$`, 'i');
             conditions.push({
                 $or: [{ media_type: formatRegex }, { format: formatRegex }]
             });
@@ -179,11 +179,11 @@ router.get('/collection', requireAuth, async (req, res) => {
 
 
         if (location) {
-            conditions.push({ location: new RegExp(location, 'i') });
+            conditions.push({ location: new RegExp(escapeRegExp(location), 'i') });
         }
 
         if (artist) {
-            const artistRegex = new RegExp(artist, 'i');
+            const artistRegex = new RegExp(escapeRegExp(artist), 'i');
             conditions.push({
                 $or: [
                     { artist: artistRegex },
@@ -202,8 +202,8 @@ router.get('/collection', requireAuth, async (req, res) => {
             if (genreArr.length > 0) {
                 conditions.push({
                     $or: [
-                        { genre: { $in: genreArr.map(g => new RegExp(g, 'i')) } },
-                        { genres: { $in: genreArr.map(g => new RegExp(g, 'i')) } }
+                        { genre: { $in: genreArr.map(g => new RegExp(escapeRegExp(g), 'i')) } },
+                        { genres: { $in: genreArr.map(g => new RegExp(escapeRegExp(g), 'i')) } }
                     ]
                 });
             }
@@ -213,7 +213,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             const styleArr = style.split(',').map(s => s.trim()).filter(Boolean);
             if (styleArr.length > 0) {
                 conditions.push({
-                    styles: { $in: styleArr.map(s => new RegExp(s, 'i')) }
+                    styles: { $in: styleArr.map(s => new RegExp(escapeRegExp(s), 'i')) }
                 });
             }
         }
