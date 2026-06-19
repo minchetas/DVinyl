@@ -4,3 +4,5 @@
 /mongo_data
 docker-compose.override.yml
 .vscode/
+CLAUDE.md
+FORK.md

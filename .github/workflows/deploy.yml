@@ -15,7 +15,7 @@ jobs:
       - name: Login en el registry privado
         uses: docker/login-action@v3
         with:
-          registry: registry.larefactoria.com
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -29,5 +29,5 @@ jobs:
           context: .
           push: true
           tags: |
-            registry.larefactoria.com/miguel.otero/dvinyl:latest
-            registry.larefactoria.com/miguel.otero/dvinyl:${{ steps.vars.outputs.sha }}
+            ${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_NAMESPACE }}/dvinyl:latest
+            ${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_NAMESPACE }}/dvinyl:${{ steps.vars.outputs.sha }}
