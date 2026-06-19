@@ -285,6 +285,8 @@ router.post(
         navbarShortcuts: shortcuts,
         statsWidgets: stats,
         fastAdd: fastAdd,
+        jackSparrowMode: req.body.jackSparrowMode === 'on',
+        jackSparrowHideFromPublic: req.body.jackSparrowHideFromPublic === 'on',
       };
 
       await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });

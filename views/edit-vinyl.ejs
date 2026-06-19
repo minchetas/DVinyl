@@ -245,6 +245,26 @@
                             </label>
                         </div>
                     </div>
+                    <% if (settings.jackSparrowMode) { %>
+                    <div id="bootlegToggle" class="mt-6 <%= (vinyl.media_type === 'cd' || vinyl.media_type === 'cassette') ? '' : 'hidden' %>">
+                        <label class="flex items-center gap-4 cursor-pointer group p-4 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all">
+                            <div class="relative shrink-0">
+                                <input type="checkbox" name="is_bootleg" id="is_bootleg" value="on"
+                                    <%- vinyl.is_bootleg ? 'checked' : '' %>
+                                    class="sr-only peer">
+                                <div class="w-12 h-6 bg-black/10 dark:bg-white/10 rounded-full peer-checked:bg-amber-500 transition-all"></div>
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+                            </div>
+                            <div>
+                                <span class="font-bold flex items-center gap-2">
+                                    <i class="fa-solid fa-skull-crossbones text-amber-500"></i>
+                                    <%= t('detail.bootleg_label') %>
+                                </span>
+                                <span id="bootlegDesc" class="text-xs opacity-60"><%- vinyl.media_type === 'cassette' ? t('detail.bootleg_desc_cassette') : t('detail.bootleg_desc_cd') %></span>
+                            </div>
+                        </label>
+                    </div>
+                    <% } %>
                     <input type="hidden" name="in_wishlist" value="<%= vinyl.in_wishlist %>">
                     <input type="hidden" name="mongo_id" value="<%= vinyl._id %>">
                     
@@ -379,6 +399,27 @@
             }
         });
     });
+
+    <% if (settings.jackSparrowMode) { %>
+    const bootlegDescs = {
+        cd: '<%- t('detail.bootleg_desc_cd') %>',
+        cassette: '<%- t('detail.bootleg_desc_cassette') %>'
+    };
+    document.querySelectorAll('input[name="media_type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const bootlegToggle = document.getElementById('bootlegToggle');
+            if (bootlegToggle) {
+                const show = radio.value === 'cd' || radio.value === 'cassette';
+                bootlegToggle.classList.toggle('hidden', !show);
+                if (!show) {
+                    document.getElementById('is_bootleg').checked = false;
+                } else {
+                    document.getElementById('bootlegDesc').textContent = bootlegDescs[radio.value] || '';
+                }
+            }
+        });
+    });
+    <% } %>
 </script>
 
 <%- include('partials/footer') %>

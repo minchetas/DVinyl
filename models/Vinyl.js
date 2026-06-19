@@ -20,6 +20,7 @@ const vinylSchema = new mongoose.Schema({
   discogs_id: Number,
   country: { type: String, default: '' },
   tracklist: [{ position: String, title: String, duration: String }],
+  is_bootleg: { type: Boolean, default: false },
 });
 
 const Vinyl = Item.discriminator('Music', vinylSchema);
