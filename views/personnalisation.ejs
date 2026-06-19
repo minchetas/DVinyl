@@ -313,6 +313,50 @@
             </div>
 
 
+            <% if (settings.modules.music) { %>
+            <div class="card-theme rounded-3xl p-6 shadow-xl transition-colors mt-8">
+                <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary-theme/10 text-primary-theme flex items-center justify-center">
+                        <i class="fa-solid fa-skull-crossbones"></i>
+                    </div>
+                    <%= t('perso.jack_sparrow_title') %>
+                </h2>
+                <p class="text-sm opacity-60 mb-6">
+                    <%= t('perso.jack_sparrow_desc') %>
+                </p>
+
+                <div class="space-y-4">
+                    <label class="flex items-center gap-4 cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" name="jackSparrowMode" id="jackSparrowMode" value="on"
+                                <%- settings.jackSparrowMode ? 'checked' : '' %>
+                                class="sr-only peer"
+                                onchange="document.getElementById('jackSparrowSub').classList.toggle('hidden', !this.checked)">
+                            <div class="w-12 h-6 bg-black/10 dark:bg-white/10 rounded-full peer-checked:bg-primary-theme transition-all"></div>
+                            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+                        </div>
+                        <span class="font-bold"><%= t('perso.jack_sparrow_enable') %></span>
+                    </label>
+
+                    <div id="jackSparrowSub" class="ml-16 <%= settings.jackSparrowMode ? '' : 'hidden' %>">
+                        <label class="flex items-center gap-4 cursor-pointer group">
+                            <div class="relative">
+                                <input type="checkbox" name="jackSparrowHideFromPublic" value="on"
+                                    <%- settings.jackSparrowHideFromPublic ? 'checked' : '' %>
+                                    class="sr-only peer">
+                                <div class="w-12 h-6 bg-black/10 dark:bg-white/10 rounded-full peer-checked:bg-primary-theme transition-all"></div>
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+                            </div>
+                            <div>
+                                <span class="font-bold block"><%= t('perso.jack_sparrow_hide_public') %></span>
+                                <span class="text-xs opacity-60"><%= t('perso.jack_sparrow_hide_public_desc') %></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
             <div class="flex justify-end pt-4">
                 <button type="submit"
                     class="w-full md:w-auto px-10 py-4 bg-primary-theme text-white font-black rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary-theme/20 flex items-center justify-center gap-3">

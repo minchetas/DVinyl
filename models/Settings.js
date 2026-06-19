@@ -34,7 +34,9 @@ const settingsSchema = new mongoose.Schema({
         hiddenItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }],
         hiddenGenres: [{ type: String }],
         hiddenTypes: [{ type: String }]
-    }
+    },
+    jackSparrowMode: { type: Boolean, default: false },
+    jackSparrowHideFromPublic: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

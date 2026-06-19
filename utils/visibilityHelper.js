@@ -17,12 +17,20 @@ function applyVisibilityFilter(query, isAdmin, settings) {
 
     const { applyToAdmin, hiddenItems, hiddenGenres, hiddenTypes } = settings.visibility;
 
-    // Do not apply filter if user is admin and applyToAdmin is false
-    if (isAdmin && !applyToAdmin) {
-        return;
+    const conditions = [];
+
+    if (!isAdmin && settings.jackSparrowMode && settings.jackSparrowHideFromPublic) {
+        conditions.push({ $or: [{ is_bootleg: { $ne: true } }, { is_bootleg: { $exists: false } }] });
     }
 
-    const conditions = [];
+    // Do not apply remaining visibility filters if user is admin and applyToAdmin is false
+    if (isAdmin && !applyToAdmin) {
+        if (conditions.length > 0) {
+            if (!query.$and) query.$and = [];
+            query.$and.push(...conditions);
+        }
+        return;
+    }
 
     if (hiddenItems && hiddenItems.length > 0) {
         conditions.push({ _id: { $nin: hiddenItems } });

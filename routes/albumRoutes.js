@@ -234,6 +234,10 @@ router.get('/collection', requireAuth, async (req, res) => {
         }
 
 
+        if (req.query.bootleg === 'true') {
+            conditions.push({ is_bootleg: true });
+        }
+
         // Wrap conditions if filterMode is 'hide'
         const filterMode = req.query.filterMode || 'show';
         if (filterMode === 'hide' && conditions.length > 0) {
@@ -336,6 +340,7 @@ router.get('/collection', requireAuth, async (req, res) => {
             queryArtist: artist || '',
             queryDecade: decade || '',
             queryFilterMode: filterMode,
+            queryBootleg: req.query.bootleg || '',
             currentSort: sort,
 
             activeFilters: filterMap[type] || [],
@@ -641,6 +646,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
         const adminId = req.user._id;
         const isWishlist = in_wishlist === 'true';
         const isBarcodeLocked = barcode_locked === 'on' || barcode_locked === 'true' || barcode_locked === true;
+        const isBootleg = req.body.is_bootleg === 'on';
 
         let album;
 
@@ -684,6 +690,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 country: country || '',
                 barcode: barcode || '',
                 barcode_locked: isBarcodeLocked,
+                is_bootleg: isBootleg,
                 added_at: added_at ? new Date(added_at) : (album.added_at || new Date()),
                 kind: 'Music'
             };
