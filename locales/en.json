@@ -735,5 +735,11 @@
     "view_igdb": "View on IGDB",
     "refresh_info_success": "Metadata refreshed successfully!",
     "refresh_info_error": "Error refreshing metadata."
+  },
+  "tracklist": {
+    "col_position": "Pos.",
+    "col_title": "Title",
+    "col_duration": "Dur.",
+    "add_track": "Add track"
   }
 }

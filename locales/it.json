@@ -735,5 +735,11 @@
     "view_igdb": "Vedi su IGDB",
     "refresh_info_success": "Metadati aggiornati con successo!",
     "refresh_info_error": "Errore durante aggiornamento metadati."
+  },
+  "tracklist": {
+    "col_position": "Pos.",
+    "col_title": "Titolo",
+    "col_duration": "Dur.",
+    "add_track": "Aggiungi traccia"
   }
 }

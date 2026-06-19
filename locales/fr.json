@@ -735,5 +735,11 @@
     "view_igdb": "Voir sur IGDB",
     "refresh_info_success": "Métadonnées actualisées avec succès !",
     "refresh_info_error": "Erreur lors de l'actualisation des métadonnées."
+  },
+  "tracklist": {
+    "col_position": "Pos.",
+    "col_title": "Titre",
+    "col_duration": "Durée",
+    "add_track": "Ajouter une piste"
   }
 }
