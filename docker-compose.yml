@@ -28,6 +28,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json
+    environment:
+      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL}
     command: --interval 300 --cleanup dvinyl_app
 
 volumes:

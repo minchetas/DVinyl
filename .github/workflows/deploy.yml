@@ -19,9 +19,15 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
+      - name: Obtener SHA corto
+        id: vars
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build y push de la imagen
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: registry.larefactoria.com/miguel.otero/dvinyl:latest
+          tags: |
+            registry.larefactoria.com/miguel.otero/dvinyl:latest
+            registry.larefactoria.com/miguel.otero/dvinyl:${{ steps.vars.outputs.sha }}
