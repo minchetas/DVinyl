@@ -98,6 +98,14 @@ Filters in the music collection route are built using a `conditions` array. All 
 
 This means any new filter must be pushed into `conditions` **before** the filterMode block, never set directly on `query`, or the eye-icon inversion won't work.
 
+### Manual vinyl entry
+
+`GET /add-vinyl/manual` renders `confirm-vinyl.ejs` with an empty `vinyl` object and `isManual: true`. The cover panel opens by default and an info banner indicates Discogs features are unavailable. Saves via the existing `POST /save-vinyl` without `discogs_id`.
+
+### Tracklist editor
+
+`views/partials/tracklist-editor.ejs` — self-contained component included in both `confirm-vinyl.ejs` and `edit-vinyl.ejs`. Manages its own `<input name="tracklist_json">` hidden field. Duration fields are normalized on blur (`"5"` → `"5:00"`, invalid text → cleared). Total album duration is calculated from the tracklist directly in `vinyl-detail.ejs` and shown as a pill.
+
 ### Real-time imports
 
 Discogs and Musik-Sammler CSV imports run asynchronously after returning a `202` response. Progress is pushed to the frontend via Socket.io events: `import_progress`, `import_finished`, `import_error`. Socket.io is initialized in `app.js` and exposed to routes via `req.io = io`.

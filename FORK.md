@@ -4,7 +4,56 @@ Documentación interna de los cambios propios de este fork respecto al proyecto 
 
 ---
 
+## Changelog
+
+### 2026-06-19
+- **Entrada manual de discos** — `GET /add-vinyl/manual`, enlace discreto bajo el buscador de Discogs
+- **Editor de lista de canciones** — partial reutilizable en edición y confirmación; normalización de duración; pill de duración total en vista de detalle
+- **Deploy automático** — GitHub Actions → Portus (registry privado) → Watchtower (Proxmox LXC); versionado por SHA de commit; notificaciones Telegram
+- **Modo Jack Sparrow** — marcado de copias no originales (CD/cassette) con filtro y ocultación a visitantes
+- **Correcciones i18n** — traducciones erróneas en es/it corregidas; etiquetas de filtro mejoradas en los 5 idiomas
+
+---
+
 ## Features propias (no upstream)
+
+### Entrada manual de discos
+**Rama:** `feature/manual-vinyl-entry` (mezclada en `main`)
+
+Permite agregar discos que no figuran en Discogs sin pasar por la búsqueda.
+
+**Qué hace:**
+- Ruta `GET /add-vinyl/manual` → renderiza el formulario de confirmación con campos vacíos
+- Enlace discreto "¿No aparece en Discogs? Agregar manualmente" bajo el buscador
+- Panel de portada abierto por defecto; banner indicando que la estimación de mercado no estará disponible
+- Guarda vía `POST /save-vinyl` sin `discogs_id`
+
+**Archivos implicados:**
+- `routes/albumRoutes.js` — nueva ruta `/add-vinyl/manual`
+- `views/add-vinyl.ejs` — enlace al formulario manual
+- `views/confirm-vinyl.ejs` — adaptaciones para modo manual (`isManual`)
+- `locales/*.json` — claves `add_vinyl.manual_entry`, `confirm_vinyl.manual_title`, etc.
+
+---
+
+### Editor de lista de canciones
+**Rama:** `feature/manual-vinyl-entry` (mezclada en `main`)
+
+Editor dinámico de tracklist disponible en la pantalla de edición y de confirmación de cualquier disco.
+
+**Qué hace:**
+- Filas editables con posición, título y duración
+- Añadir/eliminar pistas dinámicamente
+- Normalización de duración al salir del campo (`"5"` → `"5:00"`, texto inválido → vacío)
+- Duración total calculada en la vista de detalle y mostrada como pill junto al año
+
+**Archivos implicados:**
+- `views/partials/tracklist-editor.ejs` — componente reutilizable
+- `views/edit-vinyl.ejs`, `views/confirm-vinyl.ejs` — incluyen el partial
+- `views/vinyl-detail.ejs` — cálculo y pill de duración total
+- `locales/*.json` — claves `tracklist.*`
+
+---
 
 ### Modo Jack Sparrow
 **Rama:** `feature/jack-sparrow-mode` (mezclada en `main`)
@@ -70,5 +119,9 @@ git merge upstream/main
 **Archivos con mayor riesgo de conflicto al mergear upstream:**
 - `locales/*.json` — el upstream puede añadir/modificar claves que también hemos tocado
 - `models/Settings.js` — hemos añadido campos propios (`jackSparrowMode`, etc.)
-- `routes/albumRoutes.js` — el patrón `conditions[]` es propio; cuidado si upstream modifica la lógica de filtrado
+- `models/Vinyl.js` — campo `is_bootleg` propio
+- `routes/albumRoutes.js` — ruta manual, patrón `conditions[]` y filtro bootleg
 - `utils/visibilityHelper.js` — bloque de bootleg al final del fichero
+- `views/confirm-vinyl.ejs` — adaptaciones modo manual y editor de tracklist
+- `views/edit-vinyl.ejs` — editor de tracklist
+- `views/vinyl-detail.ejs` — cálculo de duración total
