@@ -724,5 +724,11 @@
     "view_igdb": "Auf IGDB ansehen",
     "refresh_info_success": "Metadaten erfolgreich aktualisiert!",
     "refresh_info_error": "Fehler beim Aktualisieren der Metadaten."
+  },
+  "tracklist": {
+    "col_position": "Pos.",
+    "col_title": "Titel",
+    "col_duration": "Dauer",
+    "add_track": "Titel hinzufügen"
   }
 }

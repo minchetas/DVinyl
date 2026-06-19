@@ -218,8 +218,9 @@
                     <input type="hidden" name="discogs_id" value="<%= vinyl.discogs_id %>">
                     <input type="hidden" name="label" value="<%= vinyl.label %>">
                     <input type="hidden" name="catalog_number" value="<%= vinyl.catalog_number %>">
-                    <input type="hidden" name="tracklist_json" value="<%= JSON.stringify(vinyl.tracklist) %>">
                     <input type="hidden" name="country" value="<%= vinyl.country %>">
+
+                    <%- include('partials/tracklist-editor') %>
 
                     <div class="mb-6">
                         <label class="block mb-3 text-sm font-bold uppercase tracking-widest opacity-60"><%= t('confirm_vinyl.field_media_type') %></label>
