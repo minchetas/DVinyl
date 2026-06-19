@@ -2,25 +2,33 @@ version: '3.8'
 
 services:
   dvinyl-app:
-    build: .
+    image: registry.larefactoria.com/miguel.otero/dvinyl:latest
     container_name: dvinyl_app
     restart: unless-stopped
     ports:
-      - "3099:3099" # External port : Internal port
+      - "3099:3099"
     volumes:
       - ./public/uploads:/app/public/uploads
     env_file:
-        - .env
+      - .env
     depends_on:
       - mongodb
 
-  # Database service
   mongodb:
     image: mongo:latest
     container_name: dvinyl_db
     restart: unless-stopped
     volumes:
-      - ./mongo_data:/data/db 
+      - ./mongo_data:/data/db
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: dvinyl_watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 300 --cleanup dvinyl_app
 
 volumes:
   mongo_data:
