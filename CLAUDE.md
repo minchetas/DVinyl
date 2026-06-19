@@ -2,6 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Workflow rules
+
+### Branching
+- Every new feature goes in its own branch: `feature/<name>`
+- Never commit directly to `main`
+- Merge to `main` only after the user has tested and explicitly approved
+- Always merge with `--no-ff` to preserve branch history: `git merge --no-ff feature/<name>`
+
+### Commits
+- Never commit until the solution is verified and stable by the user
+- If a correction is needed before the user validates, edit the staged files and wait — do not commit
+- If a premature commit was already made, use `git reset HEAD~N` to undo it before the user tests
+- If a fix is needed after a commit that has not been pushed yet, squash with `git reset HEAD~N` + recommit
+- Never add `Co-Authored-By` lines to commit messages
+
+### Documentation
+- After merging a feature to `main`, always update `FORK.md` (changelog + feature section) and `CLAUDE.md` if new architectural patterns were introduced
+
 ## Commands
 
 ```bash
