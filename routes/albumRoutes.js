@@ -749,6 +749,7 @@ router.post('/save-vinyl', requireAuth, requireAdmin, async (req, res) => {
                 country: country || '',
                 barcode: barcode || '',
                 barcode_locked: isBarcodeLocked,
+                is_bootleg: isBootleg,
                 added_at: added_at ? new Date(added_at) : new Date()
             });
         }
