@@ -741,5 +741,19 @@
     "col_title": "Titel",
     "col_duration": "Dauer",
     "add_track": "Titel hinzufügen"
+  },
+  "spotify": {
+    "open_in": "Auf Spotify anhören",
+    "loading": "Suche auf Spotify...",
+    "not_found": "Nicht auf Spotify gefunden",
+    "title": "Spotify-Integration",
+    "desc": "Zeigt einen eingebetteten Spotify-Player auf jeder Albumseite an.",
+    "enable": "Spotify-Integration aktivieren",
+    "credentials_title": "Spotify-Zugangsdaten",
+    "credentials_desc": "Erstelle eine App auf developer.spotify.com/dashboard, um diese Schlüssel zu erhalten. Wähle den Typ „Web API\".",
+    "client_id": "Client ID",
+    "client_secret": "Client Secret",
+    "credentials_hint": "Ohne diese Schlüssel wird ein Spotify-Suchlink anstelle des Players angezeigt.",
+    "popout": "In Fenster öffnen"
   }
 }

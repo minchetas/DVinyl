@@ -10,6 +10,20 @@ const { requireAuth, requireAdmin } = require('../middleware/authMiddleware'); /
 const User = require('../models/User');
 const { STANDARD_FORMAT_TERMS } = require('../config/constants');
 const { applyVisibilityFilter } = require('../utils/visibilityHelper');
+const { searchAlbumId } = require('../utils/spotifyHelper');
+
+function getSpotifyMode(settings) {
+    if (!settings || !settings.spotifyEnabled) return 'off';
+    const clientId     = (settings.spotifyClientId)     || process.env.SPOTIFY_CLIENT_ID     || '';
+    const clientSecret = (settings.spotifyClientSecret) || process.env.SPOTIFY_CLIENT_SECRET || '';
+    return (clientId && clientSecret) ? 'embed' : 'link';
+}
+
+function getSpotifyCreds(settings) {
+    const clientId     = (settings && settings.spotifyClientId)     || process.env.SPOTIFY_CLIENT_ID     || '';
+    const clientSecret = (settings && settings.spotifyClientSecret) || process.env.SPOTIFY_CLIENT_SECRET || '';
+    return { clientId, clientSecret };
+}
 
 async function getAdminId() {
     const admin = await User.findOne({ isAdmin: true }).select('_id');
@@ -816,6 +830,27 @@ router.get('/wishlist', requireAuth, async (req, res) => {
     }
 });
 
+// Spotify album search proxy (uses Client Credentials — no user auth needed)
+router.get('/api/spotify/search', requireAuth, async (req, res) => {
+    const { artist, title } = req.query;
+    const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(`${artist} ${title}`)}`;
+    const { clientId, clientSecret } = getSpotifyCreds(res.locals.settings);
+
+    if (!clientId || !clientSecret) return res.json({ mode: 'link', searchUrl });
+
+    try {
+        const albumId = await searchAlbumId(clientId, clientSecret, artist, title);
+        if (albumId) {
+            res.json({ mode: 'embed', albumId, embedUrl: `https://open.spotify.com/embed/album/${albumId}?utm_source=generator` });
+        } else {
+            res.json({ mode: 'link', searchUrl });
+        }
+    } catch (err) {
+        console.error('[Spotify]', err.message);
+        res.json({ mode: 'link', searchUrl });
+    }
+});
+
 // collection item detail
 router.get('/album/:id', requireAuth, async (req, res) => {
     try {
@@ -823,7 +858,7 @@ router.get('/album/:id', requireAuth, async (req, res) => {
         if (!album) return res.redirect('/collection?type=music');
         const albumFormatted = formatForView(album);
 
-        res.render('vinyl-detail', { album: albumFormatted, vinyl: albumFormatted, user: res.locals.user, currentType: 'album' });
+        res.render('vinyl-detail', { album: albumFormatted, vinyl: albumFormatted, user: res.locals.user, currentType: 'album', spotifyMode: getSpotifyMode(res.locals.settings) });
     } catch (err) {
         res.redirect('/collection?type=music');
     }

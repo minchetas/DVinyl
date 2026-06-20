@@ -741,5 +741,19 @@
     "col_title": "Title",
     "col_duration": "Dur.",
     "add_track": "Add track"
+  },
+  "spotify": {
+    "open_in": "Listen on Spotify",
+    "loading": "Searching on Spotify...",
+    "not_found": "Not found on Spotify",
+    "title": "Spotify Integration",
+    "desc": "Display an embedded Spotify player on each album detail page.",
+    "enable": "Enable Spotify integration",
+    "credentials_title": "Spotify Credentials",
+    "credentials_desc": "Create an app at developer.spotify.com/dashboard to get these keys. Select type \"Web API\".",
+    "client_id": "Client ID",
+    "client_secret": "Client Secret",
+    "credentials_hint": "Without these keys, a Spotify search link is shown instead of the player.",
+    "popout": "Open in window"
   }
 }

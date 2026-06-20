@@ -357,6 +357,53 @@
             </div>
             <% } %>
 
+            <div class="card-theme rounded-3xl p-6 shadow-xl transition-colors mt-8">
+                <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                    </div>
+                    <%= t('spotify.title') %>
+                </h2>
+                <p class="text-sm opacity-60 mb-6"><%= t('spotify.desc') %></p>
+
+                <div class="space-y-4">
+                    <label class="flex items-center gap-4 cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" name="spotifyEnabled" id="spotifyEnabled" value="on"
+                                <%- settings.spotifyEnabled ? 'checked' : '' %>
+                                class="sr-only peer"
+                                onchange="document.getElementById('spotifySub').classList.toggle('hidden', !this.checked)">
+                            <div class="w-12 h-6 bg-black/10 dark:bg-white/10 rounded-full peer-checked:bg-[#1DB954] transition-all"></div>
+                            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+                        </div>
+                        <span class="font-bold"><%= t('spotify.enable') %></span>
+                    </label>
+
+                    <div id="spotifySub" class="ml-16 space-y-4 <%= settings.spotifyEnabled ? '' : 'hidden' %>">
+                        <p class="text-xs opacity-60 leading-relaxed">
+                            <%= t('spotify.credentials_desc') %>
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase opacity-40 mb-1"><%= t('spotify.client_id') %></label>
+                                <input type="text" name="spotifyClientId"
+                                    value="<%- settings.spotifyClientId || process.env.SPOTIFY_CLIENT_ID || '' %>"
+                                    placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                    class="w-full p-3 text-sm rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:ring-2 focus:ring-[#1DB954] outline-none font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase opacity-40 mb-1"><%= t('spotify.client_secret') %></label>
+                                <input type="password" name="spotifyClientSecret"
+                                    value="<%- settings.spotifyClientSecret || process.env.SPOTIFY_CLIENT_SECRET || '' %>"
+                                    placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                    class="w-full p-3 text-sm rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:ring-2 focus:ring-[#1DB954] outline-none font-mono">
+                            </div>
+                        </div>
+                        <p class="text-xs opacity-40"><%= t('spotify.credentials_hint') %></p>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-end pt-4">
                 <button type="submit"
                     class="w-full md:w-auto px-10 py-4 bg-primary-theme text-white font-black rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary-theme/20 flex items-center justify-center gap-3">

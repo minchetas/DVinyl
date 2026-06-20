@@ -287,6 +287,9 @@ router.post(
         fastAdd: fastAdd,
         jackSparrowMode: req.body.jackSparrowMode === 'on',
         jackSparrowHideFromPublic: req.body.jackSparrowHideFromPublic === 'on',
+        spotifyEnabled: req.body.spotifyEnabled === 'on',
+        spotifyClientId: (req.body.spotifyClientId || '').trim(),
+        spotifyClientSecret: (req.body.spotifyClientSecret || '').trim(),
       };
 
       await Settings.findOneAndUpdate({}, { $set: update }, { upsert: true });

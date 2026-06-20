@@ -36,7 +36,10 @@ const settingsSchema = new mongoose.Schema({
         hiddenTypes: [{ type: String }]
     },
     jackSparrowMode: { type: Boolean, default: false },
-    jackSparrowHideFromPublic: { type: Boolean, default: false }
+    jackSparrowHideFromPublic: { type: Boolean, default: false },
+    spotifyEnabled: { type: Boolean, default: false },
+    spotifyClientId: { type: String, default: '' },
+    spotifyClientSecret: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);
