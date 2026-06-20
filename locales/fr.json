@@ -741,5 +741,19 @@
     "col_title": "Titre",
     "col_duration": "Durée",
     "add_track": "Ajouter une piste"
+  },
+  "spotify": {
+    "open_in": "Écouter sur Spotify",
+    "loading": "Recherche sur Spotify...",
+    "not_found": "Introuvable sur Spotify",
+    "title": "Intégration Spotify",
+    "desc": "Affichez un lecteur Spotify intégré sur chaque fiche d'album.",
+    "enable": "Activer l'intégration Spotify",
+    "credentials_title": "Identifiants Spotify",
+    "credentials_desc": "Créez une application sur developer.spotify.com/dashboard pour obtenir ces clés. Sélectionnez le type « Web API ».",
+    "client_id": "Client ID",
+    "client_secret": "Client Secret",
+    "credentials_hint": "Sans ces clés, un lien de recherche Spotify est affiché à la place du lecteur.",
+    "popout": "Ouvrir dans une fenêtre"
   }
 }
