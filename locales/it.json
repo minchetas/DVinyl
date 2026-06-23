@@ -238,6 +238,7 @@
     "artist_filter": "Artista",
     "sort_added": "Data aggiunta",
     "sort_artist": "Artista",
+    "sort_artist_year": "Artista + Anno",
     "sort_label": "Ordina per",
     "sort_title": "Titolo",
     "sort_year": "Anno",

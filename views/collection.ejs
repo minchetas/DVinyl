@@ -298,19 +298,25 @@
                                 </button>
                                 <% }); %>
                                     <% if (currentType !=='all' ) { %>
-                                        <% const artistActive=currentSort.startsWith('artist'); const
-                                            artistDir=artistActive ? (currentSort.endsWith('_asc') ? 'asc'
-                                            : 'desc' ) : 'asc' ; %>
+                                        <% const artistActive = currentSort.startsWith('artist') && !currentSort.startsWith('artist_year');
+                                           const artistDir = artistActive ? (currentSort.endsWith('_asc') ? 'asc' : 'desc') : 'asc'; %>
                                             <button onclick="handleSort('artist', '<%= artistDir %>', false)"
                                                 class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
                                             <%= artistActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                                <span>
-                                                    <%= t('collection.sort_artist') %>
-                                                </span>
+                                                <span><%= t('collection.sort_artist') %></span>
                                                 <% if (artistActive) { %>
-                                                    <i
-                                                        class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
-                                                    <% } %>
+                                                    <i class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                                <% } %>
+                                            </button>
+                                        <% const artistYearActive = currentSort.startsWith('artist_year');
+                                           const artistYearDir = artistYearActive ? (currentSort.endsWith('_asc') ? 'asc' : 'desc') : 'asc'; %>
+                                            <button onclick="handleSort('artist_year', '<%= artistYearDir %>', false)"
+                                                class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
+                                            <%= artistYearActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                                <span><%= t('collection.sort_artist_year') %></span>
+                                                <% if (artistYearActive) { %>
+                                                    <i class="fa-solid fa-arrow-<%= artistYearDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                                <% } %>
                                             </button>
                                             <% } %>
                     </div>
