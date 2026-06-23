@@ -275,6 +275,14 @@ router.get('/collection', requireAuth, async (req, res) => {
                 'year_asc': { year: 1 },
             };
 
+            if (sort && sort.startsWith('artist_year')) {
+                const dir = sort === 'artist_year_asc' ? 1 : -1;
+                if (!type || type === 'all') return { title: dir, year: dir };
+                const artistFieldMap = { music: 'artist', books: 'author', dvd: 'director', games: 'developer' };
+                const field = artistFieldMap[type] || 'title';
+                return { [field]: dir, year: dir };
+            }
+
             if (sort && sort.startsWith('artist')) {
                 const dir = sort === 'artist_asc' ? 1 : -1;
                 // In 'all' mode, fall back to title sort
