@@ -40,7 +40,22 @@ interface AppSettings {
 }
 
 export function applyVisibilityFilter(query: any, isAdmin: boolean, settings: AppSettings): void {
-    if (!settings || !settings.visibility) {
+    if (!settings) {
+        return;
+    }
+
+    // Fork-only: "Jack Sparrow mode" (music plugin) can hide bootleg copies from
+    // non-admin visitors. Independent of applyToAdmin below (that toggle governs the
+    // hidden-items/genres/types filter, not this one), so it is checked unconditionally.
+    const musicSettings = (settings as any).pluginSettings?.music;
+    if (!isAdmin && musicSettings?.jackSparrowMode && musicSettings?.jackSparrowHideFromPublic) {
+        if (!query.$and) {
+            query.$and = [];
+        }
+        query.$and.push({ $or: [{ is_bootleg: { $ne: true } }, { is_bootleg: { $exists: false } }] });
+    }
+
+    if (!settings.visibility) {
         return;
     }
 

@@ -390,13 +390,20 @@
                             class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode !== 'hide') ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
                             <i class="fa-solid fa-eye text-xs"></i>
                         </button>
-                        <button onclick="setFilterMode('hide')" 
+                        <button onclick="setFilterMode('hide')"
                             title="<%= t('collection.filter_mode_hide') %>"
                             class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode === 'hide') ? 'bg-red-500 text-white shadow-sm' : 'opacity-40 hover:opacity-100' %>">
                             <i class="fa-solid fa-eye-slash text-xs"></i>
                         </button>
+                        <% if (settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode && (currentType === 'music' || currentType === 'all')) { %>
+                            <button onclick="toggleBootlegFilter()"
+                                title="<%= t('collection.filter_bootleg_copies') %>"
+                                class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryBootleg === 'true') ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
+                                <i class="fa-solid fa-skull-crossbones text-xs"></i>
+                            </button>
+                        <% } %>
                     </div>
-                    
+
                     <div class="w-12">
                         <button onclick="reloadPage()"
                             class="block w-full h-10 flex items-center justify-center rounded-lg border hover:text-primary-theme hover:border-primary-theme card-theme transition-all bg-primary-theme/5">
@@ -531,6 +538,14 @@
                                             <%= t(badge.label, { defaultValue: badge.label }) %>
                                         </span>
                                         <% } %>
+
+                                        <% if (settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode && album.kind === 'Music' && album.is_bootleg) { %>
+                                        <span
+                                            class="absolute top-2 right-2 z-20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm bg-black/40"
+                                            title="<%= t('detail.bootleg_label') %>">
+                                            <i class="fa-solid fa-skull-crossbones opacity-70"></i>
+                                        </span>
+                                        <% } %>
                             </div>
 
                             <%- include('partials/item-card-body', { item: album, plugin: itemPlugin, size: 'collection' }) %>
@@ -663,9 +678,15 @@
         let currentDecade = '<%= locals.queryDecade || "" %>';
         let currentStyle = '<%= locals.queryStyle || "" %>';
         let currentFilterMode = '<%= locals.queryFilterMode || "show" %>';
+        let currentBootleg = '<%= locals.queryBootleg || "" %>';
 
         function setFilterMode(mode) {
             currentFilterMode = mode;
+            reloadPage();
+        }
+
+        function toggleBootlegFilter() {
+            currentBootleg = currentBootleg === 'true' ? '' : 'true';
             reloadPage();
         }
 
@@ -736,6 +757,7 @@
             validateAndSetUrlSearchParamString('sort', currentSort);
             validateAndSetUrlSearchParamString('artist', artistInput?.value);
             validateAndSetUrlSearchParamString('filterMode', currentFilterMode);
+            validateAndSetUrlSearchParamString('bootleg', currentBootleg);
 
             url.searchParams.set('page', 1);
             window.location.href = url.toString();
@@ -780,12 +802,14 @@
             const sort = new URLSearchParams(window.location.search).get('sort');
             const limit = new URLSearchParams(window.location.search).get('limit');
             const filterMode = new URLSearchParams(window.location.search).get('filterMode');
-            
+            const bootleg = new URLSearchParams(window.location.search).get('bootleg');
+
             if (type) url.searchParams.set('type', type);
             if (format) url.searchParams.set('format', format);
             if (sort) url.searchParams.set('sort', sort);
             if (limit) url.searchParams.set('limit', limit);
             if (filterMode) url.searchParams.set('filterMode', filterMode);
+            if (bootleg) url.searchParams.set('bootleg', bootleg);
             
             url.searchParams.set('page', 1);
             window.location.href = url.toString();

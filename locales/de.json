@@ -106,6 +106,10 @@
       "warning_body": "Rechnen Sie mit etwa 1-2 Minuten für 200 Bücher, etwa 10 Minuten für 2000. Der Import läuft im Hintergrund, sodass Sie frei navigieren können.",
       "warning_title": "Import möglicherweise lang"
     },
+    "jack_sparrow_hide_public": "Raubkopien vor Besuchern verbergen",
+    "jack_sparrow_hide_public_desc": "Markierte Einträge sind für nicht angemeldete Benutzer nicht sichtbar.",
+    "jack_sparrow_mode": "Jack-Sparrow-Modus aktivieren",
+    "jack_sparrow_mode_desc": "Ermöglicht das Markieren nicht originaler Kopien (CD und Kassette) mit einem visuellen Indikator.",
     "musiksammler": {
       "title": "Musik-Sammler",
       "subtitle": "Importieren Sie Ihre Musik-Sammler-Sammlung",
@@ -392,6 +396,7 @@
   },
   "collection": {
     "add": "Hinzufügen",
+    "filter_bootleg_copies": "Kopien",
     "filter_placeholder": "Filter...",
     "refresh": "Aktualisieren",
     "refresh_metadata_btn": "Informationen aktualisieren",
@@ -561,6 +566,10 @@
     "added_at": "Hinzugefügt bei",
     "added_by": "Hinzugefügt von",
     "additional_image": "Zusätzliches Bild",
+    "bootleg_badge": "Kopie",
+    "bootleg_desc_cassette": "Diese Kassette als nicht originale Kopie markieren.",
+    "bootleg_desc_cd": "Diese CD als nicht originale Kopie markieren.",
+    "bootleg_label": "Nicht originale Kopie",
     "view_fullscreen": "Vollbild anzeigen",
     "close_preview": "Vorschau schließen",
     "back_to_collection": "Zurück zur Sammlung",

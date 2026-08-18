@@ -1,0 +1,6 @@
+<% if (settings && settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode && item.is_bootleg) { %>
+    <span class="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-md text-neutral-900 dark:text-white text-xs px-3 py-1 rounded-full border border-black/5 dark:border-white/10 shadow-sm flex items-center gap-1.5">
+        <i class="fa-solid fa-skull-crossbones opacity-60"></i>
+        <%= t('detail.bootleg_badge') %>
+    </span>
+<% } %>

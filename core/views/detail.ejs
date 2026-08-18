@@ -37,6 +37,14 @@
                     <%= item.user_image ? secondaryImageLabel : mainImageLabel %>
                 </span>
 
+                <!-- Cover overlay Detail Zones from plugin (e.g. a bootleg badge) -->
+                <% if (plugin.partialsPath && plugin.detailZones) { %>
+                    <% const coverZones = plugin.detailZones.filter(z => z.id === 'cover') %>
+                    <% for (const zone of coverZones) { %>
+                        <%- include('../../' + plugin.partialsPath + '/' + zone.partial, { item }) %>
+                    <% } %>
+                <% } %>
+
                 <button type="button" onclick="openLightbox()" title="<%= t('detail.view_fullscreen') %>" aria-label="<%= t('detail.view_fullscreen') %>"
                     class="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-md text-neutral-900 dark:text-white border border-black/5 dark:border-white/10 shadow-sm flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 focus:outline-none transition-opacity">
                     <i class="fa-solid fa-expand text-sm"></i>

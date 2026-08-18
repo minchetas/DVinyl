@@ -107,7 +107,8 @@
                                             <% mod.settings.forEach(opt => {
                                                 const current = registry.getPluginSetting(settings, mod.pluginId, opt.key);
                                             %>
-                                                <label class="flex items-start justify-between gap-3 cursor-pointer">
+                                                <label class="flex items-start justify-between gap-3 cursor-pointer setting-row"
+                                                    <% if (opt.dependsOn) { %>data-depends-on="pluginSetting_<%= mod.pluginId %>_<%= opt.dependsOn %>"<% } %>>
                                                     <div>
                                                         <span class="text-xs font-bold opacity-80"><%= t(opt.label, { defaultValue: opt.label }) %></span>
                                                         <% if (opt.description) { %>
@@ -115,7 +116,7 @@
                                                         <% } %>
                                                     </div>
                                                     <div class="relative inline-flex items-center shrink-0 mt-0.5">
-                                                        <input type="checkbox" name="pluginSetting_<%= mod.pluginId %>_<%= opt.key %>" <%= current ? 'checked' : '' %> class="sr-only peer">
+                                                        <input type="checkbox" id="pluginSetting_<%= mod.pluginId %>_<%= opt.key %>" name="pluginSetting_<%= mod.pluginId %>_<%= opt.key %>" <%= current ? 'checked' : '' %> class="sr-only peer">
                                                         <div class="w-9 h-5 bg-black/10 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                                     </div>
                                                 </label>
@@ -570,6 +571,23 @@
     <%- include('partials/footer') %>
 
         <script>
+            // A dependent plugin setting (declared via PluginSetting.dependsOn) is disabled
+            // and dimmed while its parent toggle is off — a disabled checkbox is excluded
+            // from the form submit, so it naturally saves as false without extra JS.
+            document.querySelectorAll('.setting-row[data-depends-on]').forEach(row => {
+                const dependency = document.getElementById(row.dataset.dependsOn);
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (!dependency || !checkbox) return;
+
+                const sync = () => {
+                    checkbox.disabled = !dependency.checked;
+                    row.classList.toggle('opacity-40', !dependency.checked);
+                    row.classList.toggle('pointer-events-none', !dependency.checked);
+                };
+                dependency.addEventListener('change', sync);
+                sync();
+            });
+
             function toggleModal(id) {
                 const modal = document.getElementById(id);
                 modal.classList.toggle('hidden');

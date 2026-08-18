@@ -250,6 +250,10 @@
     "manual_entry": "Introuvable sur Discogs ? Ajouter manuellement"
   },
   "admin": {
+    "jack_sparrow_hide_public": "Masquer les copies pirates aux visiteurs",
+    "jack_sparrow_hide_public_desc": "Les éléments marqués ne seront pas visibles pour les utilisateurs non connectés.",
+    "jack_sparrow_mode": "Activer le mode Jack Sparrow",
+    "jack_sparrow_mode_desc": "Permet de marquer les copies non originales (CD et cassette) avec un indicateur visuel.",
     "title": "Administration",
     "modules": "Modules",
     "add_user_btn": "Ajouter un utilisateur",
@@ -576,6 +580,7 @@
     }
   },
   "collection": {
+    "filter_bootleg_copies": "Copies",
     "title": "Ma Collection",
     "filter_placeholder": "Filtrer...",
     "refresh_tooltip": "Rafraîchir depuis Discogs",
@@ -656,6 +661,10 @@
   "detail": {
     "back_to_collection": "Retour à la collection",
     "back_to_wishlist": "Retour à la wishlist",
+    "bootleg_badge": "Copie",
+    "bootleg_desc_cassette": "Marquer cette cassette comme copie non originale.",
+    "bootleg_desc_cd": "Marquer ce CD comme copie non originale.",
+    "bootleg_label": "Copie non originale",
     "official_cover": "Pochette officielle",
     "additional_image": "Image supplémentaire",
     "view_fullscreen": "Voir en plein écran",
