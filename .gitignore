@@ -2,7 +2,8 @@
 /node_modules
 /public/uploads/avatars/*
 /mongo_data
+/mongo_data_test
 docker-compose.override.yml
 .vscode/
-CLAUDE.md
-FORK.md
+.claude/
+dist/

@@ -6,21 +6,17 @@
   
   const rawCategory = (typeof locals.currentType !== 'undefined') ? locals.currentType : (locals.detectedType || 'home');
 
-  let themeKey = 'home'; 
-  
-  const musicTypes = ['music', 'vinyl', 'cd', 'cassette', 'add-vinyl', 'album'];
-  const bookTypes  = ['books', 'add-book', 'book'];
-  const dvdTypes   = ['dvd', 'add-dvd'];
-  const gameTypes  = ['games', 'add-game', 'game'];
-
-  if (musicTypes.includes(rawCategory)) {
-      themeKey = 'music';
-  } else if (bookTypes.includes(rawCategory)) {
-      themeKey = 'books';
-  } else if (dvdTypes.includes(rawCategory)) {
-      themeKey = 'dvd';
-  } else if (gameTypes.includes(rawCategory)) {
-      themeKey = 'games';
+  // Theme key derived from the registry: matches collectionType, id, /add-<id>, routePrefix or a pathAlias
+  let themeKey = 'home';
+  if (typeof registry !== 'undefined' && registry) {
+      const themePlugin = registry.getAll().find(p =>
+          rawCategory === p.collectionType ||
+          rawCategory === p.id ||
+          rawCategory === 'add-' + p.id ||
+          rawCategory === p.routePrefix.replace('/', '') ||
+          (p.pathAliases || []).includes(rawCategory)
+      );
+      if (themePlugin) themeKey = themePlugin.collectionType;
   }
 
   let activePresetKey = 'default';
@@ -35,10 +31,22 @@
 
   const safeFallback = { 
       light: { bg: '#e2e8f0', card: '#ffffff', navbar: '#1e293b', navText: '#ffffff', text: '#0f172a', subtext: '#475569', highlight: '#10b981' },
-      dark:  { bg: '#171717', card: '#262626', navbar: '#0a0a0a', navText: '#ffffff', text: '#ffffff', subtext: '#a3a3a3', highlight: '#10b981' }
+      dark: { bg: '#171717', card: '#262626', navbar: '#0a0a0a', navText: '#ffffff', text: '#ffffff', subtext: '#a3a3a3', highlight: '#10b981' }
   };
 
   const activeTheme = (THEMES[activePresetKey]) ? THEMES[activePresetKey] : (THEMES['default'] || safeFallback);
+
+  // Accent as separate channels. Tailwind can only honour an opacity modifier
+  // (bg-primary-theme/10) when the colour is written as rgb(... / <alpha-value>);
+  // handed a bare var() it drops the modifier and paints the accent at full
+  // strength, turning every faint tint into a solid block.
+  const rgbChannels = (hex) => {
+      const raw = String(hex || '').trim().replace('#', '');
+      const full = raw.length === 3 ? raw.split('').map(c => c + c).join('') : raw;
+      if (!/^[0-9a-f]{6}$/i.test(full)) return '16 185 129'; // preset default
+      const n = parseInt(full, 16);
+      return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+  };
 %>
 
 <html lang="<%= currentLng %>" class="<%= isDark ? 'dark' : '' %>">
@@ -61,7 +69,13 @@
                 text: 'var(--text-main)',
                 subtext: 'var(--text-sub)',
                 highlight: 'var(--highlight)'
-            }
+            },
+            // Same variable as theme.highlight, declared as a colour of its own so
+            // Tailwind generates the whole family: border-, ring-, shadow-, accent-
+            // had no rule at all, and no hover:/focus:/peer-checked: variant existed,
+            // because a class written by hand in the <style> block below is invisible
+            // to the variant machinery.
+            'primary-theme': 'rgb(var(--highlight-rgb) / <alpha-value>)'
           }
         }
       }
@@ -80,6 +94,7 @@
         --text-main: <%= activeTheme.light.text %>;
         --text-sub: <%= activeTheme.light.subtext %>;
         --highlight: <%= activeTheme.light.highlight %>;
+        --highlight-rgb: <%= rgbChannels(activeTheme.light.highlight) %>;
         
         --shadow-color: 0 0 0 rgba(0,0,0,0.05);
         --border-color: rgba(0,0,0,0.1);
@@ -92,6 +107,7 @@
         --text-main: <%= activeTheme.dark.text %>;
         --text-sub: <%= activeTheme.dark.subtext %>;
         --highlight: <%= activeTheme.dark.highlight %>;
+        --highlight-rgb: <%= rgbChannels(activeTheme.dark.highlight) %>;
         
         --shadow-color: 0 0 20px <%= activeTheme.dark.highlight %>20;
         --border-color: rgba(255,255,255,0.1);
@@ -108,9 +124,12 @@
         color: var(--text-main) !important;
     }
 
-    .text-primary-theme { color: var(--highlight) !important; }
-    .bg-primary-theme { background-color: var(--highlight) !important; color: #fff; }
-    
+    /* Tailwind generates the colour itself now, so this only carries what it cannot
+       know: a solid accent background is always paired with white text. No !important,
+       so a hover: variant on the same element can still take over. Tinted backgrounds
+       (bg-primary-theme/10) are a different class and keep their own text colour. */
+    .bg-primary-theme { color: #fff; }
+
     .card-theme {
         background-color: var(--bg-card) !important;
         border: 1px solid var(--border-color);
@@ -144,7 +163,7 @@
       
       <a href="<%= baseUrl || '/' %>" class="flex items-center space-x-3 group">
         <img src="<%= baseUrl %>/ressources/logo.png" alt="Logo" class="h-8 w-8 rounded-full object-cover group-hover:rotate-12 transition-transform">
-        <span class="self-center text-2xl font-semibold text-inherit">Vinyl</span>
+        <span class="self-center text-2xl font-semibold text-inherit"><%= locals.activeCollection && locals.activeCollection.name ? activeCollection.name : 'Vinyl' %></span>
       </a>
 
       <div class="flex items-center md:order-2 gap-4">
@@ -165,7 +184,55 @@
               <span class="block text-xs opacity-60 truncate text-[var(--text-sub)]"><%= user.email %></span>
             </div>
             <ul class="py-2">
+              <%
+                // The collections block shows the switcher (only useful with 2+ memberships)
+                // and/or the self-service creation entry, so it appears as soon as either applies.
+                const hasSwitcher = (locals.userCollections || []).length > 1;
+                const showCollectionsBlock = hasSwitcher || locals.canCreateCollection;
+              %>
+              <% if (showCollectionsBlock) { %>
+              <li class="px-4 pt-1 pb-1">
+                <span class="block text-[9px] uppercase font-bold tracking-wider opacity-50 text-[var(--text-sub)]"><%= t('nav.collections') %></span>
+              </li>
+              <% } %>
+              <% if (hasSwitcher) { %>
+              <% (locals.userCollections || []).forEach(c => { %>
+              <li>
+                <form action="<%= baseUrl %>/collection/switch" method="POST">
+                  <input type="hidden" name="collectionId" value="<%= c._id %>">
+                  <input type="hidden" name="redirectTo" value="/">
+                  <button type="submit" class="w-[calc(100%-1rem)] text-left block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3 <%= String(c._id) === String(locals.activeCollectionId) ? 'font-bold' : '' %>">
+                    <i class="fa-solid <%= String(c._id) === String(locals.activeCollectionId) ? 'fa-circle-check text-primary-theme' : 'fa-layer-group opacity-70' %> w-5 text-center"></i>
+                    <span class="truncate"><%= c.name %></span>
+                  </button>
+                </form>
+              </li>
+              <% }) %>
+              <% } %>
+              <% if (locals.canCreateCollection) { %>
+              <li>
+                <button type="button" data-new-collection-open
+                  class="w-[calc(100%-1rem)] text-left block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
+                  <i class="fa-solid fa-plus w-5 text-center opacity-70"></i>
+                  <span class="truncate"><%= t('nav.new_collection') %></span>
+                </button>
+              </li>
+              <% } %>
+              <% if (showCollectionsBlock) { %>
+              <li class="border-t border-black/5 dark:border-white/10 my-1"></li>
+              <% } %>
+              <% if (locals.isCollectionAdmin || user.isAdmin) { %>
+              <li class="px-4 pt-1 pb-1">
+                <span class="block text-[9px] uppercase font-bold tracking-wider opacity-50 text-[var(--text-sub)]"><%= t('nav.administration') %></span>
+              </li>
               <% if (user.isAdmin) { %>
+              <li>
+                <a href="<%= baseUrl %>/admin/instance" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
+                  <i class="fa-solid fa-server w-5 text-center opacity-70"></i> <span><%= t('nav.instance') %></span>
+                </a>
+              </li>
+              <% } %>
+              <% if (locals.isCollectionAdmin) { %>
               <li>
                 <a href="<%= baseUrl %>/admin" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
                   <i class="fa-solid fa-crown w-5 text-center opacity-70"></i> <span><%= t('nav.admin') %></span>
@@ -176,6 +243,8 @@
                   <i class="fa-solid fa-wand-magic-sparkles w-5 text-center opacity-70"></i> <span><%= t('perso.title') %></span>
                 </a>
               </li>
+              <% } %>
+              <li class="border-t border-black/5 dark:border-white/10 my-1"></li>
               <% } %>
               <li>
                 <a href="<%= baseUrl %>/settings" class="block px-4 py-2 text-sm text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/10 mx-2 rounded transition flex items-center gap-3">
@@ -208,33 +277,20 @@
 
       <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
         <ul class="flex flex-col font-medium p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-transparent">
-          <% 
+          <%
+            // Global shortcuts plus shortcuts declared by each plugin (navbarShortcuts)
             const shortcutConfig = {
                 'global_home': { label: t('nav.home'), url: '/' },
                 'global_collection': { label: t('nav.collection'), url: '/collection' },
-                'global_wishlist': { label: t('nav.wishlist'), url: '/wishlist' },
-
-                'music': { label: t('media.music'), url: '/collection?type=music', module: 'music' },
-                'music_vinyl': { label: t('media.vinyls'), url: '/collection?type=music&format=vinyl', module: 'music' },
-                'music_cd': { label: t('media.cds'), url: '/collection?type=music&format=cd', module: 'music' },
-                'music_cassette': { label: t('media.cassettes'), url: '/collection?type=music&format=cassette', module: 'music' },
-
-                'books': { label: t('media.books'), url: '/collection?type=books', module: 'books' },
-                'book_hardcover': { label: t('media.hardcover'), url: '/collection?type=books&format=hardcover', module: 'books' },
-                'book_paperback': { label: t('media.paperback'), url: '/collection?type=books&format=paperback', module: 'books' },
-                'book_manga': { label: t('media.manga'), url: '/collection?type=books&format=manga', module: 'books' },
-                'book_comic': { label: t('media.comic'), url: '/collection?type=books&format=comic', module: 'books' },
-                'book_graphic_novel': { label: t('media.graphic_novel'), url: '/collection?type=books&format=graphic_novel', module: 'books' },
-
-                'dvd': { label: t('media.dvd_gen'), url: '/collection?type=dvd', module: 'dvd' },
-                'dvd_dvd': { label: t('media.dvd'), url: '/collection?type=dvd&format=dvd', module: 'dvd' },
-                'dvd_bluray': { label: t('media.bluray'), url: '/collection?type=dvd&format=bluray', module: 'dvd' },
-                'dvd_4k': { label: t('media.4k'), url: '/collection?type=dvd&format=4k', module: 'dvd' },
-                'dvd_vhs': { label: t('media.vhs'), url: '/collection?type=dvd&format=vhs', module: 'dvd' },
-                'dvd_laserdisc': { label: t('media.laserdisc'), url: '/collection?type=dvd&format=laserdisc', module: 'dvd' },
-                
-                'games': { label: t('media.games'), url: '/collection?type=games', module: 'games' }
+                'global_wishlist': { label: t('nav.wishlist'), url: '/wishlist' }
             };
+            if (typeof registry !== 'undefined' && registry) {
+                registry.getAll().forEach(p => {
+                    (p.navbarShortcuts || []).forEach(s => {
+                        shortcutConfig[s.id] = { label: t(s.label), url: s.url, module: p.collectionType };
+                    });
+                });
+            }
 
             if (settings && settings.navbarShortcuts) {
               settings.navbarShortcuts.forEach(id => {
@@ -257,11 +313,36 @@
     </div>
   </nav>
 
+  <% if (locals.user && locals.canCreateCollection) { %>
+  <!-- Self-service collection creation, opened from the user dropdown. Self-contained
+       (its own toggle script) since the header is included by every page. -->
+  <div id="newCollectionModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="absolute inset-0" data-new-collection-close></div>
+    <div class="relative card-theme rounded-[2rem] p-8 md:p-10 shadow-2xl w-full max-w-md">
+      <button type="button" data-new-collection-close
+        class="absolute top-5 right-5 w-9 h-9 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-[var(--text-main)]">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h3 class="text-2xl font-black mb-8 text-[var(--text-main)]"><%= t('nav.new_collection') %></h3>
+      <form action="<%= baseUrl %>/collection/create" method="POST" class="space-y-6">
+        <input type="text" name="name" required maxlength="60" autocomplete="off"
+          placeholder="<%= t('admin.collections.name_placeholder') %>"
+          class="w-full p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-[var(--text-main)] focus:outline-none focus:border-primary-theme transition-colors">
+        <button type="submit"
+          class="w-full flex items-center justify-center gap-2 bg-primary-theme hover:brightness-110 text-white px-6 py-4 rounded-2xl shadow-lg shadow-primary-theme/20 transition-all active:scale-95">
+          <i class="fa-solid fa-plus text-sm"></i>
+          <span class="text-xs font-black"><%= t('admin.collections.create') %></span>
+        </button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+
   <script>
     document.body.classList.add('js-ready');
     const navTranslations = {
-        themeDark: "<%= t('nav.theme_dark') %>",
-        themeLight: "<%= t('nav.theme_light') %>"
+        themeDark: <%- JSON.stringify(t('nav.theme_dark')) %>,
+        themeLight: <%- JSON.stringify(t('nav.theme_light')) %>
     };
     
     document.addEventListener('DOMContentLoaded', () => {
@@ -301,6 +382,26 @@
         }
     });
     
+    // New-collection modal (only rendered when the user is allowed to create one)
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('newCollectionModal');
+        if (!modal) return;
+
+        const setOpen = (open) => {
+            modal.classList.toggle('hidden', !open);
+            modal.classList.toggle('flex', open);
+            if (open) modal.querySelector('input[name="name"]')?.focus();
+        };
+
+        document.querySelectorAll('[data-new-collection-open]')
+            .forEach(el => el.addEventListener('click', () => setOpen(true)));
+        modal.querySelectorAll('[data-new-collection-close]')
+            .forEach(el => el.addEventListener('click', () => setOpen(false)));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+        });
+    });
+
     window.addEventListener('load', () => {
         const loader = document.getElementById('page-loader');
         if(loader) {

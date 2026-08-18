@@ -1,5 +1,16 @@
 <%- include('partials/header') %>
 
+    <%
+        // Collection-level action buttons are declared by the active plugin (collectionActions).
+        // Filter by admin rights and per-user data requirements (e.g. a stored Discogs username).
+        const _collectionPlugin = registry.getAll().find(p => p.collectionType === currentType);
+        const _userBucket = (_collectionPlugin && user && user.pluginData && user.pluginData[_collectionPlugin.id]) || {};
+        const collectionActions = (locals.canEditCollection && _collectionPlugin)
+            ? (_collectionPlugin.collectionActions || []).filter(a => !a.requiresUserData || _userBucket[a.requiresUserData])
+            : [];
+        const hasEstimateAction = collectionActions.some(a => a.behavior === 'estimate');
+    %>
+
     <div class="max-w-screen-xl mx-auto px-1 md:px-0 pb-12">
 
         <div class="pt-6 mb-6 flex items-center justify-between">
@@ -13,9 +24,15 @@
                         <%= t('common.items') %>
                 </span>
             </h1>
-            <% if (user.isAdmin) { %>
-                <% const addRoutes={ music: '/add-vinyl' , books: '/add-book' , dvd: '/add-dvd' , games: '/add-game' };
-                    const addRoute=addRoutes[currentType]; %>
+            <% if (locals.canEditCollection) { %>
+                <%
+                    // Add button target: external-search page if the plugin has one, else manual entry
+                    const currentPlugin = registry.getAll().find(p => p.collectionType === currentType);
+                    let addRoute = null;
+                    if (currentPlugin) {
+                        addRoute = currentPlugin.searchProvider ? ('/add-' + currentPlugin.id) : ('/manual-add?type=' + currentPlugin.id);
+                    }
+                %>
                     <div class="flex gap-2">
 
                         <% if (addRoute) { %>
@@ -29,30 +46,17 @@
                             </a>
                             <% } %>
 
-                                <% if (currentType==='music' ) { %>
-                                    <button onclick="openEstimateModal()"
+                                <% collectionActions.forEach(action => { %>
+                                    <button type="button" data-action-id="<%= action.id %>"
+                                        onclick="runCollectionAction('<%= action.id %>')"
                                         class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group"
-                                        title="<%= t('index.btn_estimate') %>">
-                                        <i
-                                            class="fa-solid fa-calculator group-hover:scale-110 transition-transform"></i>
+                                        title="<%= t(action.tooltip || action.label) %>">
+                                        <i class="fa-solid <%= action.icon %> group-hover:scale-110 transition-transform"></i>
                                         <span class="hidden md:inline text-xs font-bold uppercase tracking-widest">
-                                            <%= t('index.btn_estimate') %>
+                                            <%= t(action.label) %>
                                         </span>
                                     </button>
-                                    <% } %>
-
-                                        <% if (user.discogsUsername && currentType==='music' ) { %>
-                                            <button onclick="refreshCollection()" id="refreshBtn"
-                                                class="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 card-theme hover:text-primary-theme hover:border-primary-theme rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 group"
-                                                title="<%= t('collection.refresh_tooltip') %>">
-                                                <i
-                                                    class="fa-solid fa-sync group-hover:rotate-180 transition-transform duration-500"></i>
-                                                <span
-                                                    class="hidden md:inline text-xs font-bold uppercase tracking-widest">
-                                                    <%= t('collection.refresh') %>
-                                                </span>
-                                            </button>
-                                            <% } %>
+                                <% }) %>
 
                     </div>
                     <% } %>
@@ -63,10 +67,8 @@
 
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex flex-wrap gap-2" id="formatFilters">
-                    <% const mainTypes=[ { id: 'all' , label: t('common.all') }, { id: 'music' , label: t('media.music')
-                        }, ...(settings.modules.books ? [{ id: 'books' , label: t('media.books') }] : []),
-                        ...(settings.modules.dvd ? [{ id: 'dvd' , label: t('media.dvds') }] : []),
-                        ...(settings.modules.games ? [{ id: 'games' , label: t('media.games') }] : []), ]; %>
+                    <% const mainTypes = [{ id: 'all', label: t('common.all') },
+                        ...registry.getEnabled(settings).map(p => ({ id: p.collectionType, label: t(p.label) }))]; %>
 
                         <% if (currentType==='all' ) { %>
                             <% mainTypes.forEach(type=> { %>
@@ -81,6 +83,7 @@
                                             <i class="fa-solid fa-arrow-left mr-2"></i>
                                             <%= t('common.all') %>
                                         </button>
+                                        <% const activeFilters = currentType !== 'all' ? (filterMap[currentType] || []) : []; %>
                                         <% activeFilters.forEach(filter=> { %>
                                             <button onclick="currentFormat = '<%= filter.id %>'; reloadPage();"
                                                 class="px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 <%= (currentFormat === filter.id) ? 'bg-primary-theme text-white shadow-lg' : 'bg-black/5 dark:bg-white/10 opacity-60' %>">
@@ -128,6 +131,9 @@
                     </datalist>
                 </div>
 
+                <%# Each control below is dropped when the selected type has nothing to
+                    offer for it, rather than showing an empty or foreign list %>
+                <% if (locals.hasYear) { %>
                 <div class="w-full lg:w-36 relative">
                     <button onclick="toggleDecadeMenu(event)" id="decadeSelectorBtn"
                         class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
@@ -160,8 +166,10 @@
                         </div>
                     </div>
                 </div>
+                <% } %>
 
                 <% if (currentType !=='all' ) { %>
+                    <% if (genres.length > 0) { %>
                     <div class="w-full lg:w-48 relative">
                         <button onclick="toggleGenreMenu(event)" id="genreSelectorBtn"
                             class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
@@ -203,8 +211,10 @@
                             </div>
                         </div>
                     </div>
+                    <% } %>
 
-                    <% if (currentType === 'music') { %>
+                    <% const stylesPlugin = registry.getAll().find(p => p.collectionType === currentType); %>
+                    <% if (stylesPlugin && stylesPlugin.schemaDefinition && stylesPlugin.schemaDefinition.styles && styles.length > 0) { %>
                         <div class="w-full lg:w-48 relative">
                             <button onclick="toggleStyleMenu(event)" id="styleSelectorBtn"
                                 class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
@@ -246,11 +256,55 @@
                             </div>
                         </div>
                     <% } %>
+
+                    <% if (stylesPlugin && stylesPlugin.schemaDefinition && stylesPlugin.schemaDefinition.platform && platforms.length > 0) { %>
+                        <div class="w-full lg:w-48 relative">
+                            <button onclick="togglePlatformMenu(event)" id="platformSelectorBtn"
+                                class="block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none transition-all flex justify-between items-center group">
+                                <span class="truncate opacity-50 group-hover:opacity-100 transition-opacity">
+                                    <%= locals.queryPlatform ? (locals.queryPlatform.split(',').length + ' ' +
+                                        t('collection.platform_filter')) : t('collection.platform_filter') %>
+                                </span>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-20 group-hover:opacity-60 transition-all"></i>
+                            </button>
+                            <div id="platform-multi-select"
+                                class="hidden absolute left-0 right-0 top-full z-50 mt-2 card-theme rounded-xl p-3 shadow-2xl border border-black/5 dark:border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div class="mb-2 pb-2 border-b border-black/5 dark:border-white/5">
+                                    <input type="text" placeholder="<%= t('collection.search_platform_placeholder') %>"
+                                           oninput="filterDropdownList(this, 'platform-checkbox-list')"
+                                           class="w-full p-2 text-xs rounded-lg border card-theme outline-none focus:ring-1 focus:ring-primary-theme placeholder-opacity-50">
+                                </div>
+                                <div id="platform-checkbox-list" class="space-y-1 max-h-[45vh] overflow-y-auto custom-scrollbar">
+                                    <% const currentPlatformArr = locals.queryPlatform ? locals.queryPlatform.split(',') : [];
+                                        platforms.forEach(plat => { %>
+                                        <label class="flex items-center gap-3 p-2 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors group">
+                                            <input type="checkbox"
+                                                class="platform-checkbox accent-primary-theme w-4 h-4 rounded border-gray-300 transition-all cursor-pointer"
+                                                value="<%= plat %>" <%= currentPlatformArr.includes(plat) ? 'checked' : '' %>>
+                                            <span class="group-hover:translate-x-0.5 transition-transform">
+                                                <%= plat %>
+                                            </span>
+                                        </label>
+                                    <% }); %>
+                                </div>
+                                <div class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 flex gap-2">
+                                    <button onclick="clearPlatformCheckboxes()" title="<%= t('common.delete') %>" class="flex-1 py-2 bg-black/5 dark:bg-white/10 rounded-lg hover:brightness-110 transition-all flex items-center justify-center">
+                                        <i class="fa-solid fa-trash-can text-xs opacity-75"></i>
+                                    </button>
+                                    <button onclick="reloadPage()" title="<%= t('common.apply') %>"
+                                        class="flex-1 py-2 bg-primary-theme text-white rounded-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
                 <% } %>
 
                 <div class="w-full lg:w-44 relative">
                     <div class="relative">
-                        <input type="text" id="artistInput" placeholder="<%= t('collection.artist_filter') %>"
+                        <%# The selected type names its own creator field ("Fabricant", "Réalisateur"...) %>
+                        <input type="text" id="artistInput" placeholder="<%= locals.creatorFilterLabel || t('collection.artist_filter') %>"
                             value="<%= locals.queryArtist || '' %>" autocomplete="off"
                             class="filter-input-textbox block w-full p-2.5 <%= locals.queryArtist ? 'pr-8' : '' %> text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none placeholder-opacity-50">
                         <% if (locals.queryArtist) { %>
@@ -298,33 +352,54 @@
                                 </button>
                                 <% }); %>
                                     <% if (currentType !=='all' ) { %>
-                                        <% const artistActive = currentSort.startsWith('artist') && !currentSort.startsWith('artist_year');
-                                           const artistDir = artistActive ? (currentSort.endsWith('_asc') ? 'asc' : 'desc') : 'asc'; %>
+                                        <% const artistActive=currentSort.startsWith('artist') && !currentSort.startsWith('artist_year'); const
+                                            artistDir=artistActive ? (currentSort.endsWith('_asc') ? 'asc'
+                                            : 'desc' ) : 'asc' ; %>
                                             <button onclick="handleSort('artist', '<%= artistDir %>', false)"
                                                 class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
                                             <%= artistActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                                <span><%= t('collection.sort_artist') %></span>
+                                                <span>
+                                                    <%= locals.creatorFilterLabel || t('collection.sort_artist') %>
+                                                </span>
                                                 <% if (artistActive) { %>
-                                                    <i class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
-                                                <% } %>
+                                                    <i
+                                                        class="fa-solid fa-arrow-<%= artistDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                                    <% } %>
                                             </button>
-                                        <% const artistYearActive = currentSort.startsWith('artist_year');
-                                           const artistYearDir = artistYearActive ? (currentSort.endsWith('_asc') ? 'asc' : 'desc') : 'asc'; %>
-                                            <button onclick="handleSort('artist_year', '<%= artistYearDir %>', false)"
-                                                class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
-                                            <%= artistYearActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
-                                                <span><%= t('collection.sort_artist_year') %></span>
-                                                <% if (artistYearActive) { %>
-                                                    <i class="fa-solid fa-arrow-<%= artistYearDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
-                                                <% } %>
-                                            </button>
+                                            <% const artistYearActive=currentSort.startsWith('artist_year'); const
+                                                artistYearDir=artistYearActive ? (currentSort.endsWith('_asc') ? 'asc'
+                                                : 'desc' ) : 'asc' ; %>
+                                                <button onclick="handleSort('artist_year', '<%= artistYearDir %>', false)"
+                                                    class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
+                                                <%= artistYearActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                                    <span>
+                                                        <%= t('collection.sort_artist_year') %>
+                                                    </span>
+                                                    <% if (artistYearActive) { %>
+                                                        <i
+                                                            class="fa-solid fa-arrow-<%= artistYearDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                                        <% } %>
+                                                </button>
                                             <% } %>
+                                    <% (locals.extraFilters || []).forEach(xf => {
+                                        const xfActive = currentSort.startsWith(xf.sortKey + '_');
+                                        const xfDir = xfActive ? (currentSort.endsWith('_asc') ? 'asc' : 'desc') : 'asc';
+                                    %>
+                                        <button onclick="handleSort('<%= xf.sortKey %>', '<%= xfDir %>', false)"
+                                            class="w-full flex items-center justify-between gap-2 p-2.5 text-sm rounded-lg transition-all cursor-pointer
+                                            <%= xfActive ? 'bg-primary-theme/10 text-primary-theme font-semibold' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-70 hover:opacity-100' %>">
+                                            <span class="truncate"><%= xf.label %></span>
+                                            <% if (xfActive) { %>
+                                                <i class="fa-solid fa-arrow-<%= xfDir === 'asc' ? 'up' : 'down' %> text-[11px]"></i>
+                                            <% } %>
+                                        </button>
+                                    <% }) %>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 w-full lg:w-auto">
                     <div class="flex bg-black/5 dark:bg-white/5 p-1 rounded-lg h-10 items-center">
-                        <button onclick="setFilterMode('show')"
+                        <button onclick="setFilterMode('show')" 
                             title="<%= t('collection.filter_mode_show') %>"
                             class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode !== 'hide') ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
                             <i class="fa-solid fa-eye text-xs"></i>
@@ -334,15 +409,15 @@
                             class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryFilterMode === 'hide') ? 'bg-red-500 text-white shadow-sm' : 'opacity-40 hover:opacity-100' %>">
                             <i class="fa-solid fa-eye-slash text-xs"></i>
                         </button>
-                        <% if (settings.jackSparrowMode && (currentType === 'music' || currentType === 'all')) { %>
-                        <button onclick="currentBootleg = currentBootleg ? '' : 'true'; reloadPage();"
-                            title="<%= t('collection.filter_bootleg_copies') %>"
-                            class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= locals.queryBootleg ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
-                            <i class="fa-solid fa-skull-crossbones text-xs"></i>
-                        </button>
+                        <% if (settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode && (currentType === 'music' || currentType === 'all')) { %>
+                            <button onclick="toggleBootlegFilter()"
+                                title="<%= t('collection.filter_bootleg_copies') %>"
+                                class="w-10 h-8 flex items-center justify-center rounded-md transition-all <%= (locals.queryBootleg === 'true') ? 'bg-white dark:bg-white/20 shadow-sm text-primary-theme' : 'opacity-40 hover:opacity-100' %>">
+                                <i class="fa-solid fa-skull-crossbones text-xs"></i>
+                            </button>
                         <% } %>
                     </div>
-                    
+
                     <div class="w-12">
                         <button onclick="reloadPage()"
                             class="block w-full h-10 flex items-center justify-center rounded-lg border hover:text-primary-theme hover:border-primary-theme card-theme transition-all bg-primary-theme/5">
@@ -352,12 +427,55 @@
                 </div>
             </div>
 
+            <!-- User-defined field filters, on their own row: their number depends on what
+                 the collection admin declared, so they must not squeeze the main row. -->
+            <% const xFilters = locals.extraFilters || []; %>
+            <% if (xFilters.length > 0) { %>
+                <!-- Wrapping grid rather than a single flex row: the number of controls is
+                     whatever the collection admin declared, so the row must reflow instead
+                     of squeezing everything onto one line. A range takes two columns, which
+                     leaves each of its two inputs about the width of a normal filter. -->
+                <div id="extraFilterContainer" class="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                    <% xFilters.forEach(xf => { %>
+                        <div class="min-w-0 <%= xf.kind === 'range' ? 'sm:col-span-2' : '' %>">
+                            <label class="block mb-1 text-[10px] font-bold uppercase tracking-widest opacity-40 truncate" title="<%= xf.label %>"><%= xf.label %></label>
+                            <% if (xf.kind === 'range') { %>
+                                <div class="flex items-center gap-1">
+                                    <%# min-w-0 defeats the intrinsic minimum width of a date input, which
+                                        would otherwise overflow the cell and overlap the next filter %>
+                                    <input type="<%= xf.type === 'date' ? 'date' : 'number' %>" class="xf-range block w-full min-w-0 p-2 text-xs card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none"
+                                        data-param="<%= xf.paramFrom %>" value="<%= xf.from %>" title="<%= t('collection.xf_from') %>">
+                                    <span class="opacity-30 text-xs shrink-0">→</span>
+                                    <input type="<%= xf.type === 'date' ? 'date' : 'number' %>" class="xf-range block w-full min-w-0 p-2 text-xs card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none"
+                                        data-param="<%= xf.paramTo %>" value="<%= xf.to %>" title="<%= t('collection.xf_to') %>">
+                                </div>
+                            <% } else { %>
+                                <select class="xf-select block w-full p-2.5 text-sm card-theme rounded-lg border focus:ring-1 focus:ring-primary-theme outline-none cursor-pointer"
+                                    data-param="<%= xf.param %>">
+                                    <option value="" class="bg-white dark:bg-[#1a1a1a]"><%= t('common.all') %></option>
+                                    <% if (xf.kind === 'boolean') { %>
+                                        <option value="true" class="bg-white dark:bg-[#1a1a1a]" <%= xf.value === 'true' ? 'selected' : '' %>><%= t('common.yes') %></option>
+                                        <option value="false" class="bg-white dark:bg-[#1a1a1a]" <%= xf.value === 'false' ? 'selected' : '' %>><%= t('common.no') %></option>
+                                    <% } else { %>
+                                        <option value="<%= locals.extraAny %>" class="bg-white dark:bg-[#1a1a1a]" <%= xf.value === locals.extraAny ? 'selected' : '' %>><%= t('collection.xf_any') %></option>
+                                        <option value="<%= locals.extraNone %>" class="bg-white dark:bg-[#1a1a1a]" <%= xf.value === locals.extraNone ? 'selected' : '' %>><%= t('collection.xf_none') %></option>
+                                        <% xf.choices.forEach(c => { %>
+                                            <option value="<%= c.value %>" class="bg-white dark:bg-[#1a1a1a]" <%= xf.value === c.value ? 'selected' : '' %>><%= t(c.label, { defaultValue: c.label }) %></option>
+                                        <% }) %>
+                                    <% } %>
+                                </select>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
             <!-- Active Filter Badges/Pills -->
-            <% 
+            <%
                 const activePills = [];
                 if (locals.querySearch) activePills.push({ key: 'search', label: t('collection.filter_placeholder') + ': "' + locals.querySearch + '"' });
                 if (locals.queryLocation) activePills.push({ key: 'location', label: t('common.location') + ': "' + locals.queryLocation + '"' });
-                if (locals.queryArtist) activePills.push({ key: 'artist', label: t('collection.artist_filter') + ': "' + locals.queryArtist + '"' });
+                if (locals.queryArtist) activePills.push({ key: 'artist', label: (locals.creatorFilterLabel || t('collection.artist_filter')) + ': "' + locals.queryArtist + '"' });
                 
                 if (locals.queryDecade) {
                     activePills.push({ key: 'decade', label: t('collection.decade_filter') + ': ' + locals.queryDecade.split(',').map(d => d + 's').join(', ') });
@@ -368,6 +486,21 @@
                 if (locals.queryStyle) {
                     activePills.push({ key: 'style', label: t('collection.styles_filter') + ': ' + locals.queryStyle.split(',').join(', ') });
                 }
+                if (locals.queryPlatform) {
+                    activePills.push({ key: 'platform', label: t('collection.platform_filter') + ': ' + locals.queryPlatform.split(',').join(', ') });
+                }
+
+                // One pill per active user-defined filter; a range contributes one per bound
+                xFilters.forEach(xf => {
+                    const readable = (v) => v === locals.extraAny ? t('collection.xf_any')
+                        : v === locals.extraNone ? t('collection.xf_none')
+                        : v === 'true' ? t('common.yes')
+                        : v === 'false' ? t('common.no')
+                        : t(v, { defaultValue: v });
+                    if (xf.value) activePills.push({ key: xf.param, label: xf.label + ': ' + readable(xf.value) });
+                    if (xf.from) activePills.push({ key: xf.paramFrom, label: xf.label + ' ≥ ' + xf.from });
+                    if (xf.to) activePills.push({ key: xf.paramTo, label: xf.label + ' ≤ ' + xf.to });
+                });
             %>
 
             <% if (activePills.length > 0) { %>
@@ -388,90 +521,48 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6" id="albumGrid">
             <% albums.forEach(album=> { %>
-                <% const isBook=album.kind==='Book' ; const isDvd=album.kind==='Dvd' || (album.tmdb_id !==undefined &&
-                    album.tmdb_id !==null); const isGame=album.kind==='Game' ; const aspectClass='aspect-square' ; let
-                    detailUrl=`/album/${album._id}`; if (isBook) detailUrl=`/book/${album._id}`; if (isDvd)
-                    detailUrl=`/dvd/${album._id}`; if (isGame) detailUrl=`/game/${album._id}`; const formatKey=isGame ?
-                    (album.format || 'physical' ) : ((isDvd) ? album.format : (album.media_type || album.format)); let
-                    isAdvancedCD=false; let advancedCDType='' ; if (settings && settings.modules &&
-                    settings.modules.advancedCD && formatKey==='cd' && album.format_type) { if
-                    (album.format_type.toLowerCase().includes('sacd')) { isAdvancedCD=true; advancedCDType='sacd' ; }
-                    else if (album.format_type.toLowerCase().includes('cdr')) { isAdvancedCD=true; advancedCDType='cdr'
-                    ; } } const badgeMap={ 'vinyl' : 'bg-green-600/90' , 'cd' : 'bg-blue-600/90' , 'cassette'
-                    : 'bg-orange-600/90' , 'manga' : 'bg-pink-600/90' , 'comic' : 'bg-indigo-600/90' , 'hardcover'
-                    : 'bg-purple-600/90' , 'paperback' : 'bg-amber-600/90' , 'book' : 'bg-amber-700/90' , 'dvd'
-                    : 'bg-sky-600/90' , 'bluray' : 'bg-indigo-700/90' , '4k' : 'bg-red-600/90' , 'vhs'
-                    : 'bg-amber-600/90' , 'laserdisc' : 'bg-purple-600/90' , 'physical' : 'bg-emerald-600/90'
-                    , 'collector' : 'bg-amber-600/90' , 'limited' : 'bg-purple-600/90' , 'steelbook' : 'bg-sky-600/90'
-                    }; let badgeClass=isAdvancedCD ? (advancedCDType==='sacd' ? 'bg-red-600/90' : 'bg-blue-600/90' ) :
-                    (badgeMap[formatKey] || 'bg-gray-600/90' ); let displayFormat=isAdvancedCD ? t('media.' +
-                    advancedCDType) : (isGame ? (album.platform || 'Game' ) : t('media.' + formatKey)); %>
+                <%
+                    const itemPlugin = registry.getByKind(album.kind);
+                    const isPoster = itemPlugin ? itemPlugin.aspectRatioClass !== 'aspect-square' : true;
+                    const detailUrl = (itemPlugin ? itemPlugin.routePrefix : '/album') + '/' + album._id;
+                    const badge = (itemPlugin && itemPlugin.cardBadge)
+                        ? itemPlugin.cardBadge(album, settings)
+                        : (function(){ var fmt=(album.format||album.media_type||'').toLowerCase(); var opt=itemPlugin?(itemPlugin.formats||[]).find(function(f){return f.value===fmt}):null; return { label: opt?opt.label:fmt, colorClass: (opt&&opt.color)||'bg-gray-600/90' }; })();
+                %>
 
                     <div class="album-card group relative card-theme rounded-xl overflow-hidden hover:border-primary-theme transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                         data-location="<%= album.location || '' %>"
-                        data-format="<%= isDvd ? album.format : (album.media_type || album.format || '') %>">
+                        data-format="<%= album.format || album.media_type || '' %>">
                         <a href="<%= baseUrl + detailUrl %>" class="block">
                             <div
-                                class="<%= aspectClass %> w-full relative overflow-hidden bg-black/5 flex items-center justify-center">
+                                class="aspect-square w-full relative overflow-hidden bg-black/5 flex items-center justify-center">
 
-                                <% if (isBook || isDvd || isGame) { %>
+                                <% if (isPoster) { %>
                                     <img src="<%= album.cover_image %>"
                                         class="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110 pointer-events-none">
                                     <% } %>
 
                                         <img src="<%= album.cover_image %>"
-                                            class="relative z-10 w-full h-full <%= (isBook || isDvd || isGame) ? 'object-contain p-2' : 'object-cover' %> transition-transform duration-500 group-hover:scale-105"
+                                            class="relative z-10 w-full h-full <%= isPoster ? 'object-contain p-2' : 'object-cover' %> transition-transform duration-500 group-hover:scale-105"
                                             loading="lazy">
 
+                                        <% if (badge.label) { %>
                                         <span
-                                            class="absolute bottom-2 left-2 z-20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badgeClass %>">
-                                            <%= displayFormat %>
+                                            class="absolute bottom-2 left-2 z-20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm <%= badge.colorClass %>">
+                                            <%= t(badge.label, { defaultValue: badge.label }) %>
                                         </span>
-                                        <% if (settings.jackSparrowMode && album.is_bootleg) { %>
-                                        <span class="absolute top-2 right-2 z-20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm bg-black/40" title="<%= t('detail.bootleg_label') %>">
+                                        <% } %>
+
+                                        <% if (settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode && album.kind === 'Music' && album.is_bootleg) { %>
+                                        <span
+                                            class="absolute top-2 right-2 z-20 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 shadow-sm bg-black/40"
+                                            title="<%= t('detail.bootleg_label') %>">
                                             <i class="fa-solid fa-skull-crossbones opacity-70"></i>
                                         </span>
                                         <% } %>
                             </div>
 
-                            <div class="p-3">
-                                <h3 class="font-bold text-sm truncate" title="<%= album.title %>">
-                                    <%= album.title %>
-                                </h3>
-                                <p class="text-xs opacity-60 truncate mb-2">
-                                    <%= isBook ? album.author : (isGame ? (album.developer || album.publisher || '' ) :
-                                        (album.artist || album.director || 'Inconnu' )) %>
-                                </p>
-
-                                <% if(album.format_type || album.variant_color) { 
-                                    let cleanedFormat = '';
-                                    if (album.format_type) {
-                                        cleanedFormat = album.format_type
-                                            .split(',')
-                                            .map(s => s.trim())
-                                            .filter(s => !['vinyl', 'album', 'reissue', 'repress', 'cd', 'cassette'].includes(s.toLowerCase()))
-                                            .join(', ');
-                                        if (!cleanedFormat) cleanedFormat = album.format_type;
-                                    }
-                                %>
-                                    <div class="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
-                                        <% if(cleanedFormat) { %>
-                                            <span class="text-[9px] md:text-[10px] opacity-60 bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded border border-transparent truncate max-w-[50%] font-medium transition-colors" title="<%= album.format_type %>">
-                                                <%= cleanedFormat %>
-                                            </span>
-                                        <% } %>
-                                        <% if(album.variant_color) { %>
-                                            <div class="flex items-center gap-1 min-w-0 truncate" title="<%= album.variant_color %>">
-                                                <span
-                                                    class="w-1.5 h-1.5 rounded-full bg-primary-theme inline-block flex-shrink-0"></span>
-                                                <span class="text-[9px] md:text-[10px] opacity-60 truncate">
-                                                    <%= album.variant_color %>
-                                                </span>
-                                            </div>
-                                        <% } %>
-                                    </div>
-                                <% } %>
-                            </div>
+                            <%- include('partials/item-card-body', { item: album, plugin: itemPlugin, size: 'collection' }) %>
                         </a>
                     </div>
                     <% }) %>
@@ -527,6 +618,7 @@
         </div>
     </div>
 
+    <% if (hasEstimateAction) { %>
     <div id="estimateModal"
         class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="card-theme rounded-2xl w-full max-w-lg p-6 md:p-8 shadow-2xl relative">
@@ -586,6 +678,7 @@
             </div>
         </div>
     </div>
+    <% } %>
 
     <script src="<%= baseUrl %>/socket.io/socket.io.js"></script>
     <script>
@@ -606,14 +699,18 @@
             reloadPage();
         }
 
+        function toggleBootlegFilter() {
+            currentBootleg = currentBootleg === 'true' ? '' : 'true';
+            reloadPage();
+        }
+
         function toggleMobileFilters() {
-            const container = document.getElementById('filterContainer');
-            if (container.classList.contains('hidden')) {
-                container.classList.remove('hidden');
-                container.classList.add('grid');
-            } else {
-                container.classList.add('hidden');
-            }
+            const containers = [document.getElementById('filterContainer'), document.getElementById('extraFilterContainer')];
+            const opening = containers[0].classList.contains('hidden');
+            containers.filter(Boolean).forEach(container => {
+                container.classList.toggle('hidden', !opening);
+                if (opening) container.classList.add('grid');
+            });
         }
 
         function updateURLParams(key, value) {
@@ -646,12 +743,16 @@
                 }
             }
 
-            if (currentType === 'music') {
-                const styleMenu = document.getElementById('style-multi-select');
-                if (styleMenu) {
-                    const checkedStyles = [...styleMenu.querySelectorAll('.style-checkbox:checked')].map(cb => cb.value);
-                    if (checkedStyles.length) url.searchParams.set('style', checkedStyles.join(','));
-                }
+            const styleMenu = document.getElementById('style-multi-select');
+            if (styleMenu) {
+                const checkedStyles = [...styleMenu.querySelectorAll('.style-checkbox:checked')].map(cb => cb.value);
+                if (checkedStyles.length) url.searchParams.set('style', checkedStyles.join(','));
+            }
+
+            const platformMenu = document.getElementById('platform-multi-select');
+            if (platformMenu) {
+                const checkedPlatforms = [...platformMenu.querySelectorAll('.platform-checkbox:checked')].map(cb => cb.value);
+                if (checkedPlatforms.length) url.searchParams.set('platform', checkedPlatforms.join(','));
             }
 
             const decadeMenu = document.getElementById('decade-menu');
@@ -659,6 +760,12 @@
                 const checkedDecades = [...decadeMenu.querySelectorAll('.decade-checkbox:checked')].map(cb => cb.value);
                 if (checkedDecades.length) url.searchParams.set('decade', checkedDecades.join(','));
             }
+
+            // User-defined field filters, declared per plugin: each control carries the
+            // query param it owns, so nothing here needs to know their names.
+            document.querySelectorAll('.xf-select, .xf-range').forEach(el => {
+                validateAndSetUrlSearchParamString(el.dataset.param, el.value);
+            });
 
             validateAndSetUrlSearchParamString('limit', currentLimit);
             validateAndSetUrlSearchParamString('sort', currentSort);
@@ -689,6 +796,12 @@
             });
         });
 
+        // A date/number input fires 'change' once the value is complete, so applying
+        // right away does not reload half-typed bounds.
+        document.querySelectorAll('.xf-select, .xf-range').forEach(element => {
+            element.addEventListener('change', () => reloadPage());
+        });
+
         function clearFilterParam(key) {
             const url = new URL(window.location.href);
             url.searchParams.delete(key);
@@ -703,12 +816,14 @@
             const sort = new URLSearchParams(window.location.search).get('sort');
             const limit = new URLSearchParams(window.location.search).get('limit');
             const filterMode = new URLSearchParams(window.location.search).get('filterMode');
-            
+            const bootleg = new URLSearchParams(window.location.search).get('bootleg');
+
             if (type) url.searchParams.set('type', type);
             if (format) url.searchParams.set('format', format);
             if (sort) url.searchParams.set('sort', sort);
             if (limit) url.searchParams.set('limit', limit);
             if (filterMode) url.searchParams.set('filterMode', filterMode);
+            if (bootleg) url.searchParams.set('bootleg', bootleg);
             
             url.searchParams.set('page', 1);
             window.location.href = url.toString();
@@ -734,6 +849,14 @@
             const styleMenu = document.getElementById('style-multi-select');
             if (styleMenu) {
                 styleMenu.querySelectorAll('.style-checkbox').forEach(cb => cb.checked = false);
+            }
+            reloadPage();
+        }
+
+        function clearPlatformCheckboxes() {
+            const platformMenu = document.getElementById('platform-multi-select');
+            if (platformMenu) {
+                platformMenu.querySelectorAll('.platform-checkbox').forEach(cb => cb.checked = false);
             }
             reloadPage();
         }
@@ -786,6 +909,21 @@
             }
         }
 
+        function togglePlatformMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('platform-multi-select');
+            const btn = document.getElementById('platformSelectorBtn');
+            closeAllMenusExcept('platform');
+
+            const isHidden = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            if (!isHidden) {
+                btn.classList.remove('ring-1', 'ring-primary-theme', 'border-primary-theme');
+            } else {
+                btn.classList.add('ring-1', 'ring-primary-theme', 'border-primary-theme');
+            }
+        }
+
         function toggleDecadeMenu(e) {
             e.stopPropagation();
             const menu = document.getElementById('decade-menu');
@@ -820,6 +958,7 @@
             const menus = [
                 { id: 'genre-multi-select', btnId: 'genreSelectorBtn' },
                 { id: 'style-multi-select', btnId: 'styleSelectorBtn' },
+                { id: 'platform-multi-select', btnId: 'platformSelectorBtn' },
                 { id: 'sort-menu', btnId: 'sortSelectorBtn' },
                 { id: 'decade-menu', btnId: 'decadeSelectorBtn' },
             ];
@@ -846,6 +985,7 @@
             const menuConfigs = [
                 { menuId: 'genre-multi-select', btnId: 'genreSelectorBtn' },
                 { menuId: 'style-multi-select', btnId: 'styleSelectorBtn' },
+                { menuId: 'platform-multi-select', btnId: 'platformSelectorBtn' },
                 { menuId: 'sort-menu', btnId: 'sortSelectorBtn' },
                 { menuId: 'decade-menu', btnId: 'decadeSelectorBtn' },
             ];
@@ -866,7 +1006,7 @@
             }
         });
 
-        ['genre-multi-select', 'style-multi-select', 'sort-menu', 'decade-menu'].forEach(id => {
+        ['genre-multi-select', 'style-multi-select', 'platform-multi-select', 'sort-menu', 'decade-menu'].forEach(id => {
             const menu = document.getElementById(id);
             if (menu) {
                 menu.addEventListener('click', (e) => {
@@ -912,59 +1052,65 @@
         }
     
 
-    <% if (user.isAdmin) { %>
-        const socket = io({
-            path: '<%= baseUrl %>/socket.io',
-        });
+    <% if (locals.canEditCollection) { %>
+        // Collection-level actions declared by the active plugin (see CollectionAction).
+        const COLLECTION_ACTIONS = <%- JSON.stringify(collectionActions) %>;
+        const jsBaseUrl = '<%= baseUrl %>';
+        const socket = io({ path: jsBaseUrl + '/socket.io' });
 
-            async function refreshCollection() {
-                const btn = document.getElementById('refreshBtn');
-                const icon = btn.querySelector('i');
-                icon.classList.add('fa-spin');
-                btn.disabled = true;
+        function runCollectionAction(id) {
+            const action = COLLECTION_ACTIONS.find(a => a.id === id);
+            if (!action) return;
+            if (action.behavior === 'estimate') return openEstimateModal(action);
+            if (action.behavior === 'importer-sync') return runImporterSync(action, id);
+        }
 
-                socket.once('import_finished', () => window.location.reload());
-                socket.once('import_error', (data) => {
-                    alert("Erreur : " + data.message);
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
-                });
+        // Behavior 'importer-sync': trigger an importer (e.g. Discogs sync) via socket, reload when done.
+        function runImporterSync(action, id) {
+            const btn = document.querySelector(`[data-action-id="${id}"]`);
+            const icon = btn ? btn.querySelector('i') : null;
+            if (icon) icon.classList.add('fa-spin');
+            if (btn) btn.disabled = true;
 
-                try {
-                    const isWishlist = window.location.pathname.includes('wishlist');
-                    await fetch('<%= baseUrl %>/import/discogs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            discogsUrl: `https://www.discogs.com/user/<%= user.discogsUsername %>`,
-                            full: false,
-                            type: isWishlist ? 'wishlist' : 'collection'
-                        })
-                    });
-                } catch (e) {
-                    icon.classList.remove('fa-spin');
-                    btn.disabled = false;
-                }
-            }
+            socket.once('import_finished', () => window.location.reload());
+            socket.once('import_error', (data) => {
+                alert("Erreur : " + data.message);
+                if (icon) icon.classList.remove('fa-spin');
+                if (btn) btn.disabled = false;
+            });
+
+            const isWishlist = window.location.pathname.includes('wishlist');
+            fetch(`${jsBaseUrl}/import/${action.importerId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full: false, type: isWishlist ? 'wishlist' : 'collection' })
+            }).catch(() => {
+                if (icon) icon.classList.remove('fa-spin');
+                if (btn) btn.disabled = false;
+            });
+        }
     <% } %>
 
+    <% if (hasEstimateAction) { %>
     const modal = document.getElementById('estimateModal');
         const startBtn = document.getElementById('startEstimateBtn');
         const resultDiv = document.getElementById('estimateResult');
         const progressBar = document.getElementById('estimateProgress');
         const countSpan = document.getElementById('estimateCount');
         const percentSpan = document.getElementById('estimatePercent');
-        const estimateErrorMsg = "<%= t('messages.estimate_error') %>";
+        const estimateErrorMsg = <%- JSON.stringify(t('messages.estimate_error')) %>;
         const currentLocale = '<%= currentLng === "fr" ? "fr-FR" : "en-US" %>';
         const currentCurrency = '<%= user.currency || "USD" %>';
 
+        let activeEstimate = null;
         let totalAlbums = 0;
         let currentProcessed = 0;
         let totalPriceVG = 0;
         let totalPriceMin = 0;
         let totalPriceMax = 0;
 
-        function openEstimateModal() {
+        function openEstimateModal(action) {
+            if (action && action.estimate) activeEstimate = action.estimate;
             modal.classList.remove('hidden');
         }
 
@@ -973,9 +1119,10 @@
         }
 
         async function startEstimation() {
+            if (!activeEstimate) return;
             startBtn.classList.add('hidden');
             try {
-                const res = await fetch('<%= baseUrl %>/api/collection/ids?type=music');
+                const res = await fetch('<%= baseUrl %>' + activeEstimate.idsEndpoint);
                 const data = await res.json();
 
                 if (!data.success) throw new Error("Server Error");
@@ -990,10 +1137,10 @@
                 countSpan.innerText = `0 / ${totalAlbums}`;
 
                 for (const album of albumsToEstimate) {
-                    await estimateOneAlbum(album.discogs_id, album.quantity || 1);
+                    await estimateOneAlbum(album[activeEstimate.idField], album.quantity || 1);
                     currentProcessed++;
 
-                    const percent = Math.round((currentProcessed / totalAlbums) * 100);
+                    const percent = totalAlbums ? Math.round((currentProcessed / totalAlbums) * 100) : 100;
                     if (progressBar) progressBar.style.width = percent + '%';
                     if (percentSpan) percentSpan.innerText = percent + '%';
 
@@ -1010,13 +1157,13 @@
 
         async function estimateOneAlbum(id, quantity) {
             try {
-                const res = await fetch(`<%= baseUrl %>/api/estimate/${id}`);
+                const res = await fetch(`<%= baseUrl %>${activeEstimate.estimateEndpoint}/${id}`);
                 const data = await res.json();
                 if (data.success && data.price) {
                     const val = data.price.value * quantity;
                     totalPriceVG += val;
                     totalPriceMin += val;
-                    totalPriceMax += (val * 1.3);
+                    totalPriceMax += (val * (activeEstimate.maxMultiplier || 1.3));
                 }
             } catch (e) { }
         }
@@ -1040,6 +1187,7 @@
             document.getElementById('progressContainer').classList.add('hidden');
             resultDiv.classList.remove('hidden');
         }
+    <% } %>
         function toggleDecadeMenu(e) {
             e.stopPropagation();
             const menuConfigs = [

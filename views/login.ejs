@@ -37,7 +37,15 @@
         <h1 class="text-3xl font-bold text-white mb-8 text-center">
           👋 <%= t('login.welcome') %>
         </h1>
-        
+
+        <% if (typeof oidcError !== 'undefined' && oidcError) { %>
+          <% const oidcErrorKeys = { oidc_unlinked: 'login.error_oidc_unlinked', oidc_forbidden: 'login.error_oidc_forbidden' }; %>
+          <div class="error text-sm text-center mb-6">
+            <%= t(oidcErrorKeys[oidcError] || 'login.error_oidc_unavailable') %>
+          </div>
+        <% } %>
+
+        <% if (!locals.localLoginDisabled) { %>
         <form action="<%= baseUrl %>/login" class="space-y-6">
           <div class="grid gap-4">
             <div>
@@ -82,6 +90,24 @@
             <%= t('login.submit_btn') %>
           </button>
         </form>
+        <% } %>
+
+        <% if (oidcEnabled) { %>
+          <% if (!locals.localLoginDisabled) { %>
+            <div class="flex items-center gap-3 my-6">
+              <div class="flex-grow border-t border-gray-700"></div>
+              <span class="text-xs text-gray-400 uppercase"><%= t('login.or_divider') %></span>
+              <div class="flex-grow border-t border-gray-700"></div>
+            </div>
+          <% } %>
+
+          <a
+            href="<%= baseUrl %>/login/oidc"
+            class="w-full flex items-center justify-center gap-2 bg-transparent border border-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition-all">
+            <i class="fas fa-shield-halved"></i>
+            <%= oidcButtonLabel || t('login.sso_button') %>
+          </a>
+        <% } %>
       </div>
     </section>
   </div>
@@ -95,7 +121,7 @@
               </div>
               <div class="text-center">
                   <p class="text-xs text-neutral-400 mt-1">
-                    <%= t('footer.made_with') %> <i class="fa-solid fa-heart text-red-500 animate-pulse mx-1"></i> <%= t('footer.for_music') %>
+                    <%= t('footer.made_with') %> <i class="fa-solid fa-heart text-red-500 animate-pulse mx-1"></i> <%= t('footer.for_collection') %>
                   </p>
               </div>
           </div>
@@ -103,6 +129,9 @@
   </footer>
 
   <script>
+  // Nothing below applies when SSO is the only way in: the page is then a single
+  // provider button, and every element this script reaches for is absent.
+  <% if (!locals.localLoginDisabled) { %>
 
     const form = document.querySelector('form');
     const emailInput = form.email;
@@ -158,6 +187,7 @@
       }
     });
 
+  <% } %>
   </script>
 </body>
 </html>
