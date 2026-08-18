@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { PluginApiRoute } from '../../core/types';
 import Item from '../../models/Item';
+import { getSpotifyCreds, searchAlbumId } from './spotify';
 
 const fetchJson = async (url: string, options?: RequestInit): Promise<any> => {
   const response = await fetch(url, options);
@@ -302,11 +303,33 @@ async function getTrackLyrics(req: any, res: any) {
   }
 }
 
+// SPOTIFY ALBUM SEARCH PROXY (fork-only, Client Credentials — no user auth needed)
+async function searchSpotify(req: any, res: any) {
+  const { artist, title } = req.query;
+  const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(`${artist} ${title}`)}`;
+  const { clientId, clientSecret } = getSpotifyCreds(res.locals.settings);
+
+  if (!clientId || !clientSecret) return res.json({ mode: 'link', searchUrl });
+
+  try {
+    const albumId = await searchAlbumId(clientId, clientSecret, artist, title);
+    if (albumId) {
+      res.json({ mode: 'embed', albumId, embedUrl: `https://open.spotify.com/embed/album/${albumId}?utm_source=generator` });
+    } else {
+      res.json({ mode: 'link', searchUrl });
+    }
+  } catch (err: any) {
+    console.error('[Spotify]', err.message);
+    res.json({ mode: 'link', searchUrl });
+  }
+}
+
 export const musicApiRoutes: PluginApiRoute[] = [
   { method: 'get', path: '/api/collection/ids', handler: getCollectionIds },
   { method: 'post', path: '/api/album/:id/track/:trackId/meta', requireEditor: true, handler: updateTrackMeta },
   { method: 'get', path: '/api/album/:id/track/:trackId/lyrics', handler: getTrackLyrics },
   { method: 'get', path: '/api/estimate/:discogsId', handler: getEstimate },
   { method: 'get', path: '/api/search-discogs-gallery', requireAdmin: true, handler: searchDiscogsGallery },
-  { method: 'post', path: '/api/batch-update-barcodes', requireAdmin: true, handler: batchUpdateBarcodes }
+  { method: 'post', path: '/api/batch-update-barcodes', requireAdmin: true, handler: batchUpdateBarcodes },
+  { method: 'get', path: '/api/spotify/search', handler: searchSpotify }
 ];

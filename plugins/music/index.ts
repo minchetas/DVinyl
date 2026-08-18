@@ -522,6 +522,7 @@ export const musicPlugin: PluginDefinition = {
     { id: 'cover', partial: 'bootleg-cover-badge' },
     { id: 'badge', partial: 'duration-pill' },
     { id: 'badge', partial: 'bootleg-badge' },
+    { id: 'content', partial: 'spotify-player' },
     { id: 'content', partial: 'tracklist-view' }
   ],
 

@@ -191,6 +191,20 @@
     "empty_wishlist": "No pending wishes.",
     "btn_estimate": "Estimate"
   },
+  "spotify": {
+    "client_id": "Client ID",
+    "client_secret": "Client Secret",
+    "credentials_desc": "Create an app at developer.spotify.com/dashboard to get these keys. Select type \"Web API\".",
+    "credentials_hint": "Without these keys, a Spotify search link is shown instead of the player.",
+    "credentials_title": "Spotify Credentials",
+    "desc": "Display an embedded Spotify player on each album detail page.",
+    "enable": "Enable Spotify integration",
+    "loading": "Searching on Spotify...",
+    "not_found": "Not found on Spotify",
+    "open_in": "Listen on Spotify",
+    "popout": "Open in window",
+    "title": "Spotify Integration"
+  },
   "stats": {
     "total_label": "Total Collection",
     "books_total_label": "Total Books",

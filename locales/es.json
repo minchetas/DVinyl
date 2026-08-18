@@ -911,6 +911,20 @@
     "username_placeholder": "Ej: Darki",
     "welcome_to": "Bienvenido a"
   },
+  "spotify": {
+    "client_id": "Client ID",
+    "client_secret": "Client Secret",
+    "credentials_desc": "Crea una aplicación en developer.spotify.com/dashboard para obtener estas claves. Selecciona el tipo \"Web API\".",
+    "credentials_hint": "Sin estas claves se mostrará un enlace de búsqueda en Spotify en lugar del reproductor.",
+    "credentials_title": "Credenciales de Spotify",
+    "desc": "Muestra un reproductor de Spotify integrado en la ficha de cada álbum.",
+    "enable": "Activar integración con Spotify",
+    "loading": "Buscando en Spotify...",
+    "not_found": "No encontrado en Spotify",
+    "open_in": "Escuchar en Spotify",
+    "popout": "Abrir en ventana",
+    "title": "Integración con Spotify"
+  },
   "stats": {
     "albums_unit": "álbumes",
     "books_total_label": "Libros totales",

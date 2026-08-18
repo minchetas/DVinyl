@@ -743,6 +743,15 @@ router.post(
         if (preset) update[`theme.${p.collectionType}.preset`] = preset;
       }
 
+      // Fork-only: Spotify integration (music plugin), only present when that card
+      // was actually rendered (music module enabled) — absent otherwise, so this never
+      // clobbers pluginSettings.music on collections without the music module.
+      if ("spotifyEnabled" in req.body || "spotifyClientId" in req.body || "spotifyClientSecret" in req.body) {
+        update["pluginSettings.music.spotifyEnabled"] = req.body.spotifyEnabled === "on";
+        update["pluginSettings.music.spotifyClientId"] = (req.body.spotifyClientId || "").trim();
+        update["pluginSettings.music.spotifyClientSecret"] = (req.body.spotifyClientSecret || "").trim();
+      }
+
       await Settings.findOneAndUpdate(
       { collection: res.locals.activeCollectionId },
       { $set: update },
