@@ -277,6 +277,9 @@ export interface PluginSetting {
   type: 'boolean'; // extensible later (select, text...)
   default?: any;
   description?: string; // i18n key or plain text (help shown under the toggle)
+  // Another setting's key (same plugin) this one is meaningless without. The admin
+  // renders it disabled/dimmed until that dependency is checked.
+  dependsOn?: string;
 }
 
 export interface PluginImporter {

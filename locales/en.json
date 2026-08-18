@@ -250,6 +250,10 @@
     "manual_entry": "Not on Discogs? Add manually"
   },
   "admin": {
+    "jack_sparrow_hide_public": "Hide bootleg copies from visitors",
+    "jack_sparrow_hide_public_desc": "Marked items will not be visible to unauthenticated users.",
+    "jack_sparrow_mode": "Enable Jack Sparrow mode",
+    "jack_sparrow_mode_desc": "Allows marking non-original copies (CD and cassette) with a visual indicator.",
     "title": "Administration",
     "visibility": {
       "title": "Visibility Settings",
@@ -576,6 +580,7 @@
     }
   },
   "collection": {
+    "filter_bootleg_copies": "Copies",
     "title": "My Collection",
     "filter_placeholder": "Filter...",
     "refresh_tooltip": "Refresh from Discogs",
@@ -656,6 +661,10 @@
   "detail": {
     "back_to_collection": "Back to collection",
     "back_to_wishlist": "Back to wishlist",
+    "bootleg_badge": "Copy",
+    "bootleg_desc_cassette": "Mark this cassette as a non-original copy.",
+    "bootleg_desc_cd": "Mark this CD as a non-original copy.",
+    "bootleg_label": "Non-original copy",
     "official_cover": "Official cover",
     "additional_image": "Additional image",
     "view_fullscreen": "View fullscreen",

@@ -106,6 +106,10 @@
       "warning_body": "Espere entre 1 y 2 minutos para 200 libros, ~10 minutos para 2000. La importación se ejecuta en segundo plano, por lo que puede navegar libremente.",
       "warning_title": "Importación potencialmente larga"
     },
+    "jack_sparrow_hide_public": "Ocultar copias piratas a los visitantes",
+    "jack_sparrow_hide_public_desc": "Los elementos marcados no serán visibles para usuarios no autenticados.",
+    "jack_sparrow_mode": "Activar modo Jack Sparrow",
+    "jack_sparrow_mode_desc": "Permite marcar copias no originales (CD y cassette) con un indicador visual.",
     "musiksammler": {
       "title": "Musik-Sammler",
       "subtitle": "Importa tu colección de Musik-Sammler",
@@ -392,6 +396,7 @@
   },
   "collection": {
     "add": "Agregar",
+    "filter_bootleg_copies": "Copias",
     "filter_placeholder": "Filtrar...",
     "refresh": "Refrescar",
     "refresh_metadata_btn": "Actualizar información",
@@ -561,6 +566,10 @@
     "added_at": "Agregado en",
     "added_by": "Añadido por",
     "additional_image": "Imagen adicional",
+    "bootleg_badge": "Copia",
+    "bootleg_desc_cassette": "Marca esta cinta como copia no original.",
+    "bootleg_desc_cd": "Marca este CD como copia no original.",
+    "bootleg_label": "Copia no original",
     "view_fullscreen": "Ver en pantalla completa",
     "close_preview": "Cerrar la vista previa",
     "back_to_collection": "Volver a la colección",

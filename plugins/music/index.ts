@@ -134,6 +134,9 @@ export const musicPlugin: PluginDefinition = {
     genre: { type: String, default: '' },
     genres: { type: [String], default: [] },
     styles: { type: [String], default: [] },
+    // Fork-only: marks a CD/cassette copy as a non-original/unofficial pressing
+    // ("Jack Sparrow mode"). Gated behind the jackSparrowMode plugin setting below.
+    is_bootleg: { type: Boolean, default: false },
     tracklist: [{
       position: String,
       title: String,
@@ -253,6 +256,18 @@ export const musicPlugin: PluginDefinition = {
       showCondition: 'manual-only'
     },
     {
+      // Fork-only (Jack Sparrow mode). Custom type: the checkbox is only meaningful for
+      // cd/cassette, which the generic boolean field can't express, so the partial handles
+      // its own conditional visibility and posts through the `_json` custom-field convention.
+      // Placed right after the main album fields, before the tracklist editor.
+      name: 'is_bootleg',
+      label: 'detail.bootleg_label',
+      type: 'custom',
+      partial: 'bootleg-toggle',
+      showIn: ['edit', 'confirm', 'manual'],
+      group: 'main'
+    },
+    {
       name: 'tracklist',
       label: 'confirm_vinyl.tracklist_label',
       type: 'custom',
@@ -321,7 +336,10 @@ export const musicPlugin: PluginDefinition = {
   apiRoutes: musicApiRoutes,
 
   settings: [
-    { key: 'advancedCD', label: 'admin.advanced_cd', type: 'boolean', default: false, description: 'admin.advanced_cd_desc' }
+    { key: 'advancedCD', label: 'admin.advanced_cd', type: 'boolean', default: false, description: 'admin.advanced_cd_desc' },
+    // Fork-only: "Jack Sparrow mode" lets CD/cassette copies be marked as non-original.
+    { key: 'jackSparrowMode', label: 'admin.jack_sparrow_mode', type: 'boolean', default: false, description: 'admin.jack_sparrow_mode_desc' },
+    { key: 'jackSparrowHideFromPublic', label: 'admin.jack_sparrow_hide_public', type: 'boolean', default: false, description: 'admin.jack_sparrow_hide_public_desc', dependsOn: 'jackSparrowMode' }
   ],
 
   cardBadge(item: any, settings?: any) {
@@ -501,7 +519,9 @@ export const musicPlugin: PluginDefinition = {
   partialsPath: 'plugins/music/partials',
 
   detailZones: [
+    { id: 'cover', partial: 'bootleg-cover-badge' },
     { id: 'badge', partial: 'duration-pill' },
+    { id: 'badge', partial: 'bootleg-badge' },
     { id: 'content', partial: 'tracklist-view' }
   ],
 

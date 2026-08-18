@@ -1,0 +1,51 @@
+<%
+    // Fork-only (Jack Sparrow mode). Only meaningful for CD/cassette copies, and only
+    // rendered at all when the collection has the mode enabled — the plugin setting is
+    // read here rather than gating showIn, since settings aren't available at
+    // formFields-definition time.
+    const jackSparrowMode = !!(settings && settings.pluginSettings && settings.pluginSettings.music && settings.pluginSettings.music.jackSparrowMode);
+%>
+<% if (jackSparrowMode) { %>
+    <div id="bootlegToggle" class="mb-6 <%= (item && (item.media_type === 'cd' || item.media_type === 'cassette')) ? '' : 'hidden' %>">
+        <label class="flex items-center gap-4 cursor-pointer group p-4 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all">
+            <div class="relative shrink-0">
+                <input type="checkbox" id="chk-is_bootleg" <%= item.is_bootleg ? 'checked' : '' %> class="sr-only peer"
+                    onchange="document.getElementById('is_bootleg_json').value = this.checked ? 'true' : 'false';">
+                <div class="w-12 h-6 bg-black/10 dark:bg-white/10 rounded-full peer-checked:bg-amber-500 transition-all"></div>
+                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all peer-checked:translate-x-6"></div>
+            </div>
+            <div>
+                <span class="font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-skull-crossbones text-amber-500"></i>
+                    <%= t(field.label) %>
+                </span>
+                <span id="bootlegDesc" class="text-xs opacity-60"><%- (item && item.media_type === 'cassette') ? t('detail.bootleg_desc_cassette') : t('detail.bootleg_desc_cd') %></span>
+            </div>
+        </label>
+    </div>
+    <input type="hidden" name="is_bootleg_json" id="is_bootleg_json" value="<%= item.is_bootleg ? 'true' : 'false' %>">
+
+    <script>
+        (function () {
+            const bootlegDescs = {
+                cd: <%- JSON.stringify(t('detail.bootleg_desc_cd')) %>,
+                cassette: <%- JSON.stringify(t('detail.bootleg_desc_cassette')) %>
+            };
+            document.querySelectorAll('input[name="media_type"]').forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    if (!radio.checked) return;
+                    const toggle = document.getElementById('bootlegToggle');
+                    if (!toggle) return;
+                    const show = radio.value === 'cd' || radio.value === 'cassette';
+                    toggle.classList.toggle('hidden', !show);
+                    if (!show) {
+                        document.getElementById('chk-is_bootleg').checked = false;
+                        document.getElementById('is_bootleg_json').value = 'false';
+                    } else {
+                        document.getElementById('bootlegDesc').textContent = bootlegDescs[radio.value] || '';
+                    }
+                });
+            });
+        })();
+    </script>
+<% } %>

@@ -140,6 +140,11 @@ router.get('/collection', requireAuth, async (req: any, res: any) => {
       conditions.push({ location: new RegExp(escapeRegExp(location), 'i') });
     }
 
+    // BOOTLEG FILTER (fork-only: Jack Sparrow mode, music plugin)
+    if (req.query.bootleg === 'true') {
+      conditions.push({ is_bootleg: true });
+    }
+
     // ARTIST / CREATOR FILTER
     if (trimmedArtist) {
       const artistRegex = new RegExp(escapeRegExp(trimmedArtist), 'i');
@@ -390,6 +395,7 @@ router.get('/collection', requireAuth, async (req: any, res: any) => {
       queryDecade: decade || '',
       filterMode,
       queryFilterMode: filterMode,
+      queryBootleg: req.query.bootleg === 'true' ? 'true' : '',
       currentSort: sort,
       filterMap,
       artistList,
