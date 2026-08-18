@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   dvinyl-app:
-    build: .
+    image: registry.larefactoria.com/miguel.otero/dvinyl:latest
     container_name: dvinyl_app
     restart: unless-stopped
     ports:
@@ -20,7 +20,18 @@ services:
     container_name: dvinyl_db
     restart: unless-stopped
     volumes:
-      - ./mongo_data:/data/db 
+      - ./mongo_data:/data/db
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: dvinyl_watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    environment:
+      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL}
+    command: --interval 300 --cleanup dvinyl_app
 
 volumes:
   mongo_data:
