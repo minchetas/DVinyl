@@ -255,6 +255,18 @@ router.get('/collection', requireAuth, async (req: any, res: any) => {
         'year_asc': { year: 1 },
       };
 
+      // Fork-only: compound sort by creator (artist/author/director/...) then year.
+      // Checked before the plain 'artist' branch below, since 'artist_year...' also
+      // starts with 'artist'.
+      if (sort && sort.startsWith('artist_year')) {
+        const dir = sort === 'artist_year_asc' ? 1 : -1;
+        if (!type || type === 'all') return { title: dir, year: dir };
+
+        const plugin = enabledPlugins.find(p => p.id === type);
+        const field = plugin ? plugin.creatorField : 'title';
+        return { [field]: dir, year: dir };
+      }
+
       if (sort && sort.startsWith('artist')) {
         const dir = sort === 'artist_asc' ? 1 : -1;
         if (!type || type === 'all') return { title: dir };

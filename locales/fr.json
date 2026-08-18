@@ -595,6 +595,7 @@
   },
   "collection": {
     "filter_bootleg_copies": "Copies",
+    "sort_artist_year": "Artiste + Année",
     "title": "Ma Collection",
     "filter_placeholder": "Filtrer...",
     "refresh_tooltip": "Rafraîchir depuis Discogs",
