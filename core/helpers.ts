@@ -1,10 +1,20 @@
+import { BASE_URL } from '../config/constants';
+
 /**
  * Fetches JSON data from a URL.
  */
 export async function fetchJson(url: string, options?: RequestInit): Promise<any> {
   const response = await fetch(url, options);
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    // The status rides on the error so callers can tell "slow down" from "broken". The
+    // message is left word for word: it is what shows up in the logs people paste into
+    // bug reports, and it is matched elsewhere.
+    const error: any = new Error(`HTTP error! status: ${response.status}`);
+    error.status = response.status;
+    // Providers that answer 429 usually say when to come back, in seconds.
+    const retryAfter = parseInt(response.headers.get('retry-after') || '', 10);
+    if (Number.isFinite(retryAfter) && retryAfter > 0) error.retryAfterMs = retryAfter * 1000;
+    throw error;
   }
   return response.json();
 }
@@ -38,6 +48,96 @@ export function parseGenresAndStyles(genres: any, styles: any): { genres: string
     genres: parse(genres),
     styles: parse(styles)
   };
+}
+
+// Paths that are not pages one can be sent back to: a JSON endpoint, and the two forms
+// that lead here in the first place. Landing on the form you just submitted is the one
+// destination nobody means, and everything else internal is fair game.
+const NON_RETURNABLE = ['/api/', '/edit/', '/save-'];
+
+/**
+ * The page to return to once an item has been edited or deleted, or '' when there is
+ * nothing worth trusting.
+ *
+ * Any page of this instance qualifies, since someone reaches an item from the dashboard,
+ * a search, a show's season list or a collection alike, and all of them are somewhere they
+ * would want to come back to.
+ *
+ * The candidate comes from a Referer header or from a query string, both of which the
+ * caller controls. Following one unchecked would bounce a signed-in user onto another site
+ * the moment they saved their work, so what is refused is what does not belong to this
+ * instance. `//evil.example` looks like a path and is not one, hence the second test.
+ *
+ * What comes out of here is a value, and every caller escapes it for wherever it lands.
+ * The angle brackets are refused all the same: a real path percent-encodes them, so
+ * nothing legitimate carries one, and a path that cannot hold `</script>` cannot end a
+ * script block whatever a future caller does with it. Quotes are left alone, since a
+ * search term is entitled to an apostrophe and the escaping at each sink covers them.
+ */
+const UNSAFE_IN_PATH = /[<>\u0000-\u001f\u007f]/;
+
+export function safeReturnPath(candidate: any, host?: string): string {
+  const raw = typeof candidate === 'string' ? candidate.trim() : '';
+  if (!raw || UNSAFE_IN_PATH.test(raw)) return '';
+
+  let path: string;
+  // A second slash, forward or back, makes this an address and not a path: browsers read
+  // `/\evil.example` the way they read `//evil.example` and leave the site.
+  if (raw.startsWith('/') && !/^\/[\\/]/.test(raw)) {
+    path = raw;
+  } else {
+    // A Referer is a whole URL; it is kept only when it points back here.
+    try {
+      const url = new URL(raw);
+      if (!host || url.host !== host) return '';
+      path = url.pathname + url.search;
+    } catch {
+      return '';
+    }
+  }
+
+  const route = BASE_URL && path.startsWith(BASE_URL) ? path.slice(BASE_URL.length) : path;
+  return NON_RETURNABLE.some(p => route.includes(p)) ? '' : path;
+}
+
+/**
+ * Builds the key a title is sorted on: lowercased, accent folded, and without a leading
+ * article. "The Wall" files under W and "Ámbar" next to "Amber", the way a record shop
+ * shelves them.
+ *
+ * Stored on the document rather than applied to the rendered results, because Mongo sorts
+ * before it paginates: normalizing in JS would only reorder the 25 items of the current
+ * page. English articles only for now.
+ */
+export function buildSortTitle(title: string | null | undefined): string {
+  const base = String(title || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+  if (!base) return '';
+  // A title made of nothing but an article keeps it, otherwise it would sort as empty.
+  return base.replace(/^(?:a|an|the)\s+/, '') || base;
+}
+
+/**
+ * The two ways an item changes once it exists, kept apart on purpose.
+ *
+ * What gets written decides which one applies, not who triggered it: a hand edit is
+ * someone's decision and records their name, while a provider filling in a cover or a
+ * genre is nobody's doing and records only the moment. Merged into one field, a nightly
+ * refresh would erase the name of the last person who actually touched the item, which is
+ * the only thing anyone wants to read there.
+ *
+ * Spread into the $set of the update that carries the change, so the stamp and what it
+ * describes land in the same write.
+ */
+export function editStamp(userId: any): { modified_at: Date; modified_by: any } {
+  return { modified_at: new Date(), modified_by: userId };
+}
+
+export function syncStamp(): { synced_at: Date } {
+  return { synced_at: new Date() };
 }
 
 /**
